@@ -68,13 +68,15 @@ export const useStore = create((set, get) => {
     orders: INITIAL_ORDERS,
     restaurantOpen: true,
     setRestaurantOpen: async (isOpen) => {
+      set({ restaurantOpen: isOpen }); // optimistic update
       try {
         await fetch(`${getApiUrl()}/toggle-restaurant`, { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } });
       } catch (e) {
-        set({ restaurantOpen: isOpen }); // local fallback
+        // if error, it will just stick to the local optimistic state
       }
     },
     addOrder: async (order) => {
+      set((state) => ({ orders: [order, ...state.orders] })); // optimistic update
       try {
         await fetch(`${getApiUrl()}/orders`, {
           method: 'POST',
@@ -82,7 +84,7 @@ export const useStore = create((set, get) => {
           body: JSON.stringify(order)
         });
       } catch (e) {
-        set((state) => ({ orders: [order, ...state.orders] })); // local fallback
+        // already added optimistically
       }
     },
     placeOrder: async (orderData) => {
@@ -97,6 +99,9 @@ export const useStore = create((set, get) => {
       return newOrder.id;
     },
     updateOrderStatus: async (id, status) => {
+      set((state) => ({
+        orders: state.orders.map(o => o.id === id ? { ...o, status } : o)
+      })); // optimistic update
       try {
         await fetch(`${getApiUrl()}/orders/${id}`, {
           method: 'PATCH',
@@ -104,9 +109,7 @@ export const useStore = create((set, get) => {
           body: JSON.stringify({ status })
         });
       } catch (e) {
-        set((state) => ({
-          orders: state.orders.map(o => o.id === id ? { ...o, status } : o)
-        }));
+        // already updated optimistically
       }
     },
 
