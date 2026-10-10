@@ -24,7 +24,7 @@
 .hero-img {
   position: absolute;
   inset: 0;
-  background: url(https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=900&q=80) center/cover;
+  background: url(/hero.jpg) center/cover;
 }
 .hero::after {
   content: '';

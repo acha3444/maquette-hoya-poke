@@ -41,6 +41,14 @@ const HomeScreen = () => {
               <span className={`live-dot ${restaurantOpen ? '' : 'off'}`} />
               {restaurantOpen ? 'Ouvert · prêt en 15 min' : 'Fermé · précommande possible'}
             </motion.span>
+            <motion.img 
+              src="/logo.jpg" 
+              alt="Hoya Poke Logo" 
+              style={{ width: 72, height: 72, borderRadius: 12, marginBottom: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.6, ease }}
+            />
             <motion.h1
               className="display hero-title"
               initial={{ opacity: 0, y: 14 }}
