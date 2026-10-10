@@ -1,0 +1,312 @@
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag } from 'lucide-react';
+import { useStore } from '../store';
+import { MENU } from '../data';
+import { formatPrice } from '../format';
+import { ease } from '../motion';
+import './restaurant.css';
+
+const STATUS_COLUMNS = [
+  { id: 'NOUVELLE', title: 'Nouvelles' },
+  { id: 'PREPARATION', title: 'En préparation' },
+  { id: 'PRETE', title: 'Prêtes' },
+  { id: 'LIVRAISON', title: 'En livraison' },
+  { id: 'TERMINEE', title: 'Terminées' }
+];
+
+const STOCK_ITEMS = [
+  ...MENU.proteines,
+  MENU.fruitsLegumes.find(i => i.name === 'Avocat'),
+  MENU.fruitsLegumes.find(i => i.name === 'Mangue'),
+  ...MENU.desserts.slice(0, 4)
+];
+
+const spring = { type: 'spring', stiffness: 420, damping: 38 };
+
+function useContainerWidth(ref) {
+  const [width, setWidth] = useState(0);
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    setWidth(ref.current.getBoundingClientRect().width);
+    const ro = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, [ref]);
+  return width;
+}
+
+function OrderCard({ order }) {
+  const updateOrderStatus = useStore(s => s.updateOrderStatus);
+  const isNew = order.status === 'NOUVELLE';
+  const done = order.status === 'TERMINEE';
+
+  const action = (label, status, variant = 'btn-primary', icon = null) => (
+    <button className={`btn btn-sm ${variant}`} onClick={() => updateOrderStatus(order.id, status)}>
+      {icon}{label}
+    </button>
+  );
+
+  return (
+    <motion.article
+      layoutId={`order-${order.id}`}
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
+      transition={spring}
+      className={`ticket ${isNew ? 'is-new' : ''} ${order.isLate && !done ? 'is-late' : ''} ${done ? 'is-done' : ''}`}
+    >
+      <header className="ticket-head">
+        <span className="ticket-id tnum">#{order.id}</span>
+        <span className={`ticket-time tnum ${order.isLate && !done ? 'text-danger' : ''}`}>
+          <Clock size={13} /> {order.time}
+        </span>
+      </header>
+
+      <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
+        <span className={`tag ${order.type === 'LIVRAISON' ? 'tag-green' : 'tag-gold'}`}>
+          {order.type === 'LIVRAISON' ? <Bike size={11} /> : <ShoppingBag size={11} />}
+          {order.type === 'LIVRAISON' ? 'Livraison' : 'Retrait'}
+        </span>
+        {order.isLate && !done && <span className="tag tag-danger">En retard</span>}
+      </div>
+
+      {!done && (
+        <div className="ticket-client">
+          <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{order.customerName}</span>
+          <span className="row gap-1"><Phone size={12} /> {order.customerPhone}</span>
+          {order.type === 'LIVRAISON' && (
+            <span className="row gap-1" style={{ alignItems: 'flex-start' }}><MapPin size={12} style={{ marginTop: 3, flexShrink: 0 }} /> {order.address}</span>
+          )}
+        </div>
+      )}
+
+      {!done && (
+        <ul className="ticket-items">
+          {order.items.map((it, idx) => (
+            <li key={idx}>
+              <span className="ticket-item-name">{it.cartName || it.name}</span>
+              {it.composition && it.composition.length > 1 && (
+                <span className="ticket-compo">{it.composition.join(' · ')}</span>
+              )}
+              {it.removedIngredients?.length > 0 && (
+                <span className="ticket-without">Sans {it.removedIngredients.join(', ').toLowerCase()}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <footer className="ticket-foot">
+        <div className="col">
+          <span className="price">{formatPrice(order.total)}</span>
+          <span className={`small ${order.paymentStatus === 'PAYÉ' ? 'muted' : 'text-danger'}`} style={{ fontSize: 11, fontWeight: 600 }}>
+            {order.paymentStatus === 'PAYÉ' ? 'Payé en ligne' : 'À encaisser'}
+          </span>
+        </div>
+        <div className="row gap-2">
+          {isNew && (
+            <>
+              {action('Refuser', 'REFUSEE', 'btn-ghost')}
+              {action('Accepter', 'PREPARATION')}
+            </>
+          )}
+          {order.status === 'PREPARATION' && action('Prête', 'PRETE')}
+          {order.status === 'PRETE' && order.type === 'LIVRAISON' && action('Confier au livreur', 'LIVRAISON', 'btn-primary', <Bike size={14} />)}
+          {order.status === 'PRETE' && order.type === 'RETRAIT' && action('Remise au client', 'TERMINEE', 'btn-ok')}
+          {order.status === 'LIVRAISON' && action('Livrée', 'TERMINEE', 'btn-ok')}
+        </div>
+      </footer>
+    </motion.article>
+  );
+}
+
+function EmptyColumn() {
+  return <div className="col-empty">Rien pour l'instant</div>;
+}
+
+export default function RestaurantView() {
+  const { orders, restaurantOpen, setRestaurantOpen, outOfStock, toggleStock } = useStore();
+  const [activeTab, setActiveTab] = useState('NOUVELLE');
+  const [showSettings, setShowSettings] = useState(false);
+  const [today] = useState(() => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
+  const rootRef = useRef(null);
+  const width = useContainerWidth(rootRef);
+  const wide = width >= 760;
+
+  const byStatus = (status) => orders.filter(o => o.status === status);
+  const newCount = byStatus('NOUVELLE').length;
+  const inProgress = orders.filter(o => ['PREPARATION', 'PRETE', 'LIVRAISON'].includes(o.status)).length;
+  const finished = byStatus('TERMINEE');
+  const revenue = finished.reduce((s, o) => s + o.total, 0);
+
+  // Jump to the "Nouvelles" tab on mobile when an order arrives
+  const prevNew = useRef(newCount);
+  useEffect(() => {
+    if (newCount > prevNew.current) setActiveTab('NOUVELLE');
+    prevNew.current = newCount;
+  }, [newCount]);
+
+  const swipe = (dir) => {
+    const i = STATUS_COLUMNS.findIndex(c => c.id === activeTab);
+    const next = STATUS_COLUMNS[i + dir];
+    if (next) setActiveTab(next.id);
+  };
+
+  return (
+    <div className="screen kitchen" ref={rootRef}>
+      <header className="kitchen-head">
+        <div className="col">
+          <span className="display" style={{ fontSize: 24, color: 'var(--green-700)' }}>Hoya Poké</span>
+          <span className="muted small">Cuisine · {today}</span>
+        </div>
+
+        {wide && (
+          <div className="kitchen-stats">
+            <div><span className="tnum">{newCount}</span><span>en attente</span></div>
+            <div><span className="tnum">{inProgress}</span><span>en cours</span></div>
+            <div><span className="tnum">{formatPrice(revenue)}</span><span>encaissé</span></div>
+          </div>
+        )}
+
+        <div className="row gap-3">
+          <button className="service-toggle" onClick={() => setRestaurantOpen(!restaurantOpen)}>
+            <span className={`switch ${restaurantOpen ? 'on' : ''}`}>
+              <motion.span layout transition={spring} className="switch-knob" />
+            </span>
+            <span>{restaurantOpen ? 'En service' : 'Fermé'}</span>
+          </button>
+          <button className="icon-btn" style={{ boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => setShowSettings(true)} aria-label="Réglages">
+            <SlidersHorizontal size={18} />
+          </button>
+        </div>
+      </header>
+
+      <AnimatePresence initial={false}>
+        {newCount > 0 && (
+          <motion.div
+            className="new-banner"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease }}
+          >
+            <div className="row gap-2" style={{ padding: '10px 20px' }}>
+              <span className="live-dot" style={{ background: 'var(--gold)' }} />
+              <span>
+                {newCount === 1 ? '1 commande attend votre validation' : `${newCount} commandes attendent votre validation`}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <LayoutGroup>
+        {width === 0 ? null : wide ? (
+          <div className="board">
+            {STATUS_COLUMNS.map(col => {
+              const colOrders = byStatus(col.id);
+              return (
+                <section key={col.id} className={`board-col ${col.id === 'TERMINEE' ? 'muted-col' : ''}`}>
+                  <div className="board-col-head">
+                    <h3>{col.title}</h3>
+                    <motion.span key={colOrders.length} className="count" initial={{ scale: 1.3 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 18 }}>
+                      {colOrders.length}
+                    </motion.span>
+                  </div>
+                  <div className="board-col-body scroll">
+                    <AnimatePresence mode="popLayout">
+                      {colOrders.map(o => <OrderCard key={o.id} order={o} />)}
+                    </AnimatePresence>
+                    {colOrders.length === 0 && <EmptyColumn />}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="col" style={{ flex: 1, minHeight: 0 }}>
+            <div className="tabs">
+              {STATUS_COLUMNS.map(col => {
+                const count = byStatus(col.id).length;
+                return (
+                  <button key={col.id} className={activeTab === col.id ? 'active' : ''} onClick={() => setActiveTab(col.id)}>
+                    {col.title}
+                    {count > 0 && <span className="count">{count}</span>}
+                    {activeTab === col.id && <motion.span layoutId="tab-underline" className="tab-underline" transition={spring} />}
+                  </button>
+                );
+              })}
+            </div>
+            <motion.div
+              className="scroll"
+              style={{ padding: 16 }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.15}
+              dragDirectionLock
+              onDragEnd={(_, { offset }) => {
+                if (offset.x < -60) swipe(1);
+                else if (offset.x > 60) swipe(-1);
+              }}
+            >
+              <div className="col gap-3">
+                <AnimatePresence mode="popLayout">
+                  {byStatus(activeTab).map(o => <OrderCard key={o.id} order={o} />)}
+                </AnimatePresence>
+                {byStatus(activeTab).length === 0 && <EmptyColumn />}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </LayoutGroup>
+
+      <AnimatePresence>
+        {showSettings && (
+          <>
+            <motion.div className="overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowSettings(false)} />
+            <motion.aside
+              className="drawer"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 380, damping: 40 }}
+            >
+              <div className="row between" style={{ padding: '18px 20px' }}>
+                <h2 className="display" style={{ fontSize: 22 }}>Service</h2>
+                <button className="icon-btn" onClick={() => setShowSettings(false)} aria-label="Fermer"><X size={20} /></button>
+              </div>
+              <div className="scroll col gap-6" style={{ padding: '0 20px 20px' }}>
+                <section className="col gap-2">
+                  <h3 className="eyebrow">Ruptures</h3>
+                  <p className="muted small">Un produit en rupture disparaît immédiatement de la carte client.</p>
+                  <div className="col" style={{ marginTop: 4 }}>
+                    {STOCK_ITEMS.map(it => {
+                      const available = !outOfStock.includes(it.id);
+                      return (
+                        <button key={it.id} className="stock-row" onClick={() => toggleStock(it.id)}>
+                          <span className={available ? '' : 'muted'} style={{ textDecoration: available ? 'none' : 'line-through' }}>{it.name}</span>
+                          <span className={`switch ${available ? 'on' : ''}`}>
+                            <motion.span layout transition={spring} className="switch-knob" />
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="col gap-2">
+                  <h3 className="eyebrow">Aujourd'hui</h3>
+                  <div className="stat-grid">
+                    <div className="card"><span className="tnum">{finished.length}</span><span className="muted small">commandes terminées</span></div>
+                    <div className="card"><span className="tnum">{formatPrice(revenue)}</span><span className="muted small">chiffre d'affaires</span></div>
+                  </div>
+                </section>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

@@ -1,0 +1,196 @@
+export const MENU = {
+  classiques: [
+    { id: 'c1', name: 'Le Saumon', description: 'Saumon cru mariné, ananas', priceM: 11.90, priceL: 14.90, defaultProtein: 'Saumon cru mariné' },
+    { id: 'c2', name: 'Le Poulet', description: 'Poulet frit maison, ananas', priceM: 11.90, priceL: 14.90, defaultProtein: 'Poulet frit maison' },
+    { id: 'c3', name: 'Le Falafel', description: 'Falafels maison, ananas', priceM: 11.90, priceL: 14.90, defaultProtein: 'Falafels maison' }
+  ],
+  surMesureBase: { name: 'Le Sur Mesure', priceM: 12.90, priceL: 15.90 },
+  bases: [
+    { id: 'b1', name: 'Riz vinaigré', price: 0 },
+    { id: 'b2', name: 'Base carotte', price: 0 },
+    { id: 'b3', name: 'Base quinoa', price: 1.00 }
+  ],
+  fruitsLegumes: [
+    { id: 'fl1', name: 'Carotte' },
+    { id: 'fl2', name: 'Oignon rouge' },
+    { id: 'fl3', name: 'Concombre' },
+    { id: 'fl4', name: 'Radis rose' },
+    { id: 'fl5', name: 'Avocat' },
+    { id: 'fl6', name: 'Edamame' },
+    { id: 'fl7', name: 'Chou rouge' },
+    { id: 'fl8', name: 'Chou blanc' },
+    { id: 'fl9', name: 'Betterave' },
+    { id: 'fl10', name: 'Mangue' },
+    { id: 'fl11', name: 'Ananas' },
+    { id: 'fl12', name: 'Grenade' },
+    { id: 'fl13', name: 'Fruit de la passion' },
+    { id: 'fl14', name: 'Raisins secs' }
+  ],
+  proteines: [
+    { id: 'p1', name: 'Saumon cru mariné', supplementPrice: 1.90 },
+    { id: 'p2', name: 'Poulet frit maison', supplementPrice: 1.90 },
+    { id: 'p3', name: 'Falafel maison', supplementPrice: 1.90 }
+  ],
+  sauces: [
+    { id: 's1', name: 'Soja sucrée', spice: 0, supplementPrice: 0.50 },
+    { id: 's2', name: 'Soja salée', spice: 0, supplementPrice: 0.50 },
+    { id: 's3', name: 'Crème cacahuète', spice: 0, supplementPrice: 0.50 },
+    { id: 's4', name: 'Tzatziki', spice: 0, supplementPrice: 0.50 },
+    { id: 's5', name: 'Coco pik', spice: 1, supplementPrice: 0.50 },
+    { id: 's6', name: 'Sriracha mayo', spice: 2, supplementPrice: 0.50 },
+    { id: 's7', name: 'Mayo wasabi', spice: 2, supplementPrice: 0.50 },
+    { id: 's8', name: 'Sriracha', spice: 3, supplementPrice: 0.50 }
+  ],
+  toppings: [
+    { id: 't1', name: 'Sésames', supplementPrice: 0.50 },
+    { id: 't2', name: 'Sésames noirs', supplementPrice: 0.50 },
+    { id: 't3', name: 'Cacahuètes', supplementPrice: 0.50 },
+    { id: 't4', name: 'Oignons frits', supplementPrice: 0.50 },
+    { id: 't5', name: 'Graines de courge', supplementPrice: 0.50 },
+    { id: 't6', name: 'Maïs grillé', supplementPrice: 0.50 }
+  ],
+  toppingGourmand: [
+    { id: 'tg1', name: 'Fromage frais combava et citron vert', price: 0.90 }
+  ],
+  sides: [
+    { id: 'sd1', name: 'Cornet de falafels et sa sauce', price: 5.90 },
+    { id: 'sd2', name: 'Cornet de poulet et sa sauce', price: 5.90 }
+  ],
+  desserts: [
+    { id: 'd1', name: 'Tiramisu spéculoos', price: 4.50, bestseller: true },
+    { id: 'd2', name: 'Banoffee', price: 4.50 },
+    { id: 'd3', name: 'Pudding chia coco mangue citron vert', price: 4.50 },
+    { id: 'd4', name: 'Cheesecake mangue spéculoos', price: 4.50 },
+    { id: 'd5', name: 'Panna cotta mûres', price: 4.50 },
+    { id: 'd6', name: 'Tiramisu crème de marron et praliné noisette', price: 4.50 },
+    { id: 'd7', name: 'Tiramisu pêche', price: 4.50 }
+  ],
+  boissons: [
+    { id: 'bo1', name: 'Thé pétillant artisanal', price: 3.50 },
+    { id: 'bo2', name: 'Eau plate', price: 2.00 },
+    { id: 'bo3', name: 'Eau pétillante', price: 2.00 },
+    { id: 'bo4', name: 'Café', price: 1.80 },
+    { id: 'bo5', name: 'Latte', price: 3.50 },
+    { id: 'bo6', name: 'Cookie chocolat au lait', price: 3.00 }
+  ]
+};
+
+export const INITIAL_ORDERS = [
+  {
+    id: '1047',
+    status: 'NOUVELLE', // NOUVELLE, PREPARATION, PRETE, LIVRAISON, TERMINEE
+    type: 'LIVRAISON',
+    time: '12:30',
+    customerName: 'Thomas',
+    customerPhone: '06 00 00 00 01',
+    address: '7 rue Anatole France, Pézenas',
+    zone: 1,
+    deliveryFee: 2.50,
+    total: 37.20,
+    paymentStatus: 'PAYÉ',
+    items: [
+      {
+        name: 'Poké Classique Saumon',
+        size: 'L',
+        price: 14.90,
+        removedIngredients: ['Ananas'],
+        composition: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Graines de sésame', 'Saumon cru mariné']
+      },
+      {
+        name: 'Poké Sur Mesure',
+        size: 'M',
+        price: 13.90, // Base M (12.90) + quinoa (1.00)
+        composition: ['Base quinoa', 'Carotte', 'Avocat', 'Edamame', 'Mangue', 'Grenade', 'Falafel maison', 'Crème cacahuète', 'Sésames noirs', 'Oignons frits']
+      },
+      {
+        name: 'Cornet de poulet',
+        price: 5.90,
+        composition: ['Cornet de poulet', 'Sauce au choix']
+      }
+    ]
+  },
+  {
+    id: '1046',
+    status: 'PREPARATION',
+    type: 'RETRAIT',
+    time: '12:15',
+    customerName: 'Julie',
+    customerPhone: '06 00 00 00 02',
+    total: 13.90,
+    paymentStatus: 'À ENCAISSER',
+    items: [
+      { name: 'Formule Poké + Boisson', price: 13.90, composition: ['Poké Classique Poulet (M)', 'Eau pétillante'] }
+    ]
+  },
+  {
+    id: '1045',
+    status: 'LIVRAISON',
+    type: 'LIVRAISON',
+    time: '12:00',
+    customerName: 'Marc',
+    customerPhone: '06 00 00 00 03',
+    address: 'Place de la République, Pézenas',
+    zone: 1,
+    deliveryFee: 2.50,
+    total: 18.40,
+    paymentStatus: 'PAYÉ',
+    driver: 'Alex',
+    items: [
+      { name: 'Poké Sur Mesure (L)', price: 15.90, composition: ['Riz vinaigré', 'Carotte', 'Concombre', 'Radis rose', 'Chou rouge', 'Betterave', 'Poulet frit maison', 'Soja sucrée', 'Sésames'] }
+    ]
+  },
+  {
+    id: '1044', // Commande en retard
+    status: 'PREPARATION',
+    type: 'LIVRAISON',
+    time: '11:45',
+    isLate: true,
+    customerName: 'Sophie',
+    customerPhone: '06 00 00 00 04',
+    address: 'Chemin de Tourbes, Pézenas',
+    zone: 1,
+    deliveryFee: 2.50,
+    total: 31.80,
+    paymentStatus: 'PAYÉ',
+    items: [
+      { name: 'Poké Classique Saumon (L)', price: 14.90, composition: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Ananas', 'Graines de sésame', 'Saumon cru mariné'] },
+      { name: 'Poké Classique Poulet (M)', price: 11.90, composition: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Ananas', 'Graines de sésame', 'Poulet frit maison'] }
+    ]
+  },
+  {
+    id: '1043',
+    status: 'PRETE',
+    type: 'RETRAIT',
+    time: '12:00',
+    customerName: 'Lucas',
+    customerPhone: '06 00 00 00 05',
+    total: 11.90,
+    paymentStatus: 'PAYÉ',
+    items: [
+      { name: 'Poké Classique Falafel (M)', price: 11.90, composition: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Ananas', 'Graines de sésame', 'Falafel maison'] }
+    ]
+  },
+  {
+    id: '1042',
+    status: 'TERMINEE',
+    type: 'LIVRAISON',
+    time: '11:30',
+    customerName: 'Emma',
+    customerPhone: '06 00 00 00 06',
+    address: 'Mairie, Castelnau-de-Guers',
+    zone: 2,
+    deliveryFee: 3.90,
+    total: 42.60,
+    paymentStatus: 'PAYÉ',
+    driver: 'Karim',
+    items: [
+      { name: 'Formule Poké + Boisson + Dessert (L)', price: 20.90, composition: ['Poké Sur Mesure (L)', 'Thé pétillant artisanal', 'Tiramisu spéculoos'] },
+      { name: 'Formule Poké + Boisson + Dessert (M)', price: 17.90, composition: ['Poké Classique Saumon (M)', 'Eau plate', 'Banoffee'] }
+    ]
+  }
+];
+
+export const DELIVERY_ZONES = [
+  { id: 1, name: 'Pézenas', fee: 2.50, min: 15.00 },
+  { id: 2, name: 'Zone 2 (Tourbes, Nézignan, etc.)', fee: 3.90, min: 25.00 }
+];
