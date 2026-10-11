@@ -6,6 +6,7 @@ import { useStore } from '../../store';
 import { DELIVERY_ZONES } from '../../data';
 import { formatPrice } from '../../format';
 import { list, item } from '../../motion';
+import { playSuccessSound } from '../../sound';
 
 const DEMO_ADDRESSES = [
   { label: 'Pézenas', value: '7 rue Anatole France, Pézenas' },
@@ -90,6 +91,7 @@ export default function CheckoutScreen() {
 
     // Short delay so the payment step reads as a real action
     setTimeout(() => {
+      playSuccessSound();
       addOrder(newOrder);
       clearCart();
       navigate('/tracking', { state: { orderId: newOrder.id } });

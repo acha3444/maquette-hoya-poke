@@ -1,10 +1,11 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
 import { ease } from '../motion';
+import { playNewOrderSound, playSuccessSound, isSoundEnabled, setSoundEnabled } from '../sound';
 import './restaurant.css';
 
 const STATUS_COLUMNS = [
@@ -42,7 +43,10 @@ function OrderCard({ order }) {
   const done = order.status === 'TERMINEE';
 
   const action = (label, status, variant = 'btn-primary', icon = null) => (
-    <button className={`btn btn-sm ${variant}`} onClick={() => updateOrderStatus(order.id, status)}>
+    <button className={`btn btn-sm ${variant}`} onClick={() => {
+      playSuccessSound();
+      updateOrderStatus(order.id, status);
+    }}>
       {icon}{label}
     </button>
   );
@@ -129,6 +133,7 @@ export default function RestaurantView() {
   const { orders, restaurantOpen, setRestaurantOpen, outOfStock, toggleStock } = useStore();
   const [activeTab, setActiveTab] = useState('NOUVELLE');
   const [showSettings, setShowSettings] = useState(false);
+  const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
   const [today] = useState(() => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const rootRef = useRef(null);
   const width = useContainerWidth(rootRef);
@@ -140,12 +145,40 @@ export default function RestaurantView() {
   const finished = byStatus('TERMINEE');
   const revenue = finished.reduce((s, o) => s + o.total, 0);
 
-  // Jump to the "Nouvelles" tab on mobile when an order arrives
+  // Sound & automatic focus on "Nouvelles" tab when a new order arrives
+  const isFirstMount = useRef(true);
   const prevNew = useRef(newCount);
+  const knownOrderIds = useRef(new Set(orders.map(o => o.id)));
+
   useEffect(() => {
-    if (newCount > prevNew.current) setActiveTab('NOUVELLE');
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      knownOrderIds.current = new Set(orders.map(o => o.id));
+      prevNew.current = newCount;
+      return;
+    }
+
+    // Detect if a brand new order arrived
+    const hasBrandNewOrder = orders.some(o => !knownOrderIds.current.has(o.id) && o.status === 'NOUVELLE');
+    if (hasBrandNewOrder || newCount > prevNew.current) {
+      if (soundOn) {
+        playNewOrderSound();
+      }
+      setActiveTab('NOUVELLE');
+    }
+
+    knownOrderIds.current = new Set(orders.map(o => o.id));
     prevNew.current = newCount;
-  }, [newCount]);
+  }, [orders, newCount, soundOn]);
+
+  const handleToggleSound = () => {
+    const next = !soundOn;
+    setSoundEnabled(next);
+    setSoundOn(next);
+    if (next) {
+      playNewOrderSound(true); // play sample chime so user hears it and browser audio context unlocks
+    }
+  };
 
   const swipe = (dir) => {
     const i = STATUS_COLUMNS.findIndex(c => c.id === activeTab);
@@ -170,6 +203,33 @@ export default function RestaurantView() {
         )}
 
         <div className="row gap-3">
+          <button
+            className="icon-btn"
+            style={{
+              boxShadow: 'inset 0 0 0 1px var(--line)',
+              color: soundOn ? 'var(--green-700)' : 'var(--muted)',
+              background: soundOn ? 'rgba(46, 125, 50, 0.08)' : 'transparent',
+              position: 'relative'
+            }}
+            onClick={handleToggleSound}
+            title={soundOn ? 'Carillon des commandes activé (cliquez pour couper ou tester)' : 'Carillon coupé (cliquez pour activer)'}
+            aria-label="Alerte sonore commandes"
+          >
+            {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            {soundOn && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 7,
+                  right: 7,
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: 'var(--green-700)'
+                }}
+              />
+            )}
+          </button>
           <button className="service-toggle" onClick={() => setRestaurantOpen(!restaurantOpen)}>
             <span className={`switch ${restaurantOpen ? 'on' : ''}`}>
               <motion.span layout transition={spring} className="switch-knob" />
@@ -191,11 +251,21 @@ export default function RestaurantView() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease }}
           >
-            <div className="row gap-2" style={{ padding: '10px 20px' }}>
-              <span className="live-dot" style={{ background: 'var(--gold)' }} />
-              <span>
-                {newCount === 1 ? '1 commande attend votre validation' : `${newCount} commandes attendent votre validation`}
-              </span>
+            <div className="row gap-2 between" style={{ padding: '10px 20px', flexWrap: 'wrap' }}>
+              <div className="row gap-2">
+                <span className="live-dot" style={{ background: 'var(--gold)' }} />
+                <span>
+                  {newCount === 1 ? '1 commande attend votre validation' : `${newCount} commandes attendent votre validation`}
+                </span>
+              </div>
+              <button
+                className="btn btn-sm btn-ghost"
+                style={{ color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.3)', padding: '3px 10px', height: 'auto', fontSize: 12 }}
+                onClick={() => playNewOrderSound(true)}
+                title="Faire retentir le carillon"
+              >
+                <Volume2 size={13} /> Rejouer carillon
+              </button>
             </div>
           </motion.div>
         )}
@@ -277,6 +347,24 @@ export default function RestaurantView() {
                 <button className="icon-btn" onClick={() => setShowSettings(false)} aria-label="Fermer"><X size={20} /></button>
               </div>
               <div className="scroll col gap-6" style={{ padding: '0 20px 20px' }}>
+                <section className="col gap-2">
+                  <h3 className="eyebrow">Notifications sonores</h3>
+                  <p className="muted small">Une alerte carillon retentit automatiquement dès qu'un client passe commande.</p>
+                  <div className="stock-row" style={{ cursor: 'pointer' }} onClick={handleToggleSound}>
+                    <span>Carillon nouvelle commande</span>
+                    <span className={`switch ${soundOn ? 'on' : ''}`}>
+                      <motion.span layout transition={spring} className="switch-knob" />
+                    </span>
+                  </div>
+                  <button
+                    className="btn btn-sm btn-ghost row gap-2"
+                    style={{ alignSelf: 'flex-start', marginTop: 4 }}
+                    onClick={() => playNewOrderSound(true)}
+                  >
+                    <Volume2 size={14} /> Tester le carillon
+                  </button>
+                </section>
+
                 <section className="col gap-2">
                   <h3 className="eyebrow">Ruptures</h3>
                   <p className="muted small">Un produit en rupture disparaît immédiatement de la carte client.</p>
