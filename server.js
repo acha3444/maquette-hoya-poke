@@ -107,6 +107,11 @@ function notifyClients() {
   clients.forEach(client => client.res.write(`data: ${data}\n\n`));
 }
 
+// SPA Fallback for client routing
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 const PORT = 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend running on http://0.0.0.0:${PORT}`);
