@@ -187,9 +187,9 @@ function CaUnlockModal({ onClose, onUnlock }) {
   }, [pin]);
 
   return (
-    <>
+    <div className="modal-centered-wrapper">
       <motion.div 
-        className="overlay" 
+        className="modal-centered-backdrop" 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }} 
@@ -201,21 +201,19 @@ function CaUnlockModal({ onClose, onUnlock }) {
         exit={{ opacity: 0, scale: 0.94, y: 16 }}
         transition={{ type: 'spring', stiffness: 420, damping: 36 }}
         style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 1000,
+          position: 'relative',
+          zIndex: 10000,
           background: 'var(--paper)',
           borderRadius: 24,
           padding: 24,
-          width: 'min(340px, 90vw)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          width: 'min(340px, 92vw)',
+          boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: 16,
-          textAlign: 'center'
+          textAlign: 'center',
+          pointerEvents: 'auto'
         }}
       >
         <div className="row between" style={{ width: '100%' }}>
@@ -332,7 +330,7 @@ function CaUnlockModal({ onClose, onUnlock }) {
           </button>
         </div>
       </motion.div>
-    </>
+    </div>
   );
 }
 

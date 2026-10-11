@@ -23,14 +23,15 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
 
   return (
     <>
-      {/* Background backdrop */}
-      <motion.div
-        className="thermal-preview-backdrop"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-      />
+      <div className="modal-centered-wrapper">
+        {/* Background backdrop */}
+        <motion.div
+          className="modal-centered-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        />
 
       {/* On-screen Preview Dialog */}
       <motion.div
@@ -163,9 +164,10 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
           )}
         </div>
       </motion.div>
+    </div>
 
-      {/* Hidden Thermal Print Area (Printed directly via window.print) */}
-      <div className="thermal-print-area">
+    {/* Hidden Thermal Print Area (Printed directly via window.print) */}
+    <div className="thermal-print-area">
         <div style={{ fontFamily: 'Courier New, Courier, monospace', fontSize: '12px', lineHeight: 1.35, color: '#000' }}>
           <div style={{ textAlign: 'center', borderBottom: '2px dashed #000', paddingBottom: '6px', marginBottom: '8px' }}>
             <div style={{ fontSize: '18px', fontWeight: 'bold' }}>HOYA POKÉ</div>
