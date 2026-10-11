@@ -1596,4 +1596,130 @@
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE REFINEMENTS
+   ========================================================================== */
+
+/* Mobile Phones (max-width: 580px) */
+@media (max-width: 580px) {
+  .client-nav {
+    padding: 8px 12px;
+  }
+  .client-nav-city {
+    display: none;
+  }
+  .client-nav-name {
+    font-size: 16px;
+  }
+  .client-nav-logo {
+    width: 30px;
+    height: 30px;
+  }
+  .client-nav-actions {
+    gap: 5px;
+  }
+  .client-pwa-badge {
+    padding: 4px 7px;
+    font-size: 11px;
+  }
+  .client-pwa-badge span:not(.tag) {
+    display: none;
+  }
+  .client-nav-actions .btn-sm {
+    padding: 0 7px;
+    height: 30px;
+    font-size: 11px;
+  }
+  .client-nav-actions .btn-sm span.small {
+    font-size: 11px;
+  }
+
+  .bowl-visualizer-card {
+    padding: 12px 10px;
+  }
+  .bowl-outer {
+    width: 195px;
+    height: 195px;
+  }
+  .bowl-rim {
+    width: 172px;
+    height: 172px;
+  }
+  .bowl-protein-center {
+    width: 66px;
+    height: 66px;
+  }
+  .protein-label {
+    font-size: 9.5px;
+  }
+  .bowl-sauce-drizzle {
+    width: 124px;
+    height: 124px;
+  }
+  .bowl-nutrition-strip {
+    gap: 4px;
+    padding: 6px 8px;
+  }
+  .nutrition-value {
+    font-size: 14px;
+  }
+  .nutrition-label {
+    font-size: 8.5px;
+  }
+
+  .loyalty-modal-overlay {
+    padding: 8px;
+    align-items: flex-end;
+  }
+  .loyalty-modal-card, 
+  .formule-modal-card, 
+  .pwa-marketing-card {
+    max-height: 90vh;
+    border-radius: 18px 18px 0 0;
+  }
+  .loyalty-header, 
+  .formule-modal-header, 
+  .pwa-card-header {
+    padding: 14px 16px;
+  }
+  .pwa-card-body {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .pwa-card-footer {
+    padding: 12px 16px;
+  }
+}
+
+/* Tablet devices (600px - 859px) */
+@media (min-width: 600px) and (max-width: 859px) {
+  .client-nav {
+    padding: 12px 24px;
+  }
+  .option-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .classic-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+  .classic-tile {
+    width: 100%;
+  }
+  .mode-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .diet-filter-bar {
+    padding: 4px 24px 8px;
+  }
+}
+
+
 

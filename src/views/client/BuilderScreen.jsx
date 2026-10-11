@@ -133,11 +133,13 @@ export default function BuilderScreen() {
 
   const toggle = (item) => {
     setSelections(prev => {
-      const current = prev[step.id];
+      const current = prev[step.id] || [];
       if (current.some(i => i.id === item.id)) {
         return { ...prev, [step.id]: current.filter(i => i.id !== item.id) };
       }
-      if (step.single) return { ...prev, [step.id]: [item] };
+      if (step.single || step.id === 'base' || step.id === 'sauce') {
+        return { ...prev, [step.id]: [item] };
+      }
       return { ...prev, [step.id]: [...current, item] };
     });
   };

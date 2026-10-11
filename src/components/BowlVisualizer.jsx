@@ -1,48 +1,71 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Activity, Flame, ShieldCheck, Heart } from 'lucide-react';
+import { Sparkles, Activity, ShieldCheck } from 'lucide-react';
 import { NUTRITION_ESTIMATES } from '../data';
 
-export default function BowlVisualizer({ selections, isCustom, baseItem }) {
+// Helper to safely extract string name whether item is an Object or a String
+const getName = (item, defaultName = '') => {
+  if (!item) return defaultName;
+  if (typeof item === 'string') return item;
+  return item.name || defaultName;
+};
+
+export default function BowlVisualizer({ selections = {}, isCustom = true, baseItem }) {
   const [showNutrition, setShowNutrition] = useState(false);
 
-  // Compute live calories & protein
-  const baseName = selections.base?.[0] || 'Riz vinaigré';
-  const proteinName = selections.proteine?.[0] || (baseItem?.defaultProtein || 'Saumon cru mariné');
-  const veggiesCount = selections.fruitsLegumes?.length || 0;
-  const hasSauce = (selections.sauce?.length || 0) > 0;
-  const hasToppings = (selections.toppings?.length || 0) > 0;
+  // Safely extract string names
+  const rawBase = selections.base?.[0];
+  const baseName = getName(rawBase, 'Riz vinaigré');
 
-  const baseCal = NUTRITION_ESTIMATES.baseCalories[baseName] || 240;
-  const baseProt = NUTRITION_ESTIMATES.baseProtein[baseName] || 4;
-  const protCal = NUTRITION_ESTIMATES.proteinCalories[proteinName] || 190;
-  const protGrams = NUTRITION_ESTIMATES.proteinGrams[proteinName] || 22;
-  const veggieCal = veggiesCount * NUTRITION_ESTIMATES.veggiePortionCalories;
-  const extraCal = (hasSauce ? NUTRITION_ESTIMATES.sauceCalories : 0) + (hasToppings ? NUTRITION_ESTIMATES.toppingsCalories : 0);
+  const rawProtein = selections.proteine?.[0];
+  const defaultProtName = getName(baseItem?.defaultProtein, 'Saumon cru mariné');
+  const proteinName = getName(rawProtein, defaultProtName);
 
-  const totalCalories = Math.round((baseCal + protCal + veggieCal + extraCal) * (selections.size === 'L' ? 1.25 : 1));
-  const totalProtein = Math.round((baseProt + protGrams + Math.round(veggiesCount * 0.8)) * (selections.size === 'L' ? 1.25 : 1));
+  const rawSauce = selections.sauce?.[0];
+  const sauceName = getName(rawSauce, '');
 
-  // Determine colors based on selections
+  const veggiesList = (selections.fruitsLegumes || []).map(v => getName(v)).filter(Boolean);
+  const toppingsList = (selections.toppings || []).map(t => getName(t)).filter(Boolean);
+
+  const veggiesCount = veggiesList.length;
+  const hasSauce = Boolean(sauceName);
+  const hasToppings = toppingsList.length > 0;
+
+  // Safe nutritional computation
+  const baseCal = NUTRITION_ESTIMATES?.baseCalories?.[baseName] || 240;
+  const baseProt = NUTRITION_ESTIMATES?.baseProtein?.[baseName] || 4;
+  const protCal = NUTRITION_ESTIMATES?.proteinCalories?.[proteinName] || 190;
+  const protGrams = NUTRITION_ESTIMATES?.proteinGrams?.[proteinName] || 22;
+  const veggieCal = veggiesCount * (NUTRITION_ESTIMATES?.veggiePortionCalories || 18);
+  const extraCal = (hasSauce ? (NUTRITION_ESTIMATES?.sauceCalories || 65) : 0) + 
+                   (hasToppings ? (NUTRITION_ESTIMATES?.toppingsCalories || 55) : 0);
+
+  const isLarge = selections.size === 'L';
+  const totalCalories = Math.round((baseCal + protCal + veggieCal + extraCal) * (isLarge ? 1.25 : 1));
+  const totalProtein = Math.round((baseProt + protGrams + Math.round(veggiesCount * 0.8)) * (isLarge ? 1.25 : 1));
+
+  // Determine colors safely
   const getBaseColor = () => {
-    if (baseName.includes('quinoa')) return '#d8b979';
-    if (baseName.includes('carotte')) return '#e0833a';
+    const s = baseName.toLowerCase();
+    if (s.includes('quinoa')) return '#d8b979';
+    if (s.includes('carotte')) return '#e0833a';
     return '#f4eee4'; // Sushi rice
   };
 
   const getProteinColor = () => {
-    if (proteinName.includes('Saumon')) return '#fa7960';
-    if (proteinName.includes('Poulet')) return '#c68437';
-    if (proteinName.includes('Falafel')) return '#7d6342';
+    const p = proteinName.toLowerCase();
+    if (p.includes('saumon')) return '#fa7960';
+    if (p.includes('poulet')) return '#c68437';
+    if (p.includes('falafel')) return '#7d6342';
     return '#fa7960';
   };
 
   const getSauceColor = () => {
-    const s = selections.sauce?.[0] || '';
-    if (s.includes('Sriracha') || s.includes('pik')) return 'rgba(235, 78, 43, 0.75)';
-    if (s.includes('Tzatziki')) return 'rgba(240, 248, 245, 0.85)';
-    if (s.includes('cacahuète')) return 'rgba(200, 140, 70, 0.8)';
-    return 'rgba(60, 35, 20, 0.75)'; // Soja
+    const s = sauceName.toLowerCase();
+    if (s.includes('sriracha') || s.includes('pik') || s.includes('wasabi')) return 'rgba(235, 78, 43, 0.85)';
+    if (s.includes('tzatziki')) return 'rgba(240, 248, 245, 0.9)';
+    if (s.includes('cacahuète') || s.includes('cacahuete')) return 'rgba(200, 140, 70, 0.85)';
+    return 'rgba(60, 35, 20, 0.8)'; // Soja
   };
 
   return (
@@ -58,6 +81,7 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
           className={`btn-nutrition-toggle ${showNutrition ? 'active' : ''}`}
           onClick={() => setShowNutrition(!showNutrition)}
           title="Afficher les macros nutritionnelles"
+          type="button"
         >
           <Activity size={13} />
           <span>{showNutrition ? 'Masquer nutrition' : 'Valeurs nutritionnelles'}</span>
@@ -70,7 +94,7 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
           className="bowl-outer"
           initial={{ scale: 0.95 }}
           animate={{ scale: 1 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.3 }}
         >
           {/* Ceramic / Coconut Rim */}
           <div className="bowl-rim">
@@ -79,9 +103,9 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
               className="bowl-base-layer"
               style={{ background: getBaseColor() }}
               key={baseName}
-              initial={{ opacity: 0.4, scale: 0.9 }}
+              initial={{ opacity: 0.5, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.25 }}
             >
               <span className="base-tag-pill">{baseName}</span>
             </motion.div>
@@ -89,8 +113,8 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
             {/* Veggies & Fruits Segments around */}
             <div className="bowl-veggies-container">
               <AnimatePresence>
-                {(selections.fruitsLegumes || []).map((veg, index) => {
-                  const total = Math.max(1, selections.fruitsLegumes.length);
+                {veggiesList.map((vegName, index) => {
+                  const total = Math.max(1, veggiesList.length);
                   const angle = (index / total) * 360;
                   const radius = 58;
                   const x = Math.round(radius * Math.cos((angle * Math.PI) / 180));
@@ -98,7 +122,7 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
 
                   return (
                     <motion.div
-                      key={veg}
+                      key={vegName + index}
                       className="bowl-topping-bubble"
                       style={{ transform: `translate(${x}px, ${y}px)` }}
                       initial={{ scale: 0, opacity: 0 }}
@@ -106,7 +130,7 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
                       exit={{ scale: 0, opacity: 0 }}
                       transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                     >
-                      {veg}
+                      {vegName}
                     </motion.div>
                   );
                 })}
@@ -118,7 +142,7 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
               className="bowl-protein-center"
               style={{ background: getProteinColor() }}
               key={proteinName}
-              initial={{ scale: 0.5, opacity: 0 }}
+              initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 450, damping: 22 }}
             >
@@ -126,35 +150,45 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
             </motion.div>
 
             {/* Sauce Swirl Drizzle */}
-            {selections.sauce?.[0] && (
+            {hasSauce && (
               <motion.div 
                 className="bowl-sauce-drizzle"
                 style={{ borderColor: getSauceColor() }}
+                key={sauceName}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.25 }}
               />
             )}
 
             {/* Toppings Sprinkles */}
-            {selections.toppings?.length > 0 && (
+            {hasToppings && (
               <motion.div 
                 className="bowl-toppings-sprinkle"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
-                <span>✨ {selections.toppings.join(' · ')}</span>
+                <span>✨ {toppingsList.join(' · ')}</span>
               </motion.div>
             )}
           </div>
         </motion.div>
       </div>
 
+      {/* Sauce Indicator Pill if selected */}
+      {hasSauce && (
+        <div style={{ textAlign: 'center', marginTop: -6, marginBottom: 4 }}>
+          <span className="tag tag-gold" style={{ fontSize: 11, padding: '3px 10px' }}>
+            Sauce : {sauceName}
+          </span>
+        </div>
+      )}
+
       {/* Nutrition Drawer / Live Metrics */}
       <div className="bowl-nutrition-strip">
         <div className="nutrition-stat">
           <span className="nutrition-value">{totalCalories}</span>
-          <span className="nutrition-label">kcal estimées</span>
+          <span className="nutrition-label">kcal</span>
         </div>
         <div className="nutrition-stat">
           <span className="nutrition-value" style={{ color: 'var(--green-700)' }}>{totalProtein}g</span>
@@ -162,13 +196,13 @@ export default function BowlVisualizer({ selections, isCustom, baseItem }) {
         </div>
         <div className="nutrition-stat">
           <span className="nutrition-value" style={{ color: 'var(--gold)' }}>
-            {selections.fruitsLegumes?.length || 0}/5
+            {veggiesCount}
           </span>
-          <span className="nutrition-label">légumes frais</span>
+          <span className="nutrition-label">légumes</span>
         </div>
         <div className="nutrition-stat">
           <span className="nutrition-value" style={{ textTransform: 'uppercase' }}>{selections.size || 'M'}</span>
-          <span className="nutrition-label">format</span>
+          <span className="nutrition-label">taille</span>
         </div>
       </div>
 
