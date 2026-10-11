@@ -1,0 +1,54 @@
+{
+  "name": "Hoya Poké · Caisse & Administration",
+  "short_name": "Hoya Admin",
+  "description": "Application de gestion de caisse, cuisine et carte Hoya Poké Pézenas",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0f1a14",
+  "theme_color": "#0f1a14",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "500x500",
+      "type": "image/jpeg"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Administration & Carte",
+      "short_name": "Admin",
+      "description": "Gestion des produits et de la caisse",
+      "url": "/admin",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Écran Cuisine (KDS)",
+      "short_name": "Cuisine",
+      "description": "Tableau de préparation des commandes",
+      "url": "/cuisine",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Site Commande Client",
+      "short_name": "Boutique",
+      "description": "Menu et commande en ligne",
+      "url": "/",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

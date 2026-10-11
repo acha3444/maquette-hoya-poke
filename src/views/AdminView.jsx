@@ -5,13 +5,14 @@ import {
   Plus, Edit2, Trash2, Image, Upload, Check, X, Search, 
   ChefHat, ShoppingBag, ArrowLeft, LockKeyhole, RefreshCw, 
   SlidersHorizontal, Sparkles, AlertCircle, FileText, Printer,
-  Eye, EyeOff, KeyRound
+  Eye, EyeOff, KeyRound, Smartphone
 } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
 import { lockStaffApp, getStaffPin } from '../components/StaffGuard';
 import CaisseClotureModal from '../components/CaisseClotureModal';
 import ChangePinModal from '../components/ChangePinModal';
+import InstallPwaModal from '../components/InstallPwaModal';
 
 const PRESET_IMAGES = [
   { label: 'Poké Saumon Mariné', url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80' },
@@ -46,6 +47,7 @@ export default function AdminView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showZModal, setShowZModal] = useState(false);
   const [showChangePinModal, setShowChangePinModal] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   // Form State
   const [formCategory, setFormCategory] = useState('classiques');
@@ -187,6 +189,16 @@ export default function AdminView() {
           >
             <ShoppingBag size={14} />
             <span>Site client</span>
+          </button>
+
+          <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            onClick={() => setShowInstallModal(true)}
+            title="Installer l'app sur l'écran d'accueil"
+            style={{ color: 'var(--green-700)', borderColor: 'rgba(46, 125, 50, 0.3)', background: 'rgba(46, 125, 50, 0.08)', fontWeight: 600 }}
+          >
+            <Smartphone size={14} />
+            <span>Installer l'app</span>
           </button>
 
           <button 
@@ -658,6 +670,9 @@ export default function AdminView() {
         )}
         {showChangePinModal && (
           <ChangePinModal onClose={() => setShowChangePinModal(false)} />
+        )}
+        {showInstallModal && (
+          <InstallPwaModal onClose={() => setShowInstallModal(false)} />
         )}
       </AnimatePresence>
     </div>

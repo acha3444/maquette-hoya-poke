@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete, Printer, LockKeyhole, FileText, Sparkles, KeyRound } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete, Printer, LockKeyhole, FileText, Sparkles, KeyRound, Smartphone } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
@@ -10,6 +10,7 @@ import { playNewOrderSound, playSuccessSound, isSoundEnabled, setSoundEnabled, u
 import TicketPrintModal from '../components/TicketPrintModal';
 import CaisseClotureModal from '../components/CaisseClotureModal';
 import ChangePinModal from '../components/ChangePinModal';
+import InstallPwaModal from '../components/InstallPwaModal';
 import { lockStaffApp, isStaffPinValid, getStaffPin } from '../components/StaffGuard';
 import './restaurant.css';
 
@@ -359,6 +360,7 @@ export default function RestaurantView() {
   const [printingOrder, setPrintingOrder] = useState(null);
   const [autoPrintOnAccept, setAutoPrintOnAccept] = useState(() => localStorage.getItem('hoya_auto_print_accept') !== 'false');
   const [showChangePinModal, setShowChangePinModal] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
   const [audioReady, setAudioReady] = useState(() => getAudioStatus() === 'running');
   const [today] = useState(() => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const rootRef = useRef(null);
@@ -856,6 +858,24 @@ export default function RestaurantView() {
                     }}
                     onClick={() => {
                       setShowSettings(false);
+                      setShowInstallModal(true);
+                    }}
+                  >
+                    <Smartphone size={16} />
+                    <span>Installer l'app sur la tablette</span>
+                  </button>
+                  <button
+                    className="btn btn-ghost row gap-2"
+                    style={{
+                      background: 'var(--cream-2)',
+                      borderColor: 'var(--line)',
+                      justifyContent: 'center',
+                      padding: '11px 16px',
+                      fontWeight: 600,
+                      borderRadius: 'var(--r)'
+                    }}
+                    onClick={() => {
+                      setShowSettings(false);
                       setShowChangePinModal(true);
                     }}
                   >
@@ -896,6 +916,9 @@ export default function RestaurantView() {
         )}
         {showChangePinModal && (
           <ChangePinModal onClose={() => setShowChangePinModal(false)} />
+        )}
+        {showInstallModal && (
+          <InstallPwaModal onClose={() => setShowInstallModal(false)} />
         )}
         {printingOrder && (
           <TicketPrintModal
