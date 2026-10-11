@@ -1,13 +1,14 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete, Printer } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete, Printer, LockKeyhole } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
 import { ease } from '../motion';
 import { playNewOrderSound, playSuccessSound, isSoundEnabled, setSoundEnabled, unlockAudio, getAudioStatus } from '../sound';
 import TicketPrintModal from '../components/TicketPrintModal';
+import { lockStaffApp } from '../components/StaffGuard';
 import './restaurant.css';
 
 const STATUS_COLUMNS = [
@@ -523,8 +524,21 @@ export default function RestaurantView() {
             </span>
             <span>{restaurantOpen ? 'En service' : 'Fermé'}</span>
           </button>
-          <button className="icon-btn" style={{ boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => setShowSettings(true)} aria-label="Réglages">
+          <button className="icon-btn" style={{ boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => setShowSettings(true)} aria-label="Réglages" title="Réglages du service">
             <SlidersHorizontal size={18} />
+          </button>
+          <button
+            className="icon-btn"
+            style={{ 
+              boxShadow: 'inset 0 0 0 1px var(--line)', 
+              color: 'var(--muted)',
+              transition: 'all 0.15s ease'
+            }}
+            onClick={lockStaffApp}
+            title="Verrouiller l'écran (Code PIN 1234)"
+            aria-label="Verrouiller l'écran cuisine"
+          >
+            <LockKeyhole size={17} />
           </button>
         </div>
       </header>
@@ -743,6 +757,29 @@ export default function RestaurantView() {
                     <div className="card"><span className="tnum">{finished.length}</span><span className="muted small">commandes terminées</span></div>
                     <div className="card"><span className="tnum">{hideRevenue ? '•••• €' : formatPrice(revenue)}</span><span className="muted small">chiffre d'affaires</span></div>
                   </div>
+                </section>
+
+                <section className="col gap-2" style={{ marginTop: 8 }}>
+                  <h3 className="eyebrow">Sécurité & Session Staff</h3>
+                  <button
+                    className="btn btn-ghost row gap-2"
+                    style={{
+                      color: '#c8463d',
+                      borderColor: 'rgba(200, 70, 61, 0.3)',
+                      background: 'rgba(200, 70, 61, 0.05)',
+                      justifyContent: 'center',
+                      padding: '12px 16px',
+                      fontWeight: 700,
+                      borderRadius: 'var(--r)'
+                    }}
+                    onClick={() => {
+                      setShowSettings(false);
+                      lockStaffApp();
+                    }}
+                  >
+                    <LockKeyhole size={16} />
+                    <span>Verrouiller l'écran cuisine (Code PIN 1234)</span>
+                  </button>
                 </section>
               </div>
             </motion.aside>

@@ -73,6 +73,14 @@ export default function StaffGuard({ children, title = 'Accès Équipe Cuisine',
     setIsAuthenticated(false);
   };
 
+  useEffect(() => {
+    const handleLockEvent = () => {
+      handleLogout();
+    };
+    window.addEventListener('hoya_lock_staff', handleLockEvent);
+    return () => window.removeEventListener('hoya_lock_staff', handleLockEvent);
+  }, []);
+
   if (!isAuthenticated) {
     return (
       <div 
@@ -329,36 +337,11 @@ export default function StaffGuard({ children, title = 'Accès Équipe Cuisine',
     );
   }
 
-  return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      {/* Quick Lock Button floating top right */}
-      <button
-        onClick={handleLogout}
-        style={{
-          position: 'fixed',
-          top: 14,
-          right: 14,
-          zIndex: 1000,
-          background: 'rgba(15, 26, 20, 0.85)',
-          color: 'var(--cream)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          borderRadius: 20,
-          padding: '5px 10px',
-          fontSize: 11,
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 5,
-          cursor: 'pointer',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-        }}
-        title="Verrouiller l'écran et fermer la session staff"
-      >
-        <LockKeyhole size={12} />
-        <span>Verrouiller</span>
-      </button>
-      {children}
-    </div>
-  );
+  return children;
+}
+
+export function lockStaffApp() {
+  localStorage.removeItem(PIN_STORAGE_KEY);
+  sessionStorage.removeItem(PIN_STORAGE_KEY);
+  window.dispatchEvent(new Event('hoya_lock_staff'));
 }
