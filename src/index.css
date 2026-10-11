@@ -533,3 +533,67 @@ a.btn { text-decoration: none; }
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
   }
 }
+
+/* ==========================================================================
+   PWA STANDALONE MODE OPTIMIZATIONS (INSTALLÉ SUR SMARTPHONE / TABLETTE)
+   S'applique UNIQUEMENT quand l'application est installée sur l'écran d'accueil.
+   Le site web classique en navigateur reste 100% intact sans aucun impact.
+   ========================================================================== */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html, body {
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Espace sécurisé sous l'encoche / Dynamic Island / barre d'état */
+  .topbar {
+    padding-top: calc(12px + env(safe-area-inset-top, 24px));
+    min-height: calc(56px + env(safe-area-inset-top, 24px));
+  }
+
+  /* Espace sécurisé au-dessus de la barre noire d'accueil du téléphone */
+  .bottom-bar {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 20px));
+  }
+
+  .cart-bar-wrap {
+    bottom: calc(16px + env(safe-area-inset-bottom, 20px));
+  }
+
+  .sheet {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 20px));
+  }
+
+  .floating-pro-badge {
+    bottom: calc(12px + env(safe-area-inset-bottom, 16px));
+  }
+}
+
+/* Fallback via classe pwa-standalone pour iOS Safari PWA */
+.pwa-standalone html,
+.pwa-standalone body {
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pwa-standalone .topbar {
+  padding-top: calc(12px + env(safe-area-inset-top, 24px));
+  min-height: calc(56px + env(safe-area-inset-top, 24px));
+}
+
+.pwa-standalone .bottom-bar {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 20px));
+}
+
+.pwa-standalone .cart-bar-wrap {
+  bottom: calc(16px + env(safe-area-inset-bottom, 20px));
+}
+
+.pwa-standalone .sheet {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 20px));
+}
+
+.pwa-standalone .floating-pro-badge {
+  bottom: calc(12px + env(safe-area-inset-bottom, 16px));
+}
+

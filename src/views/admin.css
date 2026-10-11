@@ -181,3 +181,23 @@
   }
 }
 
+/* ==========================================================================
+   ADMIN PWA STANDALONE OPTIMIZATIONS
+   ========================================================================== */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  .admin-head {
+    padding-top: calc(14px + env(safe-area-inset-top, 24px));
+  }
+  .admin-body {
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 24px));
+  }
+}
+
+.pwa-standalone .admin-head {
+  padding-top: calc(14px + env(safe-area-inset-top, 24px));
+}
+.pwa-standalone .admin-body {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom, 24px));
+}
+
+

@@ -1721,5 +1721,39 @@
   }
 }
 
+/* ==========================================================================
+   CLIENT PWA STANDALONE OPTIMIZATIONS (APP INSTALLÉE)
+   N'affecte pas les visiteurs web standards.
+   ========================================================================== */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  /* Dégager le bandeau haut sous l'encoche / Dynamic Island */
+  .client-nav {
+    padding-top: calc(14px + env(safe-area-inset-top, 24px));
+  }
+
+  /* Masquer le badge d'invitation à installer car l'app est déjà installée */
+  .client-pwa-badge {
+    display: none !important;
+  }
+
+  /* Dégager le pied de page au-dessus de la barre d'accueil */
+  .client-footer {
+    padding-bottom: calc(52px + env(safe-area-inset-bottom, 24px));
+  }
+}
+
+.pwa-standalone .client-nav {
+  padding-top: calc(14px + env(safe-area-inset-top, 24px));
+}
+
+.pwa-standalone .client-pwa-badge {
+  display: none !important;
+}
+
+.pwa-standalone .client-footer {
+  padding-bottom: calc(52px + env(safe-area-inset-bottom, 24px));
+}
+
+
 
 

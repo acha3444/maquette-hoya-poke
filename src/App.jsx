@@ -50,6 +50,16 @@ function FloatingProNav() {
   const isDelivery = location.pathname.startsWith('/livreur');
   const isClient = !isKitchen && !isDelivery;
 
+  const isStandalone = typeof window !== 'undefined' && (
+    window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true
+  );
+
+  // When installed as standalone customer app, don't show developer pro toolbar
+  if (isStandalone && isClient) {
+    return null;
+  }
+
   return (
     <>
       <button
