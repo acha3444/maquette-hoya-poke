@@ -6,6 +6,16 @@ import { formatPrice } from '../format';
 export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
   if (!order) return null;
 
+  // Auto-launch native print dialog when triggered from "Accepter"
+  React.useEffect(() => {
+    if (order?.triggerPrint) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [order?.id, order?.triggerPrint]);
+
   const handlePrint = () => {
     window.print();
   };
@@ -122,9 +132,18 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
               <span>TOTAL TTC</span>
               <span>{formatPrice(order.total)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 4, fontWeight: 700 }}>
-              <span>STATUT RÈGLEMENT :</span>
-              <span>{order.paymentStatus === 'PAYÉ' ? 'PAYÉ EN LIGNE (CB)' : 'À ENCAISSER'}</span>
+            <div style={{ marginTop: 6, padding: '8px 10px', borderRadius: 4, background: order.paymentStatus === 'PAYÉ' ? '#e6f4ea' : '#fff3cd', border: `1px solid ${order.paymentStatus === 'PAYÉ' ? '#a8dab5' : '#ffeeba'}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 800, color: order.paymentStatus === 'PAYÉ' ? '#137333' : '#856404' }}>
+                <span>RÈGLEMENT :</span>
+                <span>{order.paymentStatus === 'PAYÉ' ? '✓ PAYÉ EN LIGNE (CB)' : '⚠️ À ENCAISSER SUR PLACE'}</span>
+              </div>
+              <div style={{ fontSize: 10, color: '#555', marginTop: 3 }}>
+                {order.paymentStatus === 'PAYÉ' 
+                  ? 'Paiement carte bancaire validé en ligne.'
+                  : (isDelivery 
+                      ? 'Espèces ou CB à percevoir par le livreur lors de la livraison.' 
+                      : 'Espèces, CB ou Titres-resto à percevoir au comptoir.')}
+              </div>
             </div>
 
             {/* Ticket Footer */}
@@ -202,12 +221,19 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
 
           <div style={{ borderTop: '2px dashed #000', paddingTop: '6px', marginTop: '6px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
-              <span>TOTAL :</span>
+              <span>TOTAL TTC :</span>
               <span>{formatPrice(order.total)}</span>
             </div>
-            <div style={{ fontSize: '11px', marginTop: '2px' }}>
-              PAIEMENT : {order.paymentStatus === 'PAYÉ' ? 'PAYE EN LIGNE' : 'A ENCAISSER'}
+            <div style={{ fontSize: '12px', fontWeight: 'bold', marginTop: '4px' }}>
+              {order.paymentStatus === 'PAYÉ' 
+                ? '>>> PAIEMENT : PAYE EN LIGNE (CB) <<<' 
+                : `>>> A ENCAISSER SUR PLACE (${isDelivery ? 'LIVREUR' : 'COMPTOIR'}) <<<`}
             </div>
+            {order.paymentStatus !== 'PAYÉ' && (
+              <div style={{ fontSize: '11px', marginTop: '2px' }}>
+                * A percevoir : {formatPrice(order.total)} (Especes / CB) *
+              </div>
+            )}
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '10px' }}>

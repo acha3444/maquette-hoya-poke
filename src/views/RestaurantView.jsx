@@ -39,15 +39,18 @@ function useContainerWidth(ref) {
   return width;
 }
 
-function OrderCard({ order, onPrint }) {
+function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
   const updateOrderStatus = useStore(s => s.updateOrderStatus);
   const isNew = order.status === 'NOUVELLE';
   const done = order.status === 'TERMINEE';
 
-  const action = (label, status, variant = 'btn-primary', icon = null) => (
+  const action = (label, status, variant = 'btn-primary', icon = null, printTicket = false) => (
     <button className={`btn btn-sm ${variant}`} onClick={() => {
       playSuccessSound();
       updateOrderStatus(order.id, status);
+      if (printTicket && autoPrintOnAccept && onPrint) {
+        onPrint({ ...order, status, triggerPrint: true });
+      }
     }}>
       {icon}{label}
     </button>
@@ -122,15 +125,21 @@ function OrderCard({ order, onPrint }) {
       <footer className="ticket-foot">
         <div className="col">
           <span className="price">{formatPrice(order.total)}</span>
-          <span className={`small ${order.paymentStatus === 'PAYÉ' ? 'muted' : 'text-danger'}`} style={{ fontSize: 11, fontWeight: 600 }}>
-            {order.paymentStatus === 'PAYÉ' ? 'Payé en ligne' : 'À encaisser'}
-          </span>
+          {order.paymentStatus === 'PAYÉ' ? (
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ok)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              ✓ En ligne (CB)
+            </span>
+          ) : (
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--gold-ink)', background: 'var(--gold-soft)', padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              ⚠️ Sur place ({order.type === 'LIVRAISON' ? 'livreur' : 'comptoir'})
+            </span>
+          )}
         </div>
         <div className="row gap-2">
           {isNew && (
             <>
               {action('Refuser', 'REFUSEE', 'btn-ghost')}
-              {action('Accepter', 'PREPARATION')}
+              {action('Accepter', 'PREPARATION', 'btn-primary', <Printer size={13} />, true)}
             </>
           )}
           {order.status === 'PREPARATION' && action('Prête', 'PRETE')}
@@ -343,7 +352,7 @@ export default function RestaurantView() {
   const [showSettings, setShowSettings] = useState(false);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
   const [printingOrder, setPrintingOrder] = useState(null);
-  const [autoPrint, setAutoPrint] = useState(() => localStorage.getItem('hoya_auto_print') === 'true');
+  const [autoPrintOnAccept, setAutoPrintOnAccept] = useState(() => localStorage.getItem('hoya_auto_print_accept') !== 'false');
   const [audioReady, setAudioReady] = useState(() => getAudioStatus() === 'running');
   const [today] = useState(() => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const rootRef = useRef(null);
@@ -408,10 +417,7 @@ export default function RestaurantView() {
         playNewOrderSound();
       }
       setActiveTab('NOUVELLE');
-      if (autoPrint) {
-        const latest = orders.find(o => o.status === 'NOUVELLE');
-        if (latest) setPrintingOrder(latest);
-      }
+      // Note: Ne pas imprimer automatiquement à la réception. L'impression se lance au clic sur 'Accepter'.
     }
 
     knownOrderIds.current = new Set(orders.map(o => o.id));
@@ -597,7 +603,7 @@ export default function RestaurantView() {
                   </div>
                   <div className="board-col-body scroll">
                     <AnimatePresence mode="popLayout">
-                      {colOrders.map(o => <OrderCard key={o.id} order={o} onPrint={setPrintingOrder} />)}
+                      {colOrders.map(o => <OrderCard key={o.id} order={o} onPrint={setPrintingOrder} autoPrintOnAccept={autoPrintOnAccept} />)}
                     </AnimatePresence>
                     {colOrders.length === 0 && <EmptyColumn />}
                   </div>
@@ -633,7 +639,7 @@ export default function RestaurantView() {
             >
               <div className="col gap-3">
                 <AnimatePresence mode="popLayout">
-                  {byStatus(activeTab).map(o => <OrderCard key={o.id} order={o} onPrint={setPrintingOrder} />)}
+                  {byStatus(activeTab).map(o => <OrderCard key={o.id} order={o} onPrint={setPrintingOrder} autoPrintOnAccept={autoPrintOnAccept} />)}
                 </AnimatePresence>
                 {byStatus(activeTab).length === 0 && <EmptyColumn />}
               </div>
@@ -701,18 +707,18 @@ export default function RestaurantView() {
                     className="stock-row" 
                     style={{ cursor: 'pointer' }}
                     onClick={() => {
-                      setAutoPrint(prev => {
+                      setAutoPrintOnAccept(prev => {
                         const next = !prev;
-                        localStorage.setItem('hoya_auto_print', String(next));
+                        localStorage.setItem('hoya_auto_print_accept', String(next));
                         return next;
                       });
                     }}
                   >
                     <div className="col">
-                      <span>Impression automatique (Auto-Print)</span>
-                      <span className="muted small">Ouvre le bon dès réception d'une commande.</span>
+                      <span>Imprimer à l'acceptation</span>
+                      <span className="muted small">Lance le bon dès que vous appuyez sur "Accepter".</span>
                     </div>
-                    <span className={`switch ${autoPrint ? 'on' : ''}`}>
+                    <span className={`switch ${autoPrintOnAccept ? 'on' : ''}`}>
                       <motion.span layout transition={spring} className="switch-knob" />
                     </span>
                   </div>

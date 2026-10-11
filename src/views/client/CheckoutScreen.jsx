@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, CreditCard, Banknote, Check } from 'lucide-react';
 import { useStore } from '../../store';
 import { DELIVERY_ZONES } from '../../data';
 import { formatPrice } from '../../format';
@@ -37,6 +37,7 @@ export default function CheckoutScreen() {
   const [deliveryZone, setDeliveryZone] = useState(null);
   const [addressError, setAddressError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('ONLINE'); // 'ONLINE' | 'ON_SITE'
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', instructions: '', time: 'ASAP' });
 
   const update = (key) => (e) => setFormData(f => ({ ...f, [key]: e.target.value }));
@@ -85,7 +86,8 @@ export default function CheckoutScreen() {
       zone: deliveryZone ? deliveryZone.id : null,
       deliveryFee,
       total,
-      paymentStatus: 'PAYÉ',
+      paymentStatus: paymentMethod === 'ONLINE' ? 'PAYÉ' : 'A_ENCAISSER',
+      paymentMethod: paymentMethod === 'ONLINE' ? 'EN LIGNE (CB)' : (isDelivery ? 'SUR PLACE (LIVREUR)' : 'SUR PLACE (COMPTOIR)'),
       items: cart
     };
 
@@ -172,6 +174,69 @@ export default function CheckoutScreen() {
                 <textarea placeholder="Digicode, étage, indications" value={formData.instructions} onChange={update('instructions')} rows={2} />
               )}
             </motion.section>
+
+            <motion.section variants={item} className="col gap-3">
+              <h3 className="eyebrow">Mode de règlement</h3>
+              <div className="col gap-2">
+                <button
+                  type="button"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '14px 16px',
+                    border: paymentMethod === 'ONLINE' ? '2px solid var(--green-700)' : '1px solid var(--line)',
+                    background: paymentMethod === 'ONLINE' ? 'var(--cream-2)' : 'var(--paper)',
+                    borderRadius: 'var(--r)',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                  onClick={() => setPaymentMethod('ONLINE')}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--green-100)', color: 'var(--green-700)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <CreditCard size={18} />
+                  </div>
+                  <div className="col" style={{ flex: 1 }}>
+                    <strong style={{ fontSize: 14 }}>Payer en ligne</strong>
+                    <span className="muted small">Carte bancaire, Apple Pay ou Google Pay sécurisé</span>
+                  </div>
+                  <span className={`switch ${paymentMethod === 'ONLINE' ? 'on' : ''}`} style={{ flexShrink: 0 }}>
+                    <motion.span layout className="switch-knob" />
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '14px 16px',
+                    border: paymentMethod === 'ON_SITE' ? '2px solid var(--green-700)' : '1px solid var(--line)',
+                    background: paymentMethod === 'ON_SITE' ? 'var(--cream-2)' : 'var(--paper)',
+                    borderRadius: 'var(--r)',
+                    cursor: 'pointer',
+                    textAlign: 'left'
+                  }}
+                  onClick={() => setPaymentMethod('ON_SITE')}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--gold-soft)', color: 'var(--gold-ink)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <Banknote size={18} />
+                  </div>
+                  <div className="col" style={{ flex: 1 }}>
+                    <strong style={{ fontSize: 14 }}>Payer sur place</strong>
+                    <span className="muted small">
+                      {isDelivery 
+                        ? 'CB ou Espèces auprès du livreur lors de la livraison' 
+                        : 'CB, Espèces ou Titres-resto au retrait en boutique'}
+                    </span>
+                  </div>
+                  <span className={`switch ${paymentMethod === 'ON_SITE' ? 'on' : ''}`} style={{ flexShrink: 0 }}>
+                    <motion.span layout className="switch-knob" />
+                  </span>
+                </button>
+              </div>
+            </motion.section>
           </div>
 
           <motion.section variants={item} className="col gap-2 checkout-aside">
@@ -218,8 +283,10 @@ export default function CheckoutScreen() {
         <motion.button className="btn btn-primary btn-block" onClick={handleSubmit} disabled={!canPay} whileTap={{ scale: 0.98 }}>
           {submitting ? (
             <motion.span className="spinner" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }} />
+          ) : paymentMethod === 'ONLINE' ? (
+            <><Lock size={16} /> Payer en ligne · {formatPrice(total)}</>
           ) : (
-            <><Lock size={16} /> Payer {formatPrice(total)}</>
+            <><Check size={16} /> Confirmer la commande · {formatPrice(total)} ({isDelivery ? 'Paiement au livreur' : 'Au comptoir'})</>
           )}
         </motion.button>
       </div>
