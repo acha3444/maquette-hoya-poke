@@ -466,40 +466,124 @@ export default function RestaurantView() {
   return (
     <div className="screen kitchen" ref={rootRef}>
       <header className="kitchen-head">
-        <div className="row gap-3">
+        <div className="kitchen-head-top">
           <div className="col">
-            <span className="display" style={{ fontSize: 24, color: 'var(--green-700)' }}>Hoya Poké</span>
-            <span className="muted small">Cuisine · {today}</span>
+            <span className="display" style={{ fontSize: wide ? 24 : 19, color: 'var(--green-700)', lineHeight: 1.1 }}>Hoya Poké</span>
+            <span className="muted small" style={{ fontSize: wide ? 12 : 11 }}>Cuisine · {today}</span>
           </div>
-          <div className="row gap-2" style={{ marginLeft: 8 }}>
-            <button 
-              className="btn btn-sm btn-ghost row gap-1"
-              style={{ height: 32, padding: '0 10px', fontSize: 12 }}
-              onClick={() => navigate('/')}
-              title="Voir le site client"
+
+          <div className="row gap-2">
+            <button
+              className="icon-btn"
+              style={{
+                boxShadow: 'inset 0 0 0 1px var(--line)',
+                color: soundOn ? 'var(--green-700)' : 'var(--muted)',
+                background: soundOn ? 'rgba(46, 125, 50, 0.08)' : 'transparent',
+                position: 'relative'
+              }}
+              onClick={handleToggleSound}
+              title={soundOn ? 'Carillon des commandes activé' : 'Carillon coupé'}
+              aria-label="Alerte sonore commandes"
             >
-              <ShoppingBag size={13} />
-              <span>Site client</span>
+              {soundOn ? <Volume2 size={17} /> : <VolumeX size={17} />}
+              {soundOn && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: 'var(--green-700)'
+                  }}
+                />
+              )}
             </button>
+
             <button 
-              className="btn btn-sm btn-ghost row gap-1"
-              style={{ height: 32, padding: '0 10px', fontSize: 12 }}
-              onClick={() => navigate('/livreur')}
-              title="Ouvrir l'interface livreur"
+              className="icon-btn" 
+              style={{ boxShadow: 'inset 0 0 0 1px var(--line)' }} 
+              onClick={() => setShowSettings(true)} 
+              aria-label="Réglages" 
+              title="Réglages du service"
             >
-              <Bike size={13} />
-              <span>Livreur</span>
+              <SlidersHorizontal size={17} />
             </button>
-            <button 
-              className="btn btn-sm btn-ghost row gap-1"
-              style={{ height: 32, padding: '0 10px', fontSize: 12 }}
-              onClick={() => navigate('/admin')}
-              title="Gérer la carte des produits et clôturer la caisse"
+
+            <button
+              className="icon-btn"
+              style={{ 
+                boxShadow: 'inset 0 0 0 1px var(--line)', 
+                color: 'var(--danger)',
+                background: 'rgba(200, 70, 61, 0.05)'
+              }}
+              onClick={lockStaffApp}
+              title="Verrouiller l'écran cuisine"
+              aria-label="Verrouiller l'écran cuisine"
             >
-              <Sparkles size={13} style={{ color: 'var(--gold)' }} />
-              <span>Admin / Carte</span>
+              <LockKeyhole size={16} />
             </button>
           </div>
+        </div>
+
+        {/* Navigation & Controls Bar */}
+        <div className="kitchen-head-nav">
+          <button className="service-toggle" onClick={() => setRestaurantOpen(!restaurantOpen)} style={{ marginRight: 6 }}>
+            <span className={`switch ${restaurantOpen ? 'on' : ''}`}>
+              <motion.span layout transition={spring} className="switch-knob" />
+            </span>
+            <span style={{ fontSize: 12 }}>{restaurantOpen ? 'En service' : 'Fermé'}</span>
+          </button>
+
+          <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            onClick={() => navigate('/')}
+            title="Voir le site client"
+          >
+            <ShoppingBag size={13} />
+            <span>Site client</span>
+          </button>
+
+          <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            onClick={() => navigate('/livreur')}
+            title="Ouvrir l'interface livreur"
+          >
+            <Bike size={13} />
+            <span>Livreur</span>
+          </button>
+
+          <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            onClick={() => navigate('/admin')}
+            title="Gérer la carte des produits et clôturer la caisse"
+          >
+            <Sparkles size={13} style={{ color: 'var(--gold)' }} />
+            <span>Admin / Carte</span>
+          </button>
+
+          {!wide && (
+            <button
+              className="btn btn-sm btn-ghost row gap-1"
+              onClick={handleRevenueClick}
+              style={{ borderColor: 'var(--line)', background: 'var(--paper)' }}
+            >
+              {hideRevenue ? <Lock size={12} style={{ color: 'var(--gold)' }} /> : <Eye size={12} />}
+              <span>{hideRevenue ? 'CA protégé 🔒' : `${formatPrice(revenue)}`}</span>
+            </button>
+          )}
+
+          {!wide && (
+            <button
+              className="btn btn-sm btn-ghost row gap-1"
+              onClick={handleOpenCaisse}
+              style={{ borderColor: 'var(--line)', background: 'var(--paper)' }}
+            >
+              <FileText size={12} style={{ color: 'var(--gold-ink)' }} />
+              <span>Ticket Z</span>
+            </button>
+          )}
         </div>
 
         {wide && (
@@ -528,58 +612,6 @@ export default function RestaurantView() {
             </button>
           </div>
         )}
-
-        <div className="row gap-3">
-          <button
-            className="icon-btn"
-            style={{
-              boxShadow: 'inset 0 0 0 1px var(--line)',
-              color: soundOn ? 'var(--green-700)' : 'var(--muted)',
-              background: soundOn ? 'rgba(46, 125, 50, 0.08)' : 'transparent',
-              position: 'relative'
-            }}
-            onClick={handleToggleSound}
-            title={soundOn ? 'Carillon des commandes activé (cliquez pour couper ou tester)' : 'Carillon coupé (cliquez pour activer)'}
-            aria-label="Alerte sonore commandes"
-          >
-            {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
-            {soundOn && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: 7,
-                  right: 7,
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: 'var(--green-700)'
-                }}
-              />
-            )}
-          </button>
-          <button className="service-toggle" onClick={() => setRestaurantOpen(!restaurantOpen)}>
-            <span className={`switch ${restaurantOpen ? 'on' : ''}`}>
-              <motion.span layout transition={spring} className="switch-knob" />
-            </span>
-            <span>{restaurantOpen ? 'En service' : 'Fermé'}</span>
-          </button>
-          <button className="icon-btn" style={{ boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => setShowSettings(true)} aria-label="Réglages" title="Réglages du service">
-            <SlidersHorizontal size={18} />
-          </button>
-          <button
-            className="icon-btn"
-            style={{ 
-              boxShadow: 'inset 0 0 0 1px var(--line)', 
-              color: 'var(--muted)',
-              transition: 'all 0.15s ease'
-            }}
-            onClick={lockStaffApp}
-            title="Verrouiller l'écran (Code PIN 1234)"
-            aria-label="Verrouiller l'écran cuisine"
-          >
-            <LockKeyhole size={17} />
-          </button>
-        </div>
       </header>
 
       {!audioReady && soundOn && (

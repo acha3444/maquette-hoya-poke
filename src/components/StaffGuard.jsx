@@ -3,19 +3,68 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, ShieldAlert, ArrowLeft, Delete, Check, LockKeyhole } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { supabase } from '../supabase';
+
 const PIN_STORAGE_KEY = 'hoya_staff_authenticated';
 const PIN_CODE_KEY = 'hoya_staff_pin';
 export const DEFAULT_PIN = '1234';
+
+// Cloud Sync initialization: fetch and listen for PIN changes across all devices
+if (typeof window !== 'undefined') {
+  // 1. Initial fetch from Cloud
+  supabase
+    .from('orders')
+    .select('customer_phone')
+    .eq('id', '__pin_config__')
+    .maybeSingle()
+    .then(({ data, error }) => {
+      if (!error && data?.customer_phone && data.customer_phone.length === 4) {
+        localStorage.setItem(PIN_CODE_KEY, data.customer_phone);
+        window.dispatchEvent(new CustomEvent('hoya_pin_changed', { detail: data.customer_phone }));
+      }
+    })
+    .catch(() => {});
+
+  // 2. Realtime listener for PIN changes across all devices
+  try {
+    supabase
+      .channel('public:pin_config_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: 'id=eq.__pin_config__' }, (payload) => {
+        const cloudPin = payload.new?.customer_phone;
+        if (cloudPin && cloudPin.length === 4) {
+          localStorage.setItem(PIN_CODE_KEY, cloudPin);
+          window.dispatchEvent(new CustomEvent('hoya_pin_changed', { detail: cloudPin }));
+        }
+      })
+      .subscribe();
+  } catch (e) {}
+}
 
 export function getStaffPin() {
   if (typeof window === 'undefined') return DEFAULT_PIN;
   return localStorage.getItem(PIN_CODE_KEY) || DEFAULT_PIN;
 }
 
-export function setStaffPin(newPin) {
+export function setStaffPin(newPin, syncCloud = true) {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(PIN_CODE_KEY, String(newPin));
-    window.dispatchEvent(new CustomEvent('hoya_pin_changed', { detail: String(newPin) }));
+    const pinStr = String(newPin);
+    localStorage.setItem(PIN_CODE_KEY, pinStr);
+    window.dispatchEvent(new CustomEvent('hoya_pin_changed', { detail: pinStr }));
+
+    if (syncCloud) {
+      supabase
+        .from('orders')
+        .upsert({
+          id: '__pin_config__',
+          status: 'SYSTEM',
+          customer_name: 'STAFF_PIN',
+          customer_phone: pinStr,
+          total: 0,
+          items: []
+        })
+        .then(() => {})
+        .catch(err => console.warn('Cloud PIN sync error:', err));
+    }
   }
 }
 

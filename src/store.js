@@ -112,7 +112,8 @@ export const useStore = create((set, get) => {
           .order('created_at', { ascending: false });
 
         if (!error && data && data.length > 0) {
-          set({ orders: data.map(mapFromDb) });
+          const validOrders = data.filter(row => row.id !== '__pin_config__' && row.status !== 'SYSTEM');
+          set({ orders: validOrders.map(mapFromDb) });
         }
       } catch (e) {
         console.warn('Supabase initial fetch fallback:', e);
@@ -126,6 +127,9 @@ export const useStore = create((set, get) => {
       supabase
         .channel('public:orders_realtime')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+          if (payload.new?.id === '__pin_config__' || payload.old?.id === '__pin_config__') {
+            return; // Managed by StaffGuard PIN sync
+          }
           if (payload.eventType === 'INSERT') {
             const newOrder = mapFromDb(payload.new);
             set(state => {
@@ -285,7 +289,7 @@ export const useStore = create((set, get) => {
     resetDemo: async () => {
       set({ cart: [], orders: INITIAL_ORDERS, outOfStock: [], restaurantOpen: true, deliveryActiveOrderId: '1045' });
       try {
-        await supabase.from('orders').delete().neq('id', '0');
+        await supabase.from('orders').delete().neq('id', '__pin_config__');
         for (const init of INITIAL_ORDERS) {
           await supabase.from('orders').insert(mapToDb(init));
         }

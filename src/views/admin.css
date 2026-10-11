@@ -1,0 +1,142 @@
+/* Responsive styles for AdminView */
+.admin-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 20px;
+  background: var(--cream);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.admin-head-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-subnav {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.admin-chips-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  max-width: 100%;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-chips-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+}
+
+/* Mobile Optimizations (Smartphones & Tablets < 768px) */
+@media (max-width: 768px) {
+  .admin-head {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .admin-head-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .admin-head-actions {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-head-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-head-actions .btn {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 0 8px;
+    height: 30px;
+  }
+
+  .admin-subnav {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 14px;
+    gap: 10px;
+  }
+
+  .admin-subnav .tabs {
+    width: 100%;
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  .admin-subnav .tabs button {
+    padding: 10px 4px;
+    font-size: 13px;
+  }
+
+  .admin-add-btn {
+    width: 100%;
+    justify-content: center;
+    height: 38px;
+  }
+
+  .admin-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .admin-search-wrapper {
+    width: 100% !important;
+  }
+
+  .admin-products-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .admin-caisse-card {
+    padding: 16px !important;
+  }
+}

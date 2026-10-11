@@ -13,6 +13,7 @@ import { lockStaffApp, getStaffPin } from '../components/StaffGuard';
 import CaisseClotureModal from '../components/CaisseClotureModal';
 import ChangePinModal from '../components/ChangePinModal';
 import InstallPwaModal from '../components/InstallPwaModal';
+import './admin.css';
 
 const PRESET_IMAGES = [
   { label: 'Poké Saumon Mariné', url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80' },
@@ -163,16 +164,39 @@ export default function AdminView() {
   return (
     <div className="screen" style={{ background: 'var(--cream-2)' }}>
       {/* Top Header */}
-      <header className="kitchen-head" style={{ borderBottom: '1px solid var(--line)' }}>
-        <div className="row gap-3">
-          <img src="/logo.jpg" alt="Hoya Poké" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid var(--line)' }} />
-          <div className="col">
-            <span className="display" style={{ fontSize: 20, color: 'var(--green-700)' }}>Administration Hoya Poké</span>
-            <span className="muted small">Gestion Carte, Produits & Clôture de Caisse</span>
+      <header className="admin-head">
+        <div className="admin-head-top-row">
+          <div className="admin-head-brand">
+            <img src="/logo.jpg" alt="Hoya Poké" style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid var(--line)' }} />
+            <div className="col">
+              <span className="display" style={{ fontSize: 18, color: 'var(--green-700)', lineHeight: 1.1 }}>Hoya Admin</span>
+              <span className="muted small" style={{ fontSize: 11 }}>Carte & Caisse</span>
+            </div>
+          </div>
+
+          <div className="row gap-2">
+            <button 
+              className="btn btn-sm btn-ghost row gap-1"
+              onClick={() => setShowChangePinModal(true)}
+              title="Modifier le code PIN staff"
+              style={{ padding: '0 8px', height: 32 }}
+            >
+              <KeyRound size={14} />
+              <span>PIN</span>
+            </button>
+
+            <button 
+              className="icon-btn"
+              style={{ boxShadow: 'inset 0 0 0 1px var(--line)', color: '#c8463d', width: 32, height: 32 }}
+              onClick={lockStaffApp}
+              title="Verrouiller l'accès staff"
+            >
+              <LockKeyhole size={15} />
+            </button>
           </div>
         </div>
 
-        <div className="row gap-2">
+        <div className="admin-head-actions">
           <button 
             className="btn btn-sm btn-ghost row gap-1"
             onClick={() => navigate('/cuisine')}
@@ -200,29 +224,11 @@ export default function AdminView() {
             <Smartphone size={14} />
             <span>Installer l'app</span>
           </button>
-
-          <button 
-            className="btn btn-sm btn-ghost row gap-1"
-            onClick={() => setShowChangePinModal(true)}
-            title="Modifier le code PIN staff"
-          >
-            <KeyRound size={14} />
-            <span>Code PIN</span>
-          </button>
-
-          <button 
-            className="icon-btn"
-            style={{ boxShadow: 'inset 0 0 0 1px var(--line)', color: '#c8463d' }}
-            onClick={lockStaffApp}
-            title="Verrouiller l'accès staff"
-          >
-            <LockKeyhole size={16} />
-          </button>
         </div>
       </header>
 
       {/* Main Mode Navigation Bar */}
-      <div style={{ background: 'var(--paper)', borderBottom: '1px solid var(--line)', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="admin-subnav">
         <div className="tabs">
           <button className={activeMainTab === 'carte' ? 'active' : ''} onClick={() => setActiveMainTab('carte')}>
             <SlidersHorizontal size={14} />
@@ -236,7 +242,7 @@ export default function AdminView() {
 
         {activeMainTab === 'carte' && (
           <button 
-            className="btn btn-sm btn-primary row gap-1"
+            className="btn btn-sm btn-primary row gap-1 admin-add-btn"
             style={{ height: 32, padding: '0 12px', fontSize: 13 }}
             onClick={() => openNewItemModal(selectedCategory)}
           >
@@ -250,8 +256,8 @@ export default function AdminView() {
       {activeMainTab === 'carte' && (
         <div className="scroll" style={{ padding: '20px' }}>
           {/* Controls Bar: Categories & Search */}
-          <div className="row between gap-3" style={{ flexWrap: 'wrap', marginBottom: 20 }}>
-            <div className="row gap-2" style={{ overflowX: 'auto', paddingBottom: 4, maxWidth: '100%' }}>
+          <div className="admin-controls-row">
+            <div className="admin-chips-scroll">
               {CATEGORY_TABS.map(c => (
                 <button
                   key={c.id}
@@ -262,7 +268,9 @@ export default function AdminView() {
                     color: selectedCategory === c.id ? 'var(--cream)' : 'var(--ink)',
                     border: '1px solid var(--line)',
                     fontWeight: selectedCategory === c.id ? 700 : 500,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
                   }}
                 >
                   {c.label}
@@ -270,7 +278,7 @@ export default function AdminView() {
               ))}
             </div>
 
-            <div className="row gap-2" style={{ width: 'min(320px, 100%)' }}>
+            <div className="admin-search-wrapper" style={{ width: 'min(320px, 100%)' }}>
               <div style={{ position: 'relative', width: '100%' }}>
                 <Search size={15} style={{ position: 'absolute', left: 12, top: 12, color: 'var(--muted)' }} />
                 <input
@@ -284,7 +292,7 @@ export default function AdminView() {
           </div>
 
           {/* Product Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          <div className="admin-products-grid">
             {filteredItems.map(item => {
               const isClassic = item.category === 'classiques';
               const soldOut = outOfStock.includes(item.id);
@@ -423,9 +431,9 @@ export default function AdminView() {
 
       {/* View 2: Clôture de Caisse & Ticket Z */}
       {activeMainTab === 'caisse' && (
-        <div className="scroll" style={{ padding: '24px' }}>
-          <div style={{ maxWidth: 680, margin: '0 auto', background: 'var(--paper)', borderRadius: 'var(--r)', border: '1px solid var(--line)', padding: 24, boxShadow: 'var(--shadow-sm)' }}>
-            <div className="row between" style={{ marginBottom: 20 }}>
+        <div className="scroll" style={{ padding: '16px' }}>
+          <div className="admin-caisse-card" style={{ maxWidth: 680, margin: '0 auto', background: 'var(--paper)', borderRadius: 'var(--r)', border: '1px solid var(--line)', padding: 24, boxShadow: 'var(--shadow-sm)' }}>
+            <div className="row between" style={{ marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <span className="eyebrow">Fin de Service & Journal</span>
                 <h2 className="display" style={{ fontSize: 24, margin: '4px 0 0' }}>Bilan de Caisse Journalier</h2>

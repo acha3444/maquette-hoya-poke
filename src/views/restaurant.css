@@ -12,6 +12,42 @@
 }
 .kitchen-head .muted::first-letter { text-transform: uppercase; }
 
+@media (max-width: 768px) {
+  .kitchen-head {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  
+  .kitchen-head-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .kitchen-head-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  .kitchen-head-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .kitchen-head-nav .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+}
+
 .kitchen-stats { display: flex; gap: 28px; }
 .kitchen-stats div { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
 .kitchen-stats div span:first-child { font-weight: 800; font-size: 18px; }
