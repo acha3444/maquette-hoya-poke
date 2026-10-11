@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
-import { RotateCcw, Plus } from 'lucide-react';
+import { RotateCcw, Plus, Smartphone, Monitor } from 'lucide-react';
 import { useStore } from './store';
 import { ease } from './motion';
 import ClientView from './views/ClientView';
@@ -22,6 +22,7 @@ const frameMotion = {
 
 function App() {
   const { viewMode, setViewMode, resetDemo, simulateNewOrder } = useStore();
+  const [clientDevice, setClientDevice] = useState('phone'); // 'phone' | 'desktop'
   const showClient = viewMode === 'client' || viewMode === 'split';
   const showRestaurant = viewMode === 'restaurant' || viewMode === 'split';
 
@@ -51,6 +52,28 @@ function App() {
           </nav>
 
           <div className="shell-actions">
+            {viewMode === 'client' && (
+              <div className="segmented" style={{ height: 30, background: 'rgba(255,255,255,0.08)' }}>
+                <button
+                  className={clientDevice === 'phone' ? 'active' : ''}
+                  style={{ padding: '0 10px', fontSize: 12, gap: 5 }}
+                  onClick={() => setClientDevice('phone')}
+                  title="Format simulateur iPhone"
+                >
+                  <Smartphone size={13} />
+                  <span>Mobile</span>
+                </button>
+                <button
+                  className={clientDevice === 'desktop' ? 'active' : ''}
+                  style={{ padding: '0 10px', fontSize: 12, gap: 5 }}
+                  onClick={() => setClientDevice('desktop')}
+                  title="Format grand écran ordinateur"
+                >
+                  <Monitor size={13} />
+                  <span>Ordinateur</span>
+                </button>
+              </div>
+            )}
             {showRestaurant && (
               <button className="shell-btn accent" onClick={simulateNewOrder}>
                 <Plus size={14} strokeWidth={2.5} /> Commande test
@@ -65,7 +88,11 @@ function App() {
         <main className={`stage ${viewMode === 'split' ? 'split' : ''}`}>
           <AnimatePresence mode="popLayout" initial={false}>
             {showClient && (
-              <motion.div key="client" className="frame frame-phone" {...frameMotion}>
+              <motion.div
+                key={`client-${clientDevice}`}
+                className={`frame ${viewMode === 'split' || clientDevice === 'phone' ? 'frame-phone' : 'frame-desktop'}`}
+                {...frameMotion}
+              >
                 <ClientView />
               </motion.div>
             )}

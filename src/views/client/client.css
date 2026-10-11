@@ -417,3 +417,78 @@
 .tl-step.complete .tl-label, .tl-step.current .tl-label { color: var(--ink); }
 .tl-step.current .tl-label { font-weight: 800; }
 
+/* ---------- Desktop Client Experience (.frame-desktop) ---------- */
+.frame-desktop {
+  width: min(1040px, 95vw);
+  height: min(860px, 92vh);
+  border-radius: 22px;
+  box-shadow: 0 0 0 8px #1c1f1d, 0 0 0 9px #2c302d, 0 30px 70px rgba(0, 0, 0, 0.45);
+}
+
+.frame-desktop .hero {
+  height: 330px;
+}
+
+.frame-desktop .hero-content {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 32px 40px;
+}
+
+.frame-desktop .hero-title {
+  font-size: 52px;
+}
+
+.frame-desktop .hero-sub {
+  font-size: 16px;
+  max-width: 480px;
+}
+
+.frame-desktop .section {
+  max-width: 840px;
+  margin: 0 auto;
+  width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.frame-desktop .mode-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.frame-desktop .mode-card {
+  padding: 22px;
+}
+
+.frame-desktop .classic-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+
+.frame-desktop .classic-tile {
+  flex: none;
+  width: 100%;
+  padding: 16px;
+}
+
+.frame-desktop .topbar,
+.frame-desktop .cat-bar,
+.frame-desktop .menu-body {
+  max-width: 840px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.frame-desktop .bottom-bar {
+  max-width: 840px;
+  left: 50% !important;
+  transform: translateX(-50%);
+  border-radius: 16px 16px 0 0;
+}
+
