@@ -1464,3 +1464,136 @@
   border-radius: 8px;
 }
 
+/* --- PWA Marketing Popup & Install Prompt --- */
+.pwa-marketing-card {
+  max-width: 480px;
+}
+
+.pwa-card-header {
+  padding: 16px 20px;
+  background: var(--green-900);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pwa-app-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.pwa-card-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.pwa-reward-highlight {
+  background: linear-gradient(135deg, rgba(200, 140, 50, 0.15) 0%, rgba(45, 80, 56, 0.08) 100%);
+  border: 1.5px dashed var(--gold);
+  border-radius: var(--r);
+  padding: 12px 14px;
+}
+
+.pwa-benefits-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pwa-benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.pwa-benefit-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(45, 80, 56, 0.1);
+  color: var(--green-700);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pwa-instructions-box {
+  background: var(--paper);
+  border-radius: var(--r);
+  padding: 14px;
+  border: 1px solid var(--line);
+}
+
+.pwa-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pwa-step-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.pwa-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--green-700);
+  color: var(--cream);
+  font-weight: 700;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pwa-card-footer {
+  padding: 14px 20px;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Floating client PWA badge */
+.client-pwa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(200, 140, 50, 0.12) 0%, rgba(45, 80, 56, 0.08) 100%);
+  border: 1px solid rgba(200, 140, 50, 0.35);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.client-pwa-badge:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+

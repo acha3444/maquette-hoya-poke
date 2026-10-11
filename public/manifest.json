@@ -1,8 +1,8 @@
 {
-  "name": "Hoya Poké · Caisse & Administration",
-  "short_name": "Hoya Admin",
-  "description": "Application de gestion de caisse, cuisine et carte Hoya Poké Pézenas",
-  "start_url": "/admin",
+  "name": "Hoya Poké Pézenas · Commande en ligne",
+  "short_name": "Hoya Poké",
+  "description": "Commandez vos poké bowls frais préparés minute à Pézenas. Retrait express et livraison à domicile.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
@@ -30,24 +30,24 @@
   ],
   "shortcuts": [
     {
-      "name": "Administration & Carte",
-      "short_name": "Admin",
-      "description": "Gestion des produits et de la caisse",
-      "url": "/admin",
+      "name": "Commander en ligne",
+      "short_name": "Commander",
+      "description": "Composer son poké ou voir la carte",
+      "url": "/menu",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Écran Cuisine (KDS)",
-      "short_name": "Cuisine",
-      "description": "Tableau de préparation des commandes",
+      "name": "Suivi de commande",
+      "short_name": "Suivi",
+      "description": "Statut de votre commande en direct",
+      "url": "/tracking",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Espace Pro & Cuisine",
+      "short_name": "Pro / KDS",
+      "description": "Accès personnel restaurant",
       "url": "/cuisine",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Site Commande Client",
-      "short_name": "Boutique",
-      "description": "Menu et commande en ligne",
-      "url": "/",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]

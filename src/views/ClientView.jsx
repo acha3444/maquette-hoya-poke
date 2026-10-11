@@ -16,6 +16,8 @@ import CheckoutScreen from './client/CheckoutScreen';
 import TrackingScreen from './client/TrackingScreen';
 import LoyaltyModal from '../components/LoyaltyModal';
 import FormuleModal from '../components/FormuleModal';
+import ClientInstallPrompt from '../components/ClientInstallPrompt';
+import { Smartphone } from 'lucide-react';
 import './client/client.css';
 
 const HomeScreen = () => {
@@ -24,6 +26,7 @@ const HomeScreen = () => {
   const menu = storeMenu || MENU;
   const [loyaltyOpen, setLoyaltyOpen] = useState(false);
   const [activeFormule, setActiveFormule] = useState(null);
+  const [installPromptOpen, setInstallPromptOpen] = useState(false);
 
   const start = (type) => {
     setOrderType(type);
@@ -61,6 +64,15 @@ const HomeScreen = () => {
           </nav>
 
           <div className="client-nav-actions">
+            <button 
+              className="client-pwa-badge"
+              onClick={() => setInstallPromptOpen(true)}
+              title="Installer l'application sur votre téléphone (+1 tampon offert)"
+            >
+              <Smartphone size={13} style={{ color: 'var(--green-700)' }} />
+              <span>Installer l'App</span>
+              <span className="tag tag-gold" style={{ fontSize: 9, padding: '0 5px', height: 16 }}>+1 🎁</span>
+            </button>
             <button 
               className="btn btn-sm btn-ghost row gap-1"
               onClick={() => setLoyaltyOpen(true)}
@@ -428,9 +440,10 @@ const HomeScreen = () => {
           </motion.div>
         </motion.div>
 
-        {/* Modals for Loyalty and Formules */}
+        {/* Modals for Loyalty, Formules and PWA App Install */}
         <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
         <FormuleModal formule={activeFormule} isOpen={!!activeFormule} onClose={() => setActiveFormule(null)} />
+        <ClientInstallPrompt forceOpen={installPromptOpen} onOpenChange={setInstallPromptOpen} />
 
         {/* Full Client Footer */}
         <footer className="client-footer">
