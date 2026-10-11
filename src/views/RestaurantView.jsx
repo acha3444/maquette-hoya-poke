@@ -5,7 +5,7 @@ import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
 import { ease } from '../motion';
-import { playNewOrderSound, playSuccessSound, isSoundEnabled, setSoundEnabled } from '../sound';
+import { playNewOrderSound, playSuccessSound, isSoundEnabled, setSoundEnabled, unlockAudio, getAudioStatus } from '../sound';
 import './restaurant.css';
 
 const STATUS_COLUMNS = [
@@ -134,10 +134,26 @@ export default function RestaurantView() {
   const [activeTab, setActiveTab] = useState('NOUVELLE');
   const [showSettings, setShowSettings] = useState(false);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
+  const [audioReady, setAudioReady] = useState(() => getAudioStatus() === 'running');
   const [today] = useState(() => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const rootRef = useRef(null);
   const width = useContainerWidth(rootRef);
   const wide = width >= 760;
+
+  // Auto unlock audio on any user interaction
+  useEffect(() => {
+    const handleInteract = () => {
+      unlockAudio().then(() => {
+        setAudioReady(getAudioStatus() === 'running');
+      });
+    };
+    window.addEventListener('click', handleInteract, { passive: true });
+    window.addEventListener('touchstart', handleInteract, { passive: true });
+    return () => {
+      window.removeEventListener('click', handleInteract);
+      window.removeEventListener('touchstart', handleInteract);
+    };
+  }, []);
 
   const byStatus = (status) => orders.filter(o => o.status === status);
   const newCount = byStatus('NOUVELLE').length;
@@ -171,11 +187,13 @@ export default function RestaurantView() {
     prevNew.current = newCount;
   }, [orders, newCount, soundOn]);
 
-  const handleToggleSound = () => {
+  const handleToggleSound = async () => {
     const next = !soundOn;
     setSoundEnabled(next);
     setSoundOn(next);
     if (next) {
+      await unlockAudio();
+      setAudioReady(true);
       playNewOrderSound(true); // play sample chime so user hears it and browser audio context unlocks
     }
   };
@@ -241,6 +259,36 @@ export default function RestaurantView() {
           </button>
         </div>
       </header>
+
+      {!audioReady && soundOn && (
+        <div
+          style={{
+            background: 'var(--gold-soft)',
+            borderBottom: '1px solid rgba(217, 165, 79, 0.4)',
+            color: 'var(--gold-ink)',
+            padding: '9px 18px',
+            fontSize: 12,
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer'
+          }}
+          onClick={async () => {
+            await unlockAudio();
+            setAudioReady(true);
+            playNewOrderSound(true);
+          }}
+        >
+          <div className="row gap-2">
+            <Volume2 size={16} />
+            <span>Autorisation requise par votre navigateur : Cliquez ici pour activer le carillon de commande 🔔</span>
+          </div>
+          <span className="btn btn-sm btn-ghost" style={{ padding: '3px 10px', height: 'auto', fontSize: 11, borderColor: 'var(--gold-ink)', color: 'var(--gold-ink)' }}>
+            Activer le son
+          </span>
+        </div>
+      )}
 
       <AnimatePresence initial={false}>
         {newCount > 0 && (
