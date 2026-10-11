@@ -597,3 +597,25 @@ a.btn { text-decoration: none; }
   bottom: calc(12px + env(safe-area-inset-bottom, 16px));
 }
 
+/* ---------- Universal Centered Modal Overlay ---------- */
+.modal-centered-wrapper {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.modal-centered-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 26, 20, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
+  z-index: 1;
+}
+

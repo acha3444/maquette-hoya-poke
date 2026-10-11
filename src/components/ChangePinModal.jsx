@@ -108,7 +108,7 @@ export default function ChangePinModal({ onClose }) {
 
       <motion.div
         className="thermal-preview-modal"
-        style={{ maxWidth: 360, padding: 0 }}
+        style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto', maxWidth: 360, padding: 0 }}
         initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}

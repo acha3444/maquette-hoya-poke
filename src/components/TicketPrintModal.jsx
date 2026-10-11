@@ -46,6 +46,7 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
       {/* On-screen Preview Dialog */}
       <motion.div
         className="thermal-preview-modal"
+        style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}
         initial={{ opacity: 0, scale: 0.94, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }}

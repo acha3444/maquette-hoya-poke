@@ -498,6 +498,7 @@ export default function PosRegister() {
             />
             <motion.div 
               className="pos-pay-modal"
+              style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}
               initial={{ opacity: 0, scale: 0.95, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -639,7 +640,7 @@ export default function PosRegister() {
             <motion.div className="modal-centered-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
             <motion.div 
               className="thermal-preview-modal" 
-              style={{ maxWidth: 440, padding: 0 }}
+              style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto', maxWidth: 440, padding: 0 }}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -693,7 +694,7 @@ export default function PosRegister() {
             <motion.div className="modal-centered-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCashDrawerOpen(false)} />
             <motion.div 
               className="thermal-preview-modal" 
-              style={{ maxWidth: 480 }}
+              style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto', maxWidth: 480 }}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -794,7 +795,7 @@ export default function PosRegister() {
             <motion.div className="modal-centered-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setHistoryOpen(false)} />
             <motion.div 
               className="thermal-preview-modal" 
-              style={{ maxWidth: 540 }}
+              style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto', maxWidth: 540 }}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}

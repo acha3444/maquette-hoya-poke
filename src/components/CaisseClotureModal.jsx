@@ -96,7 +96,7 @@ export default function CaisseClotureModal({ onClose }) {
 
         <motion.div
           className="thermal-preview-modal"
-          style={{ maxWidth: 540 }}
+          style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto', maxWidth: 540 }}
           initial={{ opacity: 0, scale: 0.94, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 16 }}
