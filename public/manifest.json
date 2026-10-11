@@ -6,9 +6,10 @@
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "background_color": "#0f1a14",
   "theme_color": "#0f1a14",
+  "id": "hoya-poke-client-app",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -30,9 +31,16 @@
   ],
   "shortcuts": [
     {
-      "name": "Commander en ligne",
-      "short_name": "Commander",
-      "description": "Composer son poké ou voir la carte",
+      "name": "Composer son Poké",
+      "short_name": "Sur Mesure",
+      "description": "Composer son poké sur mesure",
+      "url": "/builder",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "La Carte",
+      "short_name": "Menu",
+      "description": "Voir la carte Hoya Poké",
       "url": "/menu",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
@@ -41,13 +49,6 @@
       "short_name": "Suivi",
       "description": "Statut de votre commande en direct",
       "url": "/tracking",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Espace Pro & Cuisine",
-      "short_name": "Pro / KDS",
-      "description": "Accès personnel restaurant",
-      "url": "/cuisine",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]

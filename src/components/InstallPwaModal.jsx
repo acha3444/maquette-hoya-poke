@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, Share, PlusSquare, Smartphone, Check, X, Sparkles } from 'lucide-react';
+import { getCurrentPwaConfig } from '../utils/usePwaManager';
 
-export default function InstallPwaModal({ onClose }) {
+export default function InstallPwaModal({ onClose, type }) {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const config = getCurrentPwaConfig(type ? `/${type}` : window.location.pathname);
 
   useEffect(() => {
     // Check if already in standalone (installed app) mode
@@ -61,8 +63,8 @@ export default function InstallPwaModal({ onClose }) {
           <div className="row gap-2">
             <img src="/apple-touch-icon.png" alt="Hoya" style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid var(--line)' }} />
             <div>
-              <strong style={{ fontSize: 15 }}>Installer sur l'écran d'accueil</strong>
-              <div className="muted small" style={{ fontSize: 11 }}>Accès direct plein écran</div>
+              <strong style={{ fontSize: 15 }}>Installer l'App {config.shortName}</strong>
+              <div className="muted small" style={{ fontSize: 11 }}>Accès direct plein écran · {config.startUrl}</div>
             </div>
           </div>
           <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={onClose} aria-label="Fermer">
@@ -77,26 +79,26 @@ export default function InstallPwaModal({ onClose }) {
               <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'var(--ok-soft)', color: 'var(--ok)', display: 'grid', placeItems: 'center' }}>
                 <Check size={28} strokeWidth={3} />
               </div>
-              <strong style={{ fontSize: 16 }}>Application déjà installée !</strong>
+              <strong style={{ fontSize: 16 }}>{config.shortName} déjà installée !</strong>
               <p className="muted small" style={{ margin: 0 }}>
-                Vous utilisez actuellement l'application en mode plein écran autonome.
+                Vous utilisez actuellement cet espace en mode application autonome.
               </p>
             </div>
           ) : (
             <>
               <p className="muted small" style={{ margin: 0, fontSize: 13, lineHeight: 1.4 }}>
-                Transformez l'espace <strong>Hoya Admin & Cuisine</strong> en véritable application autonome sur votre iPad, tablette Android ou smartphone :
+                Installez l'espace <strong>{config.name}</strong> en application autonome sur votre écran d'accueil :
               </p>
 
               {/* Benefits list */}
               <div className="col gap-2" style={{ background: 'var(--cream-2)', padding: 14, borderRadius: 'var(--r-sm)', border: '1px solid var(--line)' }}>
                 <div className="row gap-2" style={{ fontSize: 12 }}>
                   <Sparkles size={15} style={{ color: 'var(--gold)', flexShrink: 0 }} />
-                  <span><strong>Plein écran sans navigateur</strong> (pas de barre d'adresse ni d'onglets)</span>
+                  <span><strong>Plein écran sans navigateur</strong> (pas d'onglets ni de barre d'adresse)</span>
                 </div>
                 <div className="row gap-2" style={{ fontSize: 12 }}>
                   <Smartphone size={15} style={{ color: 'var(--green-700)', flexShrink: 0 }} />
-                  <span><strong>Icône sur l'écran d'accueil</strong> pour ouvrir en 1 tap</span>
+                  <span><strong>Icône dédiée « {config.shortName} »</strong> s'ouvrant directement sur {config.startUrl}</span>
                 </div>
               </div>
 

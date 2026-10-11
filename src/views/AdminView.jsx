@@ -680,7 +680,7 @@ export default function AdminView() {
           <ChangePinModal onClose={() => setShowChangePinModal(false)} />
         )}
         {showInstallModal && (
-          <InstallPwaModal onClose={() => setShowInstallModal(false)} />
+          <InstallPwaModal onClose={() => setShowInstallModal(false)} type="admin" />
         )}
       </AnimatePresence>
     </div>

@@ -950,7 +950,7 @@ export default function RestaurantView() {
           <ChangePinModal onClose={() => setShowChangePinModal(false)} />
         )}
         {showInstallModal && (
-          <InstallPwaModal onClose={() => setShowInstallModal(false)} />
+          <InstallPwaModal onClose={() => setShowInstallModal(false)} type="cuisine" />
         )}
         {printingOrder && (
           <TicketPrintModal

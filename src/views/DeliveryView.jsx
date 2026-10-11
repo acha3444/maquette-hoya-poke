@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Phone, Check, TriangleAlert, Navigation, Bike, ChefHat, ShoppingBag, LockKeyhole } from 'lucide-react';
+import { MapPin, Phone, Check, TriangleAlert, Navigation, Bike, ChefHat, ShoppingBag, LockKeyhole, Smartphone } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
 import { ease } from '../motion';
 import MiniMap from '../components/MiniMap';
 import { lockStaffApp } from '../components/StaffGuard';
+import InstallPwaModal from '../components/InstallPwaModal';
 
 const TRIP_SECONDS = 45;
 
@@ -49,6 +50,7 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
   const updateOrderStatus = useStore(s => s.updateOrderStatus);
   const [progress, setProgress] = useState(0);
   const [isStarted, setIsStarted] = useState(order.status === 'LIVRAISON');
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   useEffect(() => {
     if (!isStarted || progress >= 1) return;
@@ -82,6 +84,15 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
           <span className="muted small">· en service</span>
         </div>
         <div className="row gap-2">
+          <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            style={{ height: 28, padding: '0 8px', fontSize: 11 }}
+            onClick={() => setShowInstallModal(true)}
+            title="Installer l'App Livreur sur l'écran d'accueil"
+          >
+            <Smartphone size={12} style={{ color: 'var(--green-700)' }} />
+            <span>App Livreur</span>
+          </button>
           <button 
             className="btn btn-sm btn-ghost row gap-1"
             style={{ height: 28, padding: '0 8px', fontSize: 11 }}
@@ -255,6 +266,12 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
           )}
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {showInstallModal && (
+          <InstallPwaModal onClose={() => setShowInstallModal(false)} type="livreur" />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,0 +1,48 @@
+{
+  "name": "Hoya Poké · Administration & Caisse",
+  "short_name": "Hoya Admin",
+  "description": "Dashboard de gestion Hoya Poké : carte, stocks, commandes et clôture de caisse.",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#15221b",
+  "theme_color": "#15221b",
+  "id": "hoya-poke-admin-app",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "500x500",
+      "type": "image/jpeg"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Administration",
+      "short_name": "Admin",
+      "description": "Gérer la carte et les stocks",
+      "url": "/admin",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Écran Cuisine KDS",
+      "short_name": "Cuisine",
+      "description": "Ouvrir l'écran cuisine KDS",
+      "url": "/cuisine",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

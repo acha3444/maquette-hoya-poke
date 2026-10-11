@@ -1,0 +1,55 @@
+{
+  "name": "Hoya Poké Pézenas · Commande en ligne",
+  "short_name": "Hoya Poké",
+  "description": "Commandez vos poké bowls frais préparés minute à Pézenas. Retrait express et livraison à domicile.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0f1a14",
+  "theme_color": "#0f1a14",
+  "id": "hoya-poke-client-app",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "500x500",
+      "type": "image/jpeg"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Composer son Poké",
+      "short_name": "Sur Mesure",
+      "description": "Composer son poké sur mesure",
+      "url": "/builder",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "La Carte",
+      "short_name": "Menu",
+      "description": "Voir la carte Hoya Poké",
+      "url": "/menu",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Suivi de commande",
+      "short_name": "Suivi",
+      "description": "Statut de votre commande en direct",
+      "url": "/tracking",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

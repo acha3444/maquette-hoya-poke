@@ -12,6 +12,7 @@ import RestaurantView from './views/RestaurantView';
 import DeliveryView from './views/DeliveryView';
 import AdminView from './views/AdminView';
 import StaffGuard from './components/StaffGuard';
+import { usePwaManager } from './utils/usePwaManager';
 
 function FloatingProNav() {
   const [open, setOpen] = useState(false);
@@ -191,6 +192,8 @@ function FloatingProNav() {
 }
 
 function AppContent() {
+  usePwaManager();
+
   return (
     <>
       <Routes>
