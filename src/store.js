@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { INITIAL_ORDERS, MENU } from './data';
+import { INITIAL_ORDERS, MENU, PROMO_CODES } from './data';
 import { supabase } from './supabase';
 
 const loadInitialMenu = () => {
@@ -35,6 +35,32 @@ const loadCaisseHistory = () => {
     if (saved) return JSON.parse(saved);
   } catch (e) {}
   return [];
+};
+
+const loadLoyaltyStamps = () => {
+  if (typeof window === 'undefined') return 3;
+  try {
+    const saved = localStorage.getItem('hoya_loyalty_stamps');
+    return saved !== null ? Math.min(10, Math.max(0, parseInt(saved, 10))) : 3;
+  } catch (e) {}
+  return 3;
+};
+
+const loadFavorites = () => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem('hoya_favorites');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [
+    {
+      id: 'fav-demo-1',
+      name: 'Mon Poké Fraîcheur Saumon',
+      price: 13.90,
+      size: 'M',
+      composition: ['Riz vinaigré', 'Saumon cru mariné', 'Avocat', 'Mangue', 'Edamame', 'Concombre', 'Carotte', 'Sriracha mayo', 'Sésames noirs']
+    }
+  ];
 };
 
 const SAMPLE_CUSTOMERS = [
@@ -165,6 +191,52 @@ export const useStore = create((set, get) => {
     addToCart: (item) => set((state) => ({ cart: [...state.cart, { ...item, id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}` }] })),
     removeFromCart: (id) => set((state) => ({ cart: state.cart.filter(item => item.id !== id) })),
     clearCart: () => set({ cart: [] }),
+
+    // Loyalty & Gamification
+    loyaltyStamps: loadLoyaltyStamps(),
+    addLoyaltyStamp: (count = 1) => set(state => {
+      const next = Math.min(10, state.loyaltyStamps + count);
+      try { localStorage.setItem('hoya_loyalty_stamps', next); } catch (e) {}
+      return { loyaltyStamps: next };
+    }),
+    claimLoyaltyReward: () => set(() => {
+      try { localStorage.setItem('hoya_loyalty_stamps', 0); } catch (e) {}
+      return { loyaltyStamps: 0 };
+    }),
+
+    // Favorites & Quick Re-order
+    favorites: loadFavorites(),
+    toggleFavorite: (bowl) => set(state => {
+      const exists = state.favorites.some(f => f.name === bowl.name || f.id === bowl.id);
+      let updated;
+      if (exists) {
+        updated = state.favorites.filter(f => f.name !== bowl.name && f.id !== bowl.id);
+      } else {
+        const newFav = {
+          id: `fav-${Date.now()}`,
+          name: bowl.cartName || bowl.name || 'Mon Poké Favori',
+          price: bowl.price || 12.90,
+          size: bowl.size || 'M',
+          composition: bowl.composition || [bowl.name]
+        };
+        updated = [newFav, ...state.favorites];
+      }
+      try { localStorage.setItem('hoya_favorites', JSON.stringify(updated)); } catch (e) {}
+      return { favorites: updated };
+    }),
+
+    // Promo Codes
+    activePromo: null,
+    applyPromo: (code) => {
+      const trimmed = (code || '').trim().toUpperCase();
+      const promo = PROMO_CODES[trimmed];
+      if (!promo) {
+        return { success: false, message: 'Code promo invalide.' };
+      }
+      set({ activePromo: promo });
+      return { success: true, message: `Code ${promo.code} appliqué (${promo.label}) !` };
+    },
+    removePromo: () => set({ activePromo: null }),
 
     // Restaurant State
     orders: INITIAL_ORDERS,

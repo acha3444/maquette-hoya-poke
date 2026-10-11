@@ -190,7 +190,94 @@ export const INITIAL_ORDERS = [
   }
 ];
 
+export const FORMULES = [
+  {
+    id: 'f1',
+    name: 'Formule Déjeuner (Poké + Boisson)',
+    badge: 'Populaire midi',
+    description: '1 Poké signature ou sur-mesure (M ou L) + 1 Boisson fraîche au choix. Économisez jusqu\'à 1,50 €.',
+    priceM: 14.20,
+    priceL: 16.90,
+    includes: ['Poké au choix', 'Boisson au choix']
+  },
+  {
+    id: 'f2',
+    name: 'Formule Maxi Gourmande (Poké + Boisson + Dessert)',
+    badge: 'Best-Seller',
+    description: '1 Poké au choix + 1 Boisson + 1 Dessert artisanal (Tiramisu, Banoffee...). Économisez 2,50 €.',
+    priceM: 17.50,
+    priceL: 19.90,
+    includes: ['Poké au choix', 'Boisson au choix', 'Dessert artisanal']
+  },
+  {
+    id: 'f3',
+    name: 'Formule Duo Hoya (2 Pokés + 2 Boissons)',
+    badge: 'À partager',
+    description: '2 Pokés au choix (M) + 2 Boissons fraîches. Idéal pour un déjeuner à deux.',
+    priceM: 26.90,
+    priceL: 31.90,
+    includes: ['2 Pokés au choix', '2 Boissons']
+  }
+];
+
+export const PROMO_CODES = {
+  'BIENVENUE10': { code: 'BIENVENUE10', type: 'percent', value: 10, label: '-10% Première commande', minOrder: 0 },
+  'HOYA5': { code: 'HOYA5', type: 'fixed', value: 5.00, label: '-5 € de réduction', minOrder: 25.00 },
+  'LIVRAISONFREE': { code: 'LIVRAISONFREE', type: 'free_delivery', value: 0, label: 'Frais de livraison offerts', minOrder: 15.00 },
+  'PEZENAS': { code: 'PEZENAS', type: 'percent', value: 10, label: '-10% Club Pézenas', minOrder: 0 }
+};
+
+export const CUSTOMER_REVIEWS = [
+  {
+    id: 1,
+    author: 'Sarah L.',
+    city: 'Pézenas centre',
+    rating: 5,
+    date: 'Il y a 3 jours',
+    comment: 'Le meilleur poké de tout le secteur ! Le saumon mariné est ultra frais, les sauces maison sont incroyables (coup de cœur pour la coco pik et sriracha mayo). Équipe adorable !',
+    dish: 'Poké Saumon (L)'
+  },
+  {
+    id: 2,
+    author: 'Maxime D.',
+    city: 'Tourbes',
+    rating: 5,
+    date: 'La semaine dernière',
+    comment: 'Livraison express à Tourbes, le bol arrive impeccable et bien frais. La formule midi avec le thé pétillant est devenue notre rituel hebdomadaire.',
+    dish: 'Formule Déjeuner'
+  },
+  {
+    id: 3,
+    author: 'Clara & Thomas',
+    city: 'Pézenas',
+    rating: 5,
+    date: 'Il y a 2 semaines',
+    comment: 'Le concept sur-mesure est génial ! Tellement de choix d\'ingrédients frais (grenade, avocat, mangue). Enfin une adresse saine, gourmande et consistante.',
+    dish: 'Sur Mesure Quinoa & Falafel'
+  },
+  {
+    id: 4,
+    author: 'Julien R.',
+    city: 'Castelnau-de-Guers',
+    rating: 5,
+    date: 'Il y a 1 mois',
+    comment: 'Portions très généreuses et le tiramisu spéculoos est juste une merveille. Tout est soigné de la préparation jusqu\'à l\'emballage.',
+    dish: 'Poké Poulet Croustillant'
+  }
+];
+
+export const NUTRITION_ESTIMATES = {
+  baseCalories: { 'Riz vinaigré': 260, 'Base quinoa': 210, 'Base carotte': 75 },
+  baseProtein: { 'Riz vinaigré': 4, 'Base quinoa': 7, 'Base carotte': 2 },
+  proteinCalories: { 'Saumon cru mariné': 185, 'Poulet frit maison': 230, 'Falafel maison': 175 },
+  proteinGrams: { 'Saumon cru mariné': 23, 'Poulet frit maison': 25, 'Falafel maison': 9 },
+  veggiePortionCalories: 18, // par légume
+  sauceCalories: 65,
+  toppingsCalories: 55
+};
+
 export const DELIVERY_ZONES = [
   { id: 1, name: 'Pézenas', fee: 2.50, min: 15.00 },
   { id: 2, name: 'Zone 2 (Tourbes, Nézignan, etc.)', fee: 3.90, min: 25.00 }
 ];
+

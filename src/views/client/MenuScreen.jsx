@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, X, Plus, Check, ArrowRight } from 'lucide-react';
+import { ArrowLeft, X, Plus, Check, ArrowRight, Sparkles, Heart } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { useStore } from '../../store';
-import { MENU } from '../../data';
+import { MENU, FORMULES } from '../../data';
 import { formatPrice } from '../../format';
 import { ease } from '../../motion';
+import FormuleModal from '../../components/FormuleModal';
 
 const CATEGORIES = [
+  { id: 'formules', label: '🍱 Formules midi' },
   { id: 'classiques', label: 'Classiques' },
   { id: 'surmesure', label: 'Sur mesure' },
   { id: 'sides', label: 'Sides' },
@@ -92,10 +94,12 @@ function SimpleItem({ item, soldOut }) {
 
 export default function MenuScreen() {
   const navigate = useNavigate();
-  const { cart, orderType, setOrderType, outOfStock, removeFromCart, menu: storeMenu } = useStore();
+  const { cart, orderType, setOrderType, outOfStock, removeFromCart, addToCart, menu: storeMenu } = useStore();
   const menu = storeMenu || MENU;
-  const [activeCategory, setActiveCategory] = useState('classiques');
+  const [activeCategory, setActiveCategory] = useState('formules');
   const [cartOpen, setCartOpen] = useState(false);
+  const [dietFilter, setDietFilter] = useState('all');
+  const [selectedFormule, setSelectedFormule] = useState(null);
   const scrollRef = useRef(null);
   const lockSpy = useRef(false);
   const dragControls = useDragControls();
@@ -134,6 +138,19 @@ export default function MenuScreen() {
     setTimeout(() => { lockSpy.current = false; }, 600);
   };
 
+  // Filter items by diet
+  const filterClassiques = (items = []) => {
+    if (dietFilter === 'all') return items;
+    if (dietFilter === 'veggie') return items.filter(i => i.id === 'c3'); // Falafel
+    if (dietFilter === 'pesco') return items.filter(i => i.id === 'c1' || i.id === 'c3'); // Saumon & Falafel
+    if (dietFilter === 'protein') return items.filter(i => i.id === 'c1' || i.id === 'c2'); // Saumon & Poulet
+    if (dietFilter === 'sans_gluten') return items; // bases et garnitures adaptées
+    return items;
+  };
+
+  const hasDrinkInCart = cart.some(i => (menu.boissons || []).some(b => b.name === i.name || b.name === i.cartName) || i.isFormule);
+  const hasDessertInCart = cart.some(i => (menu.desserts || []).some(d => d.name === i.name || d.name === i.cartName) || i.isFormule);
+
   return (
     <div className="screen">
       <div className="topbar">
@@ -166,12 +183,55 @@ export default function MenuScreen() {
         ))}
       </div>
 
+      {/* Dietary Filters Pill Strip */}
+      <div className="diet-filter-bar">
+        {[
+          { id: 'all', label: 'Tous les plats' },
+          { id: 'veggie', label: '🌱 Végétarien' },
+          { id: 'sans_gluten', label: '🌾 Sans gluten' },
+          { id: 'pesco', label: '🐟 Pescétarien' },
+          { id: 'protein', label: '🔥 Protéiné' }
+        ].map(df => (
+          <button
+            key={df.id}
+            className={`diet-filter-pill ${dietFilter === df.id ? 'active' : ''}`}
+            onClick={() => setDietFilter(df.id)}
+          >
+            {df.label}
+          </button>
+        ))}
+      </div>
+
       <div className="scroll" ref={scrollRef}>
         <div className="menu-body">
+          {/* Section Formules */}
+          <section id="cat-formules" className="menu-section">
+            <h2 className="display menu-heading">Nos Formules Midi & Combos</h2>
+            <p className="muted small menu-lead">Poké au choix + Boisson fraîche (+ Dessert). Économisez jusqu'à 2,50 €.</p>
+            {FORMULES.map(f => (
+              <motion.div
+                key={f.id}
+                className="menu-row clickable"
+                onClick={() => setSelectedFormule(f)}
+                {...reveal}
+              >
+                <div className="grow col gap-1">
+                  <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
+                    <span className="menu-name">{f.name}</span>
+                    <span className="tag tag-gold">{f.badge}</span>
+                  </div>
+                  <span className="muted small" style={{ fontSize: 11 }}>{f.description}</span>
+                  <span className="price small">M {formatPrice(f.priceM)} · L {formatPrice(f.priceL)}</span>
+                </div>
+                <button className="btn btn-sm btn-primary">Composer</button>
+              </motion.div>
+            ))}
+          </section>
+
           <section id="cat-classiques" className="menu-section">
             <h2 className="display menu-heading">Les classiques</h2>
             <p className="muted small menu-lead">Riz vinaigré, carotte, concombre, edamame, avocat, ananas, sésame. Vous choisissez la sauce.</p>
-            {(menu.classiques || []).map(item => {
+            {filterClassiques(menu.classiques || []).map(item => {
               const proteinId = (menu.proteines || []).find(p => p.name === item.defaultProtein)?.id;
               const soldOut = outOfStock.includes(proteinId);
               return (
@@ -324,6 +384,44 @@ export default function MenuScreen() {
                     </motion.div>
                   ))}
                 </AnimatePresence>
+
+                {/* Upselling Suggestions */}
+                {(!hasDrinkInCart || !hasDessertInCart) && (
+                  <div className="upsell-card" style={{ margin: '14px 0' }}>
+                    <div className="row gap-2">
+                      <Sparkles size={16} style={{ color: 'var(--gold)' }} />
+                      <strong style={{ fontSize: 13, color: 'var(--ink)' }}>Parfait pour accompagner votre bol</strong>
+                    </div>
+                    {!hasDrinkInCart && (
+                      <div className="upsell-item">
+                        <div className="col">
+                          <span style={{ fontSize: 13, fontWeight: 600 }}>Thé pétillant artisanal</span>
+                          <span className="price small">3,50 €</span>
+                        </div>
+                        <button 
+                          className="btn btn-sm btn-ghost row gap-1"
+                          onClick={() => addToCart({ name: 'Thé pétillant artisanal', cartName: 'Thé pétillant artisanal', price: 3.50, composition: ['Thé pétillant artisanal'] })}
+                        >
+                          <Plus size={14} /> Ajouter
+                        </button>
+                      </div>
+                    )}
+                    {!hasDessertInCart && (
+                      <div className="upsell-item">
+                        <div className="col">
+                          <span style={{ fontSize: 13, fontWeight: 600 }}>Tiramisu spéculoos maison</span>
+                          <span className="price small">4,50 €</span>
+                        </div>
+                        <button 
+                          className="btn btn-sm btn-ghost row gap-1"
+                          onClick={() => addToCart({ name: 'Tiramisu spéculoos', cartName: 'Tiramisu spéculoos', price: 4.50, composition: ['Tiramisu spéculoos'] })}
+                        >
+                          <Plus size={14} /> Ajouter
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="bottom-bar">
@@ -342,6 +440,13 @@ export default function MenuScreen() {
           </>
         )}
       </AnimatePresence>
+
+      <FormuleModal 
+        formule={selectedFormule} 
+        isOpen={!!selectedFormule} 
+        onClose={() => setSelectedFormule(null)} 
+      />
     </div>
   );
 }
+

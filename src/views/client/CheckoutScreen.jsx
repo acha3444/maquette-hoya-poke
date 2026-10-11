@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Lock, CreditCard, Banknote, Check } from 'lucide-react';
+import { ArrowLeft, Lock, CreditCard, Banknote, Check, Sparkles, Gift, Tag, Trash2 } from 'lucide-react';
 import { useStore } from '../../store';
-import { DELIVERY_ZONES } from '../../data';
+import { DELIVERY_ZONES, PROMO_CODES } from '../../data';
 import { formatPrice } from '../../format';
 import { list, item } from '../../motion';
 import { playSuccessSound } from '../../sound';
@@ -30,7 +30,18 @@ const fade = {
 
 export default function CheckoutScreen() {
   const navigate = useNavigate();
-  const { cart, orderType, addOrder, clearCart } = useStore();
+  const { 
+    cart, 
+    orderType, 
+    addOrder, 
+    clearCart,
+    loyaltyStamps,
+    addLoyaltyStamp,
+    claimLoyaltyReward,
+    activePromo,
+    applyPromo,
+    removePromo
+  } = useStore();
   const isDelivery = orderType === 'LIVRAISON';
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
@@ -39,6 +50,9 @@ export default function CheckoutScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('ONLINE'); // 'ONLINE' | 'ON_SITE'
   const [formData, setFormData] = useState({ name: '', phone: '', address: '', instructions: '', time: 'ASAP' });
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [promoFeedback, setPromoFeedback] = useState(null);
+  const [useLoyaltyReward, setUseLoyaltyReward] = useState(false);
 
   const update = (key) => (e) => setFormData(f => ({ ...f, [key]: e.target.value }));
 
@@ -64,10 +78,34 @@ export default function CheckoutScreen() {
     checkAddress(value);
   };
 
-  const deliveryFee = isDelivery && deliveryZone ? deliveryZone.fee : 0;
-  const total = cartTotal + deliveryFee;
+  // Promo calculation
+  let promoDiscount = 0;
+  if (activePromo) {
+    if (activePromo.type === 'percent') {
+      promoDiscount = (cartTotal * activePromo.value) / 100;
+    } else if (activePromo.type === 'fixed') {
+      promoDiscount = Math.min(cartTotal, activePromo.value);
+    }
+  }
+
+  // Loyalty reward calculation (1 free bowl up to 12.90€)
+  const isLoyaltyReady = loyaltyStamps >= 10;
+  const loyaltyDiscount = useLoyaltyReward && isLoyaltyReady ? Math.min(12.90, cartTotal - promoDiscount) : 0;
+
+  // Delivery fee calculation (waived if LIVRAISONFREE promo)
+  const isFreeDelivery = activePromo?.type === 'free_delivery';
+  const deliveryFee = isDelivery && deliveryZone ? (isFreeDelivery ? 0 : deliveryZone.fee) : 0;
+  
+  const total = Math.max(0, cartTotal - promoDiscount - loyaltyDiscount) + deliveryFee;
   const belowMin = isDelivery && deliveryZone && cartTotal < deliveryZone.min;
   const canPay = cart.length > 0 && (!isDelivery || (deliveryZone && !belowMin));
+
+  const handleApplyPromo = (codeToApply) => {
+    const code = codeToApply || promoCodeInput;
+    const res = applyPromo(code);
+    setPromoFeedback(res);
+    if (res.success) setPromoCodeInput('');
+  };
 
   const handleSubmit = () => {
     if (!canPay || submitting) return;
@@ -86,17 +124,28 @@ export default function CheckoutScreen() {
       zone: deliveryZone ? deliveryZone.id : null,
       deliveryFee,
       total,
+      promoCode: activePromo?.code || null,
+      discount: promoDiscount + loyaltyDiscount,
       paymentStatus: paymentMethod === 'ONLINE' ? 'PAYÉ' : 'A_ENCAISSER',
       paymentMethod: paymentMethod === 'ONLINE' ? 'EN LIGNE (CB)' : (isDelivery ? 'SUR PLACE (LIVREUR)' : 'SUR PLACE (COMPTOIR)'),
       items: cart
     };
+
+    // Credit loyalty stamps
+    const bowlsOrdered = cart.filter(i => i.composition?.length > 0 || i.isFormule).length || 1;
+    if (useLoyaltyReward) {
+      claimLoyaltyReward();
+    } else {
+      addLoyaltyStamp(bowlsOrdered);
+    }
 
     // Short delay so the payment step reads as a real action
     setTimeout(() => {
       playSuccessSound();
       addOrder(newOrder);
       clearCart();
-      navigate('/tracking', { state: { orderId: newOrder.id } });
+      removePromo();
+      navigate('/tracking', { state: { orderId: newOrder.id, earnedStamps: useLoyaltyReward ? 0 : bowlsOrdered } });
     }, 700);
   };
 
@@ -239,20 +288,132 @@ export default function CheckoutScreen() {
             </motion.section>
           </div>
 
-          <motion.section variants={item} className="col gap-2 checkout-aside">
-            <h3 className="eyebrow">Récapitulatif</h3>
+          <motion.section variants={item} className="col gap-3 checkout-aside">
+            <h3 className="eyebrow">Récapitulatif & Avantages</h3>
+
+            {/* Loyalty Free Bowl Option if 10 stamps */}
+            {isLoyaltyReady && (
+              <div 
+                className="card"
+                style={{
+                  background: useLoyaltyReward ? 'rgba(200, 140, 50, 0.15)' : 'var(--paper)',
+                  border: '1.5px solid var(--gold)',
+                  padding: '12px 14px',
+                  cursor: 'pointer'
+                }}
+                onClick={() => setUseLoyaltyReward(!useLoyaltyReward)}
+              >
+                <div className="row between">
+                  <div className="row gap-2">
+                    <Gift size={18} style={{ color: 'var(--gold)' }} />
+                    <div className="col">
+                      <strong style={{ fontSize: 13, color: 'var(--ink)' }}>Bol offert fidélité débloqué !</strong>
+                      <span className="small muted">Économisez 12,90 € sur votre commande</span>
+                    </div>
+                  </div>
+                  <span className={`switch ${useLoyaltyReward ? 'on' : ''}`}>
+                    <motion.span layout className="switch-knob" />
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Promo Code Box */}
+            <div className="promo-box">
+              <div className="row between">
+                <div className="row gap-2">
+                  <Tag size={15} style={{ color: 'var(--green-700)' }} />
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>Code promo</span>
+                </div>
+                {activePromo && (
+                  <button 
+                    className="link-btn danger" 
+                    style={{ fontSize: 11 }} 
+                    onClick={() => { removePromo(); setPromoFeedback(null); }}
+                  >
+                    Retirer
+                  </button>
+                )}
+              </div>
+
+              {activePromo ? (
+                <div className="row between" style={{ background: 'rgba(58, 122, 64, 0.1)', padding: '8px 10px', borderRadius: 8 }}>
+                  <span style={{ fontWeight: 700, fontSize: 12, color: '#2d6232' }}>
+                    ✓ Code {activePromo.code} appliqué ({activePromo.label})
+                  </span>
+                  <span className="tag tag-gold" style={{ fontSize: 10 }}>Valide</span>
+                </div>
+              ) : (
+                <>
+                  <div className="promo-input-row">
+                    <input 
+                      type="text" 
+                      placeholder="Ex: BIENVENUE10" 
+                      value={promoCodeInput}
+                      onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                      style={{ textTransform: 'uppercase', fontSize: 13 }}
+                    />
+                    <button 
+                      type="button" 
+                      className="btn btn-sm btn-primary" 
+                      onClick={() => handleApplyPromo()}
+                      disabled={!promoCodeInput.trim()}
+                    >
+                      Appliquer
+                    </button>
+                  </div>
+
+                  <div className="promo-tags-row">
+                    <span className="small muted" style={{ fontSize: 11 }}>Codes du moment :</span>
+                    {['BIENVENUE10', 'HOYA5', 'LIVRAISONFREE'].map(c => (
+                      <button 
+                        key={c} 
+                        type="button" 
+                        className="promo-chip" 
+                        onClick={() => handleApplyPromo(c)}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+
+                  {promoFeedback && (
+                    <span className={`small ${promoFeedback.success ? 'discount-line' : 'text-danger'}`} style={{ fontSize: 11 }}>
+                      {promoFeedback.message}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+
             <div className="card summary">
+              <span className="eyebrow" style={{ fontSize: 11, marginBottom: 4 }}>Détail de la commande</span>
               {cart.map(line => (
                 <div key={line.id} className="row between gap-3 small">
                   <span>{line.cartName}</span>
                   <span className="tnum">{formatPrice(line.price)}</span>
                 </div>
               ))}
+
+              {promoDiscount > 0 && (
+                <div className="row between small discount-line">
+                  <span>Remise promo ({activePromo?.code})</span>
+                  <span className="tnum">- {formatPrice(promoDiscount)}</span>
+                </div>
+              )}
+
+              {loyaltyDiscount > 0 && (
+                <div className="row between small discount-line">
+                  <span>🎁 Bol offert fidélité (10 tampons)</span>
+                  <span className="tnum">- {formatPrice(loyaltyDiscount)}</span>
+                </div>
+              )}
+
               <AnimatePresence initial={false}>
               {isDelivery && deliveryZone && (
                 <motion.div {...fade} className="row between small muted">
-                  <span>Livraison</span>
-                  <span className="tnum">{formatPrice(deliveryFee)}</span>
+                  <span>Livraison {isFreeDelivery ? '(Offerte !)' : ''}</span>
+                  <span className="tnum">{isFreeDelivery ? '0,00 €' : formatPrice(deliveryFee)}</span>
                 </motion.div>
               )}
               </AnimatePresence>
@@ -263,7 +424,7 @@ export default function CheckoutScreen() {
                   <motion.span
                     key={total.toFixed(2)}
                     className="price"
-                    style={{ fontSize: 18 }}
+                    style={{ fontSize: 20 }}
                     initial={{ y: -8, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 8, opacity: 0 }}

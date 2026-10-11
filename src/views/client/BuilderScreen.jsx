@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, Flame, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Flame, X, Heart } from 'lucide-react';
 import { useStore } from '../../store';
 import { MENU } from '../../data';
 import { formatPrice } from '../../format';
 import { ease, list, item as itemVariant } from '../../motion';
+import BowlVisualizer from '../../components/BowlVisualizer';
 
 const CUSTOM_STEPS = [
   { id: 'size', title: 'Taille du bol' },
@@ -69,13 +70,14 @@ function CheckMark({ on }) {
 export default function BuilderScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addToCart, outOfStock } = useStore();
+  const { addToCart, outOfStock, favorites, toggleFavorite } = useStore();
 
   const isCustom = !!location.state?.isCustom;
   const baseItem = location.state?.baseItem;
   const steps = isCustom ? CUSTOM_STEPS : CLASSIC_STEPS;
 
   const [[stepIndex, direction], setStep] = useState([0, 1]);
+  const [favToast, setFavToast] = useState(false);
   const [selections, setSelections] = useState({
     size: 'M',
     base: [],
@@ -86,6 +88,22 @@ export default function BuilderScreen() {
     gourmand: [],
     removed: []
   });
+
+  const bowlTitle = isCustom ? 'Mon Poké Sur Mesure' : `Poké ${baseItem?.name?.replace('Le ', '') || ''}`;
+  const isFav = favorites.some(f => f.name === bowlTitle);
+
+  const handleToggleFav = () => {
+    toggleFavorite({
+      name: bowlTitle,
+      size: selections.size,
+      price: getPrice(),
+      composition: isCustom 
+        ? selections.fruitsLegumes.map(i => i.name)
+        : [baseItem?.name || 'Poké']
+    });
+    setFavToast(true);
+    setTimeout(() => setFavToast(false), 1800);
+  };
 
   if (!isCustom && !baseItem) {
     return (
@@ -241,7 +259,15 @@ export default function BuilderScreen() {
           <ArrowLeft size={20} />
         </button>
         <span className="topbar-title">{isCustom ? 'Le Sur Mesure' : baseItem.name}</span>
-        <span />
+        <button 
+          className="icon-btn" 
+          onClick={handleToggleFav} 
+          aria-label="Ajouter aux favoris" 
+          title={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+          style={{ color: isFav ? '#e05353' : 'var(--muted)' }}
+        >
+          <Heart size={20} fill={isFav ? '#e05353' : 'none'} />
+        </button>
       </div>
 
       <div className="progress-track">
@@ -275,6 +301,29 @@ export default function BuilderScreen() {
       </nav>
 
       <div className="scroll">
+        <div style={{ padding: '14px var(--gutter) 0' }}>
+          <BowlVisualizer selections={selections} isCustom={isCustom} baseItem={baseItem} />
+          {favToast && (
+            <motion.div 
+              initial={{ opacity: 0, y: -6 }} 
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              style={{
+                background: 'rgba(224, 83, 83, 0.1)',
+                color: '#c23b3b',
+                padding: '6px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 600,
+                textAlign: 'center',
+                margin: '8px 0 0'
+              }}
+            >
+              {isFav ? '❤️ Recette ajoutée à vos favoris Poké Club !' : 'Recette retirée de vos favoris.'}
+            </motion.div>
+          )}
+        </div>
+
         <AnimatePresence mode="wait" custom={direction} initial={false}>
           <motion.div
             key={step.id}

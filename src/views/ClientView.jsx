@@ -1,24 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShoppingBag, Bike, ArrowRight, MapPin, Clock, AtSign, 
-  Sparkles, ChefHat, ShieldCheck, ExternalLink, ShoppingBasket 
+  Sparkles, ChefHat, ShieldCheck, ExternalLink, ShoppingBasket,
+  Gift, Star, Heart, Award
 } from 'lucide-react';
 import { useStore } from '../store';
-import { MENU } from '../data';
+import { MENU, FORMULES, CUSTOMER_REVIEWS } from '../data';
 import { formatPrice } from '../format';
 import { page, list, item, ease } from '../motion';
 import MenuScreen from './client/MenuScreen';
 import BuilderScreen from './client/BuilderScreen';
 import CheckoutScreen from './client/CheckoutScreen';
 import TrackingScreen from './client/TrackingScreen';
+import LoyaltyModal from '../components/LoyaltyModal';
+import FormuleModal from '../components/FormuleModal';
 import './client/client.css';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { restaurantOpen, setOrderType, cart, menu: storeMenu } = useStore();
+  const { restaurantOpen, setOrderType, cart, menu: storeMenu, loyaltyStamps } = useStore();
   const menu = storeMenu || MENU;
+  const [loyaltyOpen, setLoyaltyOpen] = useState(false);
+  const [activeFormule, setActiveFormule] = useState(null);
 
   const start = (type) => {
     setOrderType(type);
@@ -45,6 +50,9 @@ const HomeScreen = () => {
             <button onClick={() => { setOrderType('RETRAIT'); navigate('/builder', { state: { isCustom: true } }); }}>
               Composer son Poké
             </button>
+            <button onClick={() => setLoyaltyOpen(true)}>
+              Poké Club (Fidélité)
+            </button>
             <button onClick={() => {
               document.getElementById('infos-section')?.scrollIntoView({ behavior: 'smooth' });
             }}>
@@ -53,6 +61,18 @@ const HomeScreen = () => {
           </nav>
 
           <div className="client-nav-actions">
+            <button 
+              className="btn btn-sm btn-ghost row gap-1"
+              onClick={() => setLoyaltyOpen(true)}
+              aria-label="Mon Poké Club"
+              title="Carte de fidélité & Favoris"
+            >
+              <Gift size={16} style={{ color: 'var(--gold)' }} />
+              <span className="small">Club</span>
+              <span className="tag tag-gold" style={{ marginLeft: 2, height: 18, padding: '0 6px', fontSize: 10 }}>
+                {loyaltyStamps}/10
+              </span>
+            </button>
             <button 
               className="btn btn-sm btn-ghost row gap-1"
               onClick={() => navigate('/menu')}
@@ -168,6 +188,44 @@ const HomeScreen = () => {
             </div>
           </motion.div>
 
+          {/* Formules Déjeuner & Combos Strip */}
+          <motion.div variants={item} className="col gap-3">
+            <div className="row between">
+              <div className="row gap-2">
+                <span className="formule-badge">Formules Midi</span>
+                <h2 className="display" style={{ fontSize: 24 }}>Nos Formules gourmandes</h2>
+              </div>
+              <button className="link-btn" onClick={() => navigate('/menu')}>
+                Voir le menu <ArrowRight size={14} />
+              </button>
+            </div>
+            <div className="classic-strip">
+              {FORMULES.map((f, i) => (
+                <motion.div
+                  key={f.id}
+                  className="classic-tile"
+                  style={{ minWidth: 220, cursor: 'pointer', background: 'linear-gradient(180deg, #fff 0%, #faf6f0 100%)' }}
+                  onClick={() => {
+                    if (!useStore.getState().orderType) setOrderType('RETRAIT');
+                    setActiveFormule(f);
+                  }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + i * 0.06, duration: 0.4 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="tag tag-gold" style={{ alignSelf: 'flex-start', fontSize: 10 }}>{f.badge}</span>
+                  <strong style={{ fontSize: 15, marginTop: 4 }}>{f.name}</strong>
+                  <span className="muted small" style={{ fontSize: 11, lineHeight: 1.3 }}>{f.description}</span>
+                  <div className="row between" style={{ width: '100%', marginTop: 8 }}>
+                    <span className="price small">dès {formatPrice(f.priceM)}</span>
+                    <span className="btn btn-sm btn-primary" style={{ padding: '4px 10px', fontSize: 11 }}>Choisir</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
           {/* Custom Bowl Callout Banner */}
           <motion.div variants={item}>
             <div className="builder-callout">
@@ -201,6 +259,95 @@ const HomeScreen = () => {
                 <span>Créer mon bol sur-mesure</span>
                 <ArrowRight size={16} />
               </button>
+            </div>
+          </motion.div>
+
+          {/* Poké Club Loyalty Banner */}
+          <motion.div variants={item}>
+            <div 
+              className="card"
+              style={{
+                background: 'linear-gradient(135deg, #1b3524 0%, #294c34 100%)',
+                color: 'var(--cream)',
+                padding: '20px 24px',
+                borderRadius: 'var(--r-lg)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 16
+              }}
+              onClick={() => setLoyaltyOpen(true)}
+            >
+              <div className="row gap-3">
+                <div style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 14,
+                  background: 'rgba(200, 140, 50, 0.25)',
+                  color: 'var(--gold)',
+                  display: 'grid',
+                  placeItems: 'center'
+                }}>
+                  <Gift size={24} />
+                </div>
+                <div>
+                  <div className="row gap-2">
+                    <strong style={{ fontSize: 16 }}>Le Poké Club Hoya</strong>
+                    <span className="tag tag-gold" style={{ fontSize: 10 }}>10 bols = 1 offert</span>
+                  </div>
+                  <span style={{ fontSize: 13, opacity: 0.85 }}>
+                    Vous avez actuellement <strong>{loyaltyStamps}/10 tampons</strong>. Cliquez pour voir votre carte.
+                  </span>
+                </div>
+              </div>
+
+              <button className="btn btn-sm btn-gold row gap-1">
+                <span>Ma carte fidélité</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Customer Reviews & Google Rating */}
+          <motion.div variants={item} className="reviews-section">
+            <div className="reviews-rating-header">
+              <div>
+                <div className="row gap-1" style={{ color: 'var(--gold)', marginBottom: 2 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={15} fill="currentColor" />
+                  ))}
+                  <strong style={{ color: 'var(--ink)', fontSize: 14, marginLeft: 6 }}>4.9 / 5</strong>
+                </div>
+                <h2 className="display" style={{ fontSize: 22 }}>Ce que nos clients en disent</h2>
+                <span className="muted small">Vrais avis vérifiés · Pézenas & environs</span>
+              </div>
+            </div>
+
+            <div className="reviews-carousel">
+              {CUSTOMER_REVIEWS.map((rev) => (
+                <div key={rev.id} className="review-card">
+                  <div className="row between">
+                    <div className="row gap-1" style={{ color: 'var(--gold)' }}>
+                      {[...Array(rev.rating)].map((_, i) => (
+                        <Star key={i} size={13} fill="currentColor" />
+                      ))}
+                    </div>
+                    <span className="muted small" style={{ fontSize: 11 }}>{rev.date}</span>
+                  </div>
+                  <p style={{ fontSize: 13, margin: '2px 0', lineHeight: 1.4, color: 'var(--ink)' }}>
+                    "{rev.comment}"
+                  </p>
+                  <div className="row between" style={{ marginTop: 'auto', paddingTop: 6 }}>
+                    <div>
+                      <strong style={{ fontSize: 12 }}>{rev.author}</strong>
+                      <span className="muted small" style={{ marginLeft: 6, fontSize: 11 }}>· {rev.city}</span>
+                    </div>
+                    <span className="review-dish-tag">{rev.dish}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -280,6 +427,10 @@ const HomeScreen = () => {
             </div>
           </motion.div>
         </motion.div>
+
+        {/* Modals for Loyalty and Formules */}
+        <LoyaltyModal isOpen={loyaltyOpen} onClose={() => setLoyaltyOpen(false)} />
+        <FormuleModal formule={activeFormule} isOpen={!!activeFormule} onClose={() => setActiveFormule(null)} />
 
         {/* Full Client Footer */}
         <footer className="client-footer">

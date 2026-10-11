@@ -838,3 +838,629 @@
   }
   .checkout-aside { position: sticky; top: 24px; }
 }
+
+/* ==========================================================================
+   ENHANCED CLIENT FEATURES: LOYALTY, FORMULES, VISUALIZER, DIETARY & REVIEWS
+   ========================================================================== */
+
+/* --- Modal Overlays & Cards --- */
+.loyalty-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 26, 20, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.loyalty-modal-card, .formule-modal-card {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  background: var(--paper);
+  border-radius: var(--r-lg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(220, 210, 195, 0.4);
+}
+
+.loyalty-header, .formule-modal-header {
+  padding: 18px 20px;
+  background: var(--green-900);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.icon-btn-light {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--cream);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+.icon-btn-light:hover { background: rgba(255, 255, 255, 0.25); }
+
+.loyalty-badge-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(200, 140, 50, 0.2);
+  color: var(--gold);
+  display: grid;
+  place-items: center;
+}
+
+.loyalty-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+/* Stamp Card */
+.stamp-card {
+  background: linear-gradient(135deg, #fdfbf7 0%, #f4eee2 100%);
+  border-radius: var(--r);
+  padding: 16px;
+  border: 1.5px dashed var(--gold);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.stamp-counter-badge {
+  background: var(--green-700);
+  color: var(--cream);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.stamp-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.stamp-slot {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: var(--paper);
+  border: 1.5px dashed rgba(200, 140, 50, 0.4);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all 0.25s var(--ease);
+}
+
+.stamp-slot.stamped {
+  background: var(--green-700);
+  border: 1.5px solid var(--green-700);
+  color: var(--cream);
+  box-shadow: 0 4px 10px rgba(45, 80, 56, 0.25);
+}
+
+.stamp-slot.bonus {
+  border-color: var(--gold);
+  background: #fdf5e6;
+  font-size: 18px;
+}
+.stamp-slot.bonus.stamped {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+}
+
+.stamp-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.reward-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(200, 140, 50, 0.12);
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--gold);
+}
+
+/* Favorites Section */
+.favorites-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.empty-fav-box {
+  padding: 16px;
+  background: rgba(0,0,0,0.03);
+  border-radius: var(--r);
+  text-align: center;
+}
+.fav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fav-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--paper);
+  border-radius: var(--r);
+  box-shadow: inset 0 0 0 1px var(--line);
+  gap: 12px;
+}
+
+.icon-btn-sm {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.icon-btn-sm:hover { background: rgba(0,0,0,0.06); }
+
+.loyalty-perk-box {
+  background: rgba(45, 80, 56, 0.06);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  border-left: 3px solid var(--green-700);
+}
+
+/* --- Formules Modal Styles --- */
+.formule-badge {
+  display: inline-block;
+  background: var(--gold);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.formule-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+.formule-step-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formule-step-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--green-700);
+}
+
+.formule-size-pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.size-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.size-btn.active {
+  border-color: var(--green-700);
+  background: rgba(45, 80, 56, 0.05);
+}
+
+.formule-item-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.formule-choice-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s var(--ease);
+}
+.formule-choice-pill:hover { border-color: var(--green-700); }
+.formule-choice-pill.active {
+  border-color: var(--green-700);
+  background: rgba(45, 80, 56, 0.06);
+}
+
+.choice-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  color: var(--green-700);
+}
+.formule-choice-pill.active .choice-check {
+  background: var(--green-700);
+  border-color: var(--green-700);
+  color: var(--cream);
+}
+
+.formule-modal-footer {
+  padding: 16px 20px;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-success {
+  background: #3a7a40 !important;
+  color: #fff !important;
+}
+
+/* --- Live Bowl Visualizer Styles --- */
+.bowl-visualizer-card {
+  background: var(--paper);
+  border-radius: var(--r);
+  padding: 16px;
+  box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.bowl-visualizer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-nutrition-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+}
+.btn-nutrition-toggle.active {
+  background: var(--green-700);
+  border-color: var(--green-700);
+  color: var(--cream);
+}
+
+.bowl-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.bowl-outer {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #5a3825 0%, #301d12 85%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22), inset 0 3px 6px rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+}
+
+.bowl-rim {
+  position: relative;
+  width: 196px;
+  height: 196px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+}
+
+.bowl-base-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+  transition: background 0.4s var(--ease);
+}
+
+.base-tag-pill {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+
+.bowl-veggies-container {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.bowl-topping-bubble {
+  position: absolute;
+  padding: 3px 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-size: 9px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+
+.bowl-protein-center {
+  position: relative;
+  z-index: 2;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 4px;
+}
+
+.protein-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.bowl-sauce-drizzle {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 3.5px dashed;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.bowl-toppings-sprinkle {
+  position: absolute;
+  top: 16px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  z-index: 4;
+}
+
+.bowl-nutrition-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 8px 10px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.nutrition-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.nutrition-value {
+  font-size: 15px;
+  font-weight: 800;
+  font-family: var(--font-display);
+}
+.nutrition-label {
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.nutrition-detail-card {
+  background: #f7f9f7;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--green-700);
+}
+
+/* --- Dietary Filters --- */
+.diet-filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px var(--gutter) 8px;
+  scrollbar-width: none;
+}
+.diet-filter-bar::-webkit-scrollbar { display: none; }
+
+.diet-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s var(--ease);
+}
+.diet-filter-pill:hover { border-color: var(--green-700); color: var(--ink); }
+.diet-filter-pill.active {
+  background: var(--green-700);
+  border-color: var(--green-700);
+  color: var(--cream);
+}
+
+/* --- Upsell In Cart --- */
+.upsell-card {
+  background: linear-gradient(135deg, rgba(200, 140, 50, 0.08) 0%, rgba(45, 80, 56, 0.05) 100%);
+  border-radius: var(--r);
+  padding: 12px;
+  border: 1px dashed rgba(200, 140, 50, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upsell-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--paper);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+/* --- Promo Codes In Checkout --- */
+.promo-box {
+  background: var(--paper);
+  border-radius: var(--r);
+  padding: 14px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.promo-input-row {
+  display: flex;
+  gap: 8px;
+}
+.promo-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.promo-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.promo-chip:hover {
+  background: rgba(200, 140, 50, 0.15);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+.discount-line {
+  color: #3a7a40;
+  font-weight: 700;
+}
+
+/* --- Reviews Section on Home --- */
+.reviews-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.reviews-rating-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.reviews-carousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin: 0 -20px;
+  padding: 4px 20px 8px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.reviews-carousel::-webkit-scrollbar { display: none; }
+
+.review-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  background: var(--paper);
+  border-radius: var(--r);
+  padding: 16px;
+  box-shadow: inset 0 0 0 1px var(--line), var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.review-dish-tag {
+  align-self: flex-start;
+  background: rgba(45, 80, 56, 0.08);
+  color: var(--green-900);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
