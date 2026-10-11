@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
@@ -130,10 +130,200 @@ function EmptyColumn() {
   return <div className="col-empty">Rien pour l'instant</div>;
 }
 
+function CaUnlockModal({ onClose, onUnlock }) {
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState(false);
+
+  const handleDigit = (d) => {
+    if (pin.length >= 4) return;
+    const next = pin + d;
+    setPin(next);
+    setError(false);
+
+    if (next.length === 4) {
+      if (next === '1234' || next === "123'") {
+        onUnlock();
+      } else {
+        setError(true);
+        setTimeout(() => {
+          setPin('');
+          setError(false);
+        }, 700);
+      }
+    }
+  };
+
+  const handleDelete = () => {
+    setPin(p => p.slice(0, -1));
+    setError(false);
+  };
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (/^[0-9]$/.test(e.key)) handleDigit(e.key);
+      else if (e.key === "'") handleDigit("'");
+      else if (e.key === 'Backspace') handleDelete();
+      else if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [pin]);
+
+  return (
+    <>
+      <motion.div 
+        className="overlay" 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        exit={{ opacity: 0 }} 
+        onClick={onClose} 
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.94, y: 16 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1000,
+          background: 'var(--paper)',
+          borderRadius: 24,
+          padding: 24,
+          width: 'min(340px, 90vw)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 16,
+          textAlign: 'center'
+        }}
+      >
+        <div className="row between" style={{ width: '100%' }}>
+          <div className="row gap-2">
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--gold-soft)', color: 'var(--gold-ink)', display: 'grid', placeItems: 'center' }}>
+              <Lock size={16} />
+            </div>
+            <strong style={{ fontSize: 16 }}>Code Manager Requis</strong>
+          </div>
+          <button className="icon-btn" style={{ width: 32, height: 32 }} onClick={onClose} aria-label="Fermer">
+            <X size={16} />
+          </button>
+        </div>
+
+        <p className="muted small" style={{ margin: 0 }}>
+          Saisissez votre code PIN (1234) pour afficher le chiffre d'affaires.
+        </p>
+
+        {/* PIN Indicators */}
+        <motion.div
+          animate={error ? { x: [-8, 8, -6, 6, -3, 3, 0] } : {}}
+          transition={{ duration: 0.35 }}
+          style={{ display: 'flex', gap: 14, margin: '6px 0' }}
+        >
+          {[0, 1, 2, 3].map(i => {
+            const filled = pin.length > i;
+            return (
+              <div
+                key={i}
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: error ? '#c8463d' : filled ? 'var(--gold)' : 'var(--cream-2)',
+                  border: error ? '2px solid #c8463d' : filled ? '2px solid var(--gold)' : '2px solid var(--line-strong)',
+                  boxShadow: filled && !error ? '0 0 8px rgba(227, 163, 69, 0.4)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              />
+            );
+          })}
+        </motion.div>
+
+        {error && (
+          <span style={{ color: 'var(--danger)', fontSize: 12, fontWeight: 700 }}>
+            Code PIN incorrect (par défaut : 1234)
+          </span>
+        )}
+
+        {/* Keypad */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, width: '100%', maxWidth: 240 }}>
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+            <button
+              key={num}
+              onClick={() => handleDigit(String(num))}
+              style={{
+                height: 48,
+                borderRadius: 12,
+                background: 'var(--cream)',
+                border: '1px solid var(--line)',
+                color: 'var(--ink)',
+                fontSize: 18,
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              {num}
+            </button>
+          ))}
+          <button
+            onClick={onClose}
+            style={{
+              height: 48,
+              borderRadius: 12,
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--muted)',
+              fontSize: 12,
+              cursor: 'pointer'
+            }}
+          >
+            Annuler
+          </button>
+          <button
+            onClick={() => handleDigit('0')}
+            style={{
+              height: 48,
+              borderRadius: 12,
+              background: 'var(--cream)',
+              border: '1px solid var(--line)',
+              color: 'var(--ink)',
+              fontSize: 18,
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            0
+          </button>
+          <button
+            onClick={handleDelete}
+            style={{
+              height: 48,
+              borderRadius: 12,
+              background: 'var(--cream)',
+              border: '1px solid var(--line)',
+              color: 'var(--ink)',
+              display: 'grid',
+              placeItems: 'center',
+              cursor: 'pointer'
+            }}
+            aria-label="Effacer"
+          >
+            <Delete size={18} />
+          </button>
+        </div>
+      </motion.div>
+    </>
+  );
+}
+
 export default function RestaurantView() {
   const { orders, restaurantOpen, setRestaurantOpen, outOfStock, toggleStock } = useStore();
   const navigate = useNavigate();
-  const [hideRevenue, setHideRevenue] = useState(() => localStorage.getItem('hoya_hide_ca') === 'true');
+  const [hideRevenue, setHideRevenue] = useState(() => localStorage.getItem('hoya_hide_ca') !== 'false');
+  const [showCaPinModal, setShowCaPinModal] = useState(false);
   const [activeTab, setActiveTab] = useState('NOUVELLE');
   const [showSettings, setShowSettings] = useState(false);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
@@ -143,12 +333,21 @@ export default function RestaurantView() {
   const width = useContainerWidth(rootRef);
   const wide = width >= 760;
 
-  const toggleHideRevenue = () => {
-    setHideRevenue(prev => {
-      const next = !prev;
-      localStorage.setItem('hoya_hide_ca', String(next));
-      return next;
-    });
+  const handleRevenueClick = () => {
+    if (hideRevenue) {
+      // Require PIN to reveal
+      setShowCaPinModal(true);
+    } else {
+      // Hide instantly without code
+      setHideRevenue(true);
+      localStorage.setItem('hoya_hide_ca', 'true');
+    }
+  };
+
+  const handleUnlockCa = () => {
+    setHideRevenue(false);
+    localStorage.setItem('hoya_hide_ca', 'false');
+    setShowCaPinModal(false);
   };
 
   // Auto unlock audio on any user interaction
@@ -250,15 +449,15 @@ export default function RestaurantView() {
             <div><span className="tnum">{newCount}</span><span>en attente</span></div>
             <div><span className="tnum">{inProgress}</span><span>en cours</span></div>
             <div 
-              onClick={toggleHideRevenue}
+              onClick={handleRevenueClick}
               style={{ cursor: 'pointer', transition: 'opacity 0.15s ease' }}
-              title={hideRevenue ? "Chiffre d'affaires masqué (cliquez pour afficher)" : "Cliquez pour masquer le CA aux employés"}
+              title={hideRevenue ? "Chiffre d'affaires protégé par code PIN (cliquez pour déverrouiller)" : "Cliquez pour masquer immédiatement le CA aux employés"}
             >
               <span className="tnum row gap-1" style={{ justifyContent: 'flex-end', alignItems: 'center' }}>
                 {hideRevenue ? '•••• €' : formatPrice(revenue)}
-                {hideRevenue ? <EyeOff size={13} className="muted" /> : <Eye size={13} className="muted" />}
+                {hideRevenue ? <Lock size={12} style={{ color: 'var(--gold)' }} /> : <EyeOff size={13} className="muted" />}
               </span>
-              <span>{hideRevenue ? 'CA masqué' : 'encaissé'}</span>
+              <span>{hideRevenue ? 'CA protégé 🔒' : 'encaissé'}</span>
             </div>
           </div>
         )}
@@ -476,10 +675,10 @@ export default function RestaurantView() {
 
                 <section className="col gap-2">
                   <h3 className="eyebrow">Confidentialité Équipe</h3>
-                  <div className="stock-row" style={{ cursor: 'pointer' }} onClick={toggleHideRevenue}>
+                  <div className="stock-row" style={{ cursor: 'pointer' }} onClick={handleRevenueClick}>
                     <div className="col">
-                      <span>Masquer le Chiffre d'Affaires</span>
-                      <span className="muted small">Mode employés : cache le CA de l'écran en cuisine.</span>
+                      <span>Protéger le Chiffre d'Affaires</span>
+                      <span className="muted small">{hideRevenue ? 'Actuellement masqué (Code 1234 requis pour voir)' : 'Affiché (Cliquez pour masquer)'}</span>
                     </div>
                     <span className={`switch ${hideRevenue ? 'on' : ''}`}>
                       <motion.span layout transition={spring} className="switch-knob" />
@@ -497,6 +696,14 @@ export default function RestaurantView() {
               </div>
             </motion.aside>
           </>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showCaPinModal && (
+          <CaUnlockModal 
+            onClose={() => setShowCaPinModal(false)} 
+            onUnlock={handleUnlockCa} 
+          />
         )}
       </AnimatePresence>
     </div>
