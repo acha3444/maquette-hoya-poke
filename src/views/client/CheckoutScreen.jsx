@@ -109,69 +109,72 @@ export default function CheckoutScreen() {
       </div>
 
       <div className="scroll">
-        <motion.div className="col gap-6 section" variants={list} initial="initial" animate="animate">
-          <motion.section variants={item} className="col gap-3">
-            <h3 className="eyebrow">{isDelivery ? 'Adresse de livraison' : 'Retrait'}</h3>
-            {isDelivery ? (
-              <>
-                <input
-                  placeholder="10 rue de la Foire, Pézenas"
-                  value={formData.address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
-                <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
-                  <span className="muted small">Essayer :</span>
-                  {DEMO_ADDRESSES.map(a => (
-                    <button key={a.label} className="chip" onClick={() => setAddress(a.value)}>{a.label}</button>
-                  ))}
+        <motion.div className="checkout-grid section" variants={list} initial="initial" animate="animate">
+          <div className="checkout-main">
+            <motion.section variants={item} className="col gap-3">
+              <h3 className="eyebrow">{isDelivery ? 'Adresse de livraison' : 'Retrait'}</h3>
+              {isDelivery ? (
+                <>
+                  <input
+                    placeholder="10 rue de la Foire, Pézenas"
+                    value={formData.address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                  <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
+                    <span className="muted small">Essayer :</span>
+                    {DEMO_ADDRESSES.map(a => (
+                      <button key={a.label} className="chip" onClick={() => setAddress(a.value)}>{a.label}</button>
+                    ))}
+                  </div>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {addressError && (
+                      <motion.p key="err" className="notice danger" {...fade}>{addressError}</motion.p>
+                    )}
+                    {deliveryZone && (
+                      <motion.p key={`zone-${deliveryZone.id}-${belowMin}`} className={`notice ${belowMin ? 'danger' : 'ok'}`} {...fade}>
+                        {belowMin
+                          ? `Minimum de ${formatPrice(deliveryZone.min)} pour ${deliveryZone.name}. Il manque ${formatPrice(deliveryZone.min - cartTotal)}.`
+                          : `Livré à ${deliveryZone.name} · frais ${formatPrice(deliveryZone.fee)}`}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <div className="card" style={{ padding: 14 }}>
+                  <p style={{ fontWeight: 700 }}>Hoya Poké</p>
+                  <p className="muted small">7 rue Anatole France, 34120 Pézenas</p>
                 </div>
-                <AnimatePresence mode="wait" initial={false}>
-                  {addressError && (
-                    <motion.p key="err" className="notice danger" {...fade}>{addressError}</motion.p>
-                  )}
-                  {deliveryZone && (
-                    <motion.p key={`zone-${deliveryZone.id}-${belowMin}`} className={`notice ${belowMin ? 'danger' : 'ok'}`} {...fade}>
-                      {belowMin
-                        ? `Minimum de ${formatPrice(deliveryZone.min)} pour ${deliveryZone.name}. Il manque ${formatPrice(deliveryZone.min - cartTotal)}.`
-                        : `Livré à ${deliveryZone.name} · frais ${formatPrice(deliveryZone.fee)}`}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </>
-            ) : (
-              <div className="card" style={{ padding: 14 }}>
-                <p style={{ fontWeight: 700 }}>Hoya Poké</p>
-                <p className="muted small">7 rue Anatole France, 34120 Pézenas</p>
+              )}
+            </motion.section>
+
+            <motion.section variants={item} className="col gap-3">
+              <h3 className="eyebrow">{isDelivery ? 'Heure de livraison' : 'Heure de retrait'}</h3>
+              <div className="slot-grid">
+                {SLOTS.map(s => (
+                  <motion.button
+                    key={s.value}
+                    whileTap={{ scale: 0.96 }}
+                    className={`slot ${formData.time === s.value ? 'active' : ''}`}
+                    onClick={() => setFormData(f => ({ ...f, time: s.value }))}
+                  >
+                    <span>{s.label}</span>
+                    {s.sub && <span style={{ opacity: 0.7 }}>{s.sub}</span>}
+                  </motion.button>
+                ))}
               </div>
-            )}
-          </motion.section>
+            </motion.section>
 
-          <motion.section variants={item} className="col gap-3">
-            <h3 className="eyebrow">{isDelivery ? 'Heure de livraison' : 'Heure de retrait'}</h3>
-            <div className="slot-grid">
-              {SLOTS.map(s => (
-                <button
-                  key={s.value}
-                  className={`slot ${formData.time === s.value ? 'active' : ''}`}
-                  onClick={() => setFormData(f => ({ ...f, time: s.value }))}
-                >
-                  <span>{s.label}</span>
-                  {s.sub && <span style={{ opacity: 0.7 }}>{s.sub}</span>}
-                </button>
-              ))}
-            </div>
-          </motion.section>
+            <motion.section variants={item} className="col gap-3">
+              <h3 className="eyebrow">Coordonnées</h3>
+              <input placeholder="Nom" value={formData.name} onChange={update('name')} autoComplete="name" />
+              <input type="tel" placeholder="Téléphone" value={formData.phone} onChange={update('phone')} autoComplete="tel" />
+              {isDelivery && (
+                <textarea placeholder="Digicode, étage, indications" value={formData.instructions} onChange={update('instructions')} rows={2} />
+              )}
+            </motion.section>
+          </div>
 
-          <motion.section variants={item} className="col gap-3">
-            <h3 className="eyebrow">Coordonnées</h3>
-            <input placeholder="Nom" value={formData.name} onChange={update('name')} autoComplete="name" />
-            <input type="tel" placeholder="Téléphone" value={formData.phone} onChange={update('phone')} autoComplete="tel" />
-            {isDelivery && (
-              <textarea placeholder="Digicode, étage, indications" value={formData.instructions} onChange={update('instructions')} rows={2} />
-            )}
-          </motion.section>
-
-          <motion.section variants={item} className="col gap-2">
+          <motion.section variants={item} className="col gap-2 checkout-aside">
             <h3 className="eyebrow">Récapitulatif</h3>
             <div className="card summary">
               {cart.map(line => (
@@ -180,16 +183,30 @@ export default function CheckoutScreen() {
                   <span className="tnum">{formatPrice(line.price)}</span>
                 </div>
               ))}
+              <AnimatePresence initial={false}>
               {isDelivery && deliveryZone && (
-                <div className="row between small muted">
+                <motion.div {...fade} className="row between small muted">
                   <span>Livraison</span>
                   <span className="tnum">{formatPrice(deliveryFee)}</span>
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
               <div className="divider" />
               <div className="row between">
                 <span style={{ fontWeight: 700 }}>Total</span>
-                <span className="price" style={{ fontSize: 18 }}>{formatPrice(total)}</span>
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span
+                    key={total.toFixed(2)}
+                    className="price"
+                    style={{ fontSize: 18 }}
+                    initial={{ y: -8, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 8, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {formatPrice(total)}
+                  </motion.span>
+                </AnimatePresence>
               </div>
             </div>
             {!isDelivery && <p className="muted small">Titres-restaurant acceptés au comptoir.</p>}
@@ -197,14 +214,14 @@ export default function CheckoutScreen() {
         </motion.div>
       </div>
 
-      <div className="bottom-bar">
-        <button className="btn btn-primary btn-block" onClick={handleSubmit} disabled={!canPay}>
+      <div className="bottom-bar end">
+        <motion.button className="btn btn-primary btn-block" onClick={handleSubmit} disabled={!canPay} whileTap={{ scale: 0.98 }}>
           {submitting ? (
             <motion.span className="spinner" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }} />
           ) : (
             <><Lock size={16} /> Payer {formatPrice(total)}</>
           )}
-        </button>
+        </motion.button>
       </div>
     </div>
   );

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Check, Flame, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Flame, X } from 'lucide-react';
 import { useStore } from '../../store';
 import { MENU } from '../../data';
 import { formatPrice } from '../../format';
-import { ease } from '../../motion';
+import { ease, list, item as itemVariant } from '../../motion';
 
 const CUSTOM_STEPS = [
   { id: 'size', title: 'Taille du bol' },
@@ -175,7 +175,7 @@ export default function BuilderScreen() {
           {SIZES.map(s => {
             const on = selections.size === s.id;
             return (
-              <button key={s.id} className={`option size-option ${on ? 'selected' : ''}`} onClick={() => setSelections(p => ({ ...p, size: s.id }))}>
+              <motion.button key={s.id} whileTap={{ scale: 0.98 }} className={`option size-option ${on ? 'selected' : ''}`} onClick={() => setSelections(p => ({ ...p, size: s.id }))}>
                 <div className="row between" style={{ width: '100%' }}>
                   <span className="display" style={{ fontSize: 30 }}>{s.id}</span>
                   <CheckMark on={on} />
@@ -183,7 +183,7 @@ export default function BuilderScreen() {
                 <span style={{ fontWeight: 700 }}>{s.label}</span>
                 <span className="muted small">{s.note}</span>
                 <span className="price small" style={{ marginTop: 6 }}>{formatPrice(s.id === 'M' ? prices.priceM : prices.priceL)}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
@@ -192,23 +192,23 @@ export default function BuilderScreen() {
 
     if (step.id === 'remove') {
       return (
-        <div className="col gap-2">
+        <motion.div className="option-list" variants={list} initial="initial" animate="animate">
           {REMOVABLE.map(name => {
             const removed = selections.removed.includes(name);
             return (
-              <button key={name} className={`option ${removed ? 'removed' : ''}`} onClick={() => toggleRemoved(name)}>
+              <motion.button key={name} variants={itemVariant} whileTap={{ scale: 0.98 }} className={`option ${removed ? 'removed' : ''}`} onClick={() => toggleRemoved(name)}>
                 <span className="option-name">{name}</span>
                 {removed ? <span className="tag tag-danger">Retiré</span> : <X size={16} className="muted" />}
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
       );
     }
 
     const current = selections[step.id];
     return (
-      <div className="col gap-2">
+      <motion.div className="option-list" variants={list} initial="initial" animate="animate">
         {step.items.filter(i => !outOfStock.includes(i.id)).map(item => {
           const on = current.some(i => i.id === item.id);
           let extraPrice = item.price || 0;
@@ -216,7 +216,7 @@ export default function BuilderScreen() {
             extraPrice = step.extraPrice;
           }
           return (
-            <button key={item.id} className={`option ${on ? 'selected' : ''}`} onClick={() => toggle(item)}>
+            <motion.button key={item.id} variants={itemVariant} whileTap={{ scale: 0.98 }} className={`option ${on ? 'selected' : ''}`} onClick={() => toggle(item)}>
               <span className="col gap-1">
                 <span className="option-name" style={{ fontWeight: on ? 700 : 500 }}>{item.name}</span>
                 <Spice level={item.spice} />
@@ -225,17 +225,17 @@ export default function BuilderScreen() {
                 {extraPrice > 0 && !on && <span className="small" style={{ color: 'var(--gold-ink)', fontWeight: 700 }}>+{formatPrice(extraPrice)}</span>}
                 <CheckMark on={on} />
               </span>
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
     );
   };
 
   const progress = (stepIndex + 1) / steps.length;
 
   return (
-    <div className="screen">
+    <div className="screen narrow">
       <div className="topbar">
         <button className="icon-btn" onClick={goBack} aria-label="Retour">
           <ArrowLeft size={20} />
@@ -253,6 +253,27 @@ export default function BuilderScreen() {
         />
       </div>
 
+      <nav className="stepper" aria-label="Étapes">
+        {steps.map((s, i) => {
+          const active = i === stepIndex;
+          const done = i < stepIndex;
+          return (
+            <button
+              key={s.id}
+              className={active ? 'active' : done ? 'done' : ''}
+              disabled={!done}
+              onClick={() => setStep([i, -1])}
+            >
+              {active && <motion.span layoutId="step-pill" className="step-pill" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
+              <span>
+                <span className="step-num">{done ? <Check size={11} strokeWidth={3} /> : i + 1}</span>
+                {s.title}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
       <div className="scroll">
         <AnimatePresence mode="wait" custom={direction} initial={false}>
           <motion.div
@@ -265,7 +286,7 @@ export default function BuilderScreen() {
             className="col gap-4 section"
           >
             <div className="col gap-1">
-              <span className="eyebrow">Étape {stepIndex + 1} sur {steps.length}</span>
+              <span className="eyebrow builder-eyebrow">Étape {stepIndex + 1} sur {steps.length}</span>
               <h1 className="display" style={{ fontSize: 30 }}>{step.title}</h1>
               {limitText() && <p className="muted small">{limitText()}</p>}
             </div>
@@ -274,8 +295,8 @@ export default function BuilderScreen() {
         </AnimatePresence>
       </div>
 
-      <div className="bottom-bar">
-        <div className="row between" style={{ marginBottom: 12 }}>
+      <div className="bottom-bar split">
+        <div className="bb-total">
           <span className="muted">Total</span>
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.span
@@ -291,9 +312,10 @@ export default function BuilderScreen() {
             </motion.span>
           </AnimatePresence>
         </div>
-        <button className="btn btn-primary btn-block" disabled={!canProceed()} onClick={next}>
+        <motion.button className="btn btn-primary btn-block" disabled={!canProceed()} onClick={next} whileTap={{ scale: 0.98 }}>
           {isLast ? 'Ajouter au panier' : 'Continuer'}
-        </button>
+          {!isLast && <ArrowRight size={16} />}
+        </motion.button>
       </div>
     </div>
   );

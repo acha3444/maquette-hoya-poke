@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, X, Plus, Check, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
@@ -21,6 +21,14 @@ const reveal = {
   viewport: { once: true, amount: 0.3 },
   transition: { duration: 0.45, ease }
 };
+
+const DESKTOP_QUERY = '(min-width: 860px)';
+const subscribeDesktop = (cb) => {
+  const mq = window.matchMedia(DESKTOP_QUERY);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+};
+const useIsDesktop = () => useSyncExternalStore(subscribeDesktop, () => window.matchMedia(DESKTOP_QUERY).matches);
 
 function AddButton({ item }) {
   const addToCart = useStore(s => s.addToCart);
@@ -81,6 +89,7 @@ export default function MenuScreen() {
   const scrollRef = useRef(null);
   const lockSpy = useRef(false);
   const dragControls = useDragControls();
+  const isDesktop = useIsDesktop();
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
 
@@ -244,13 +253,13 @@ export default function MenuScreen() {
               onClick={() => setCartOpen(false)}
             />
             <motion.div
-              className="sheet"
+              className={`sheet ${isDesktop ? 'drawer' : ''}`}
               style={{ height: '78%' }}
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
+              initial={isDesktop ? { x: '100%' } : { y: '100%' }}
+              animate={isDesktop ? { x: 0 } : { y: 0 }}
+              exit={isDesktop ? { x: '100%' } : { y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-              drag="y"
+              drag={isDesktop ? false : 'y'}
               dragControls={dragControls}
               dragListener={false}
               dragConstraints={{ top: 0, bottom: 0 }}
@@ -262,7 +271,7 @@ export default function MenuScreen() {
               <div className="sheet-grip" onPointerDown={(e) => dragControls.start(e)}>
                 <div className="sheet-handle" />
               </div>
-              <div className="row between" style={{ padding: '4px 20px 12px' }}>
+              <div className="row between sheet-head">
                 <h2 className="display" style={{ fontSize: 22 }}>Votre panier</h2>
                 <button className="icon-btn" onClick={() => setCartOpen(false)} aria-label="Fermer">
                   <X size={20} />
