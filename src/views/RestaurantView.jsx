@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
@@ -131,6 +132,7 @@ function EmptyColumn() {
 
 export default function RestaurantView() {
   const { orders, restaurantOpen, setRestaurantOpen, outOfStock, toggleStock } = useStore();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('NOUVELLE');
   const [showSettings, setShowSettings] = useState(false);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
@@ -207,9 +209,31 @@ export default function RestaurantView() {
   return (
     <div className="screen kitchen" ref={rootRef}>
       <header className="kitchen-head">
-        <div className="col">
-          <span className="display" style={{ fontSize: 24, color: 'var(--green-700)' }}>Hoya Poké</span>
-          <span className="muted small">Cuisine · {today}</span>
+        <div className="row gap-3">
+          <div className="col">
+            <span className="display" style={{ fontSize: 24, color: 'var(--green-700)' }}>Hoya Poké</span>
+            <span className="muted small">Cuisine · {today}</span>
+          </div>
+          <div className="row gap-2" style={{ marginLeft: 8 }}>
+            <button 
+              className="btn btn-sm btn-ghost row gap-1"
+              style={{ height: 32, padding: '0 10px', fontSize: 12 }}
+              onClick={() => navigate('/')}
+              title="Voir le site client"
+            >
+              <ShoppingBag size={13} />
+              <span>Site client</span>
+            </button>
+            <button 
+              className="btn btn-sm btn-ghost row gap-1"
+              style={{ height: 32, padding: '0 10px', fontSize: 12 }}
+              onClick={() => navigate('/livreur')}
+              title="Ouvrir l'interface livreur"
+            >
+              <Bike size={13} />
+              <span>Livreur</span>
+            </button>
+          </div>
         </div>
 
         {wide && (

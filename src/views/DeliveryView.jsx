@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Phone, Check, TriangleAlert, Navigation, Bike } from 'lucide-react';
+import { MapPin, Phone, Check, TriangleAlert, Navigation, Bike, ChefHat, ShoppingBag } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
 import { ease } from '../motion';
@@ -69,6 +70,8 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
     updateOrderStatus(order.id, 'TERMINEE');
   };
 
+  const navigate = useNavigate();
+
   return (
     <div className="screen">
       <div className="topbar" style={{ gridTemplateColumns: '1fr auto' }}>
@@ -78,6 +81,24 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
           <span className="muted small">· en service</span>
         </div>
         <div className="row gap-2">
+          <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            style={{ height: 28, padding: '0 8px', fontSize: 11 }}
+            onClick={() => navigate('/cuisine')}
+            title="Aller à la cuisine"
+          >
+            <ChefHat size={12} />
+            <span>Cuisine</span>
+          </button>
+          <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            style={{ height: 28, padding: '0 8px', fontSize: 11 }}
+            onClick={() => navigate('/')}
+            title="Aller au site client"
+          >
+            <ShoppingBag size={12} />
+            <span>Client</span>
+          </button>
           <span className="tag">Course n° {order.id}</span>
         </div>
       </div>
