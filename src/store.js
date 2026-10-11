@@ -31,7 +31,6 @@ const getApiUrl = () => `/api`;
 export const useStore = create((set, get) => {
   // Sync with local express server for the demo across devices
   if (typeof window !== 'undefined') {
-    // Poll state every 2 seconds to bypass localtunnel limitations
     const pollState = () => {
       fetch(`${getApiUrl()}/state`, {
         headers: { 'Bypass-Tunnel-Reminder': 'true' }
@@ -42,13 +41,25 @@ export const useStore = create((set, get) => {
             set({ orders: data.orders, restaurantOpen: data.restaurantOpen });
           }
         })
-        .catch(e => console.log('Polling failed, backend offline.'));
+        .catch(() => {});
     };
 
-    // Initial fetch
+    // Initial fetch + fast interval
     pollState();
-    // Start polling
-    setInterval(pollState, 2000);
+    setInterval(pollState, 1500);
+
+    // Instant Real-Time SSE Stream (Zero delay sync between phone and mac)
+    try {
+      const evt = new EventSource(`${getApiUrl()}/events`);
+      evt.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data && data.orders) {
+            set({ orders: data.orders, restaurantOpen: data.restaurantOpen });
+          }
+        } catch (_) {}
+      };
+    } catch (_) {}
   }
 
   return {
