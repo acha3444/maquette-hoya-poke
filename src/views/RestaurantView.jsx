@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
@@ -133,6 +133,7 @@ function EmptyColumn() {
 export default function RestaurantView() {
   const { orders, restaurantOpen, setRestaurantOpen, outOfStock, toggleStock } = useStore();
   const navigate = useNavigate();
+  const [hideRevenue, setHideRevenue] = useState(() => localStorage.getItem('hoya_hide_ca') === 'true');
   const [activeTab, setActiveTab] = useState('NOUVELLE');
   const [showSettings, setShowSettings] = useState(false);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
@@ -141,6 +142,14 @@ export default function RestaurantView() {
   const rootRef = useRef(null);
   const width = useContainerWidth(rootRef);
   const wide = width >= 760;
+
+  const toggleHideRevenue = () => {
+    setHideRevenue(prev => {
+      const next = !prev;
+      localStorage.setItem('hoya_hide_ca', String(next));
+      return next;
+    });
+  };
 
   // Auto unlock audio on any user interaction
   useEffect(() => {
@@ -240,7 +249,17 @@ export default function RestaurantView() {
           <div className="kitchen-stats">
             <div><span className="tnum">{newCount}</span><span>en attente</span></div>
             <div><span className="tnum">{inProgress}</span><span>en cours</span></div>
-            <div><span className="tnum">{formatPrice(revenue)}</span><span>encaissé</span></div>
+            <div 
+              onClick={toggleHideRevenue}
+              style={{ cursor: 'pointer', transition: 'opacity 0.15s ease' }}
+              title={hideRevenue ? "Chiffre d'affaires masqué (cliquez pour afficher)" : "Cliquez pour masquer le CA aux employés"}
+            >
+              <span className="tnum row gap-1" style={{ justifyContent: 'flex-end', alignItems: 'center' }}>
+                {hideRevenue ? '•••• €' : formatPrice(revenue)}
+                {hideRevenue ? <EyeOff size={13} className="muted" /> : <Eye size={13} className="muted" />}
+              </span>
+              <span>{hideRevenue ? 'CA masqué' : 'encaissé'}</span>
+            </div>
           </div>
         )}
 
@@ -456,10 +475,23 @@ export default function RestaurantView() {
                 </section>
 
                 <section className="col gap-2">
+                  <h3 className="eyebrow">Confidentialité Équipe</h3>
+                  <div className="stock-row" style={{ cursor: 'pointer' }} onClick={toggleHideRevenue}>
+                    <div className="col">
+                      <span>Masquer le Chiffre d'Affaires</span>
+                      <span className="muted small">Mode employés : cache le CA de l'écran en cuisine.</span>
+                    </div>
+                    <span className={`switch ${hideRevenue ? 'on' : ''}`}>
+                      <motion.span layout transition={spring} className="switch-knob" />
+                    </span>
+                  </div>
+                </section>
+
+                <section className="col gap-2">
                   <h3 className="eyebrow">Aujourd'hui</h3>
                   <div className="stat-grid">
                     <div className="card"><span className="tnum">{finished.length}</span><span className="muted small">commandes terminées</span></div>
-                    <div className="card"><span className="tnum">{formatPrice(revenue)}</span><span className="muted small">chiffre d'affaires</span></div>
+                    <div className="card"><span className="tnum">{hideRevenue ? '•••• €' : formatPrice(revenue)}</span><span className="muted small">chiffre d'affaires</span></div>
                   </div>
                 </section>
               </div>
