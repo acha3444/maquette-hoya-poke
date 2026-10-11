@@ -10,6 +10,7 @@ import { playNewOrderSound, unlockAudio } from './sound';
 import ClientView from './views/ClientView';
 import RestaurantView from './views/RestaurantView';
 import DeliveryView from './views/DeliveryView';
+import AdminView from './views/AdminView';
 import StaffGuard from './components/StaffGuard';
 
 function FloatingProNav() {
@@ -115,6 +116,15 @@ function FloatingProNav() {
                   <Bike size={15} />
                   <span>App Livreur (Courses & GPS)</span>
                 </button>
+
+                <button
+                  className={`btn btn-sm ${location.pathname.startsWith('/admin') ? 'btn-primary' : 'btn-ghost'}`}
+                  style={{ justifyContent: 'flex-start', gap: 10 }}
+                  onClick={() => { navigate('/admin'); setOpen(false); }}
+                >
+                  <Sparkles size={15} />
+                  <span>Admin · Carte & Clôture Caisse</span>
+                </button>
               </div>
 
               <div className="divider" style={{ margin: '6px 0' }} />
@@ -196,7 +206,7 @@ function AppContent() {
           path="/admin" 
           element={
             <StaffGuard title="Administration Hoya Poké" defaultPin="1234">
-              <RestaurantView />
+              <AdminView />
             </StaffGuard>
           } 
         />

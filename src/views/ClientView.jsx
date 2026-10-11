@@ -17,7 +17,8 @@ import './client/client.css';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { restaurantOpen, setOrderType, cart } = useStore();
+  const { restaurantOpen, setOrderType, cart, menu: storeMenu } = useStore();
+  const menu = storeMenu || MENU;
 
   const start = (type) => {
     setOrderType(type);
@@ -137,7 +138,7 @@ const HomeScreen = () => {
               </button>
             </div>
             <div className="classic-strip">
-              {MENU.classiques.map((c, i) => (
+              {(menu.classiques || []).map((c, i) => (
                 <motion.button
                   key={c.id}
                   className="classic-tile"
@@ -150,7 +151,15 @@ const HomeScreen = () => {
                   transition={{ delay: 0.25 + i * 0.06, duration: 0.45, ease }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <span className={`classic-swatch s-${c.id}`} />
+                  {c.image ? (
+                    <img 
+                      src={c.image} 
+                      alt={c.name} 
+                      style={{ width: '100%', height: 110, borderRadius: 12, objectFit: 'cover', marginBottom: 6 }} 
+                    />
+                  ) : (
+                    <span className={`classic-swatch s-${c.id}`} />
+                  )}
                   <span className="classic-name">{c.name}</span>
                   <span className="muted small">{c.description}</span>
                   <span className="price small">dès {formatPrice(c.priceM)}</span>

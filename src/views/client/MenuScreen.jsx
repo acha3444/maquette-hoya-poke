@@ -69,11 +69,20 @@ function AddButton({ item }) {
 function SimpleItem({ item, soldOut }) {
   return (
     <motion.div className={`menu-row ${soldOut ? 'sold-out' : ''}`} {...reveal}>
+      {item.image && (
+        <img
+          src={item.image}
+          alt={item.name}
+          style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,0.08)' }}
+        />
+      )}
       <div className="grow col gap-1">
         <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
           <span className="menu-name">{item.name}</span>
           {item.bestseller && <span className="tag tag-gold">Le plus commandé</span>}
+          {item.badge && <span className="tag tag-green">{item.badge}</span>}
         </div>
+        {item.description && <span className="muted small" style={{ fontSize: 11 }}>{item.description}</span>}
         <span className="price small">{formatPrice(item.price)}</span>
       </div>
       {soldOut ? <span className="tag">Épuisé</span> : <AddButton item={item} />}
@@ -83,7 +92,8 @@ function SimpleItem({ item, soldOut }) {
 
 export default function MenuScreen() {
   const navigate = useNavigate();
-  const { cart, orderType, setOrderType, outOfStock, removeFromCart } = useStore();
+  const { cart, orderType, setOrderType, outOfStock, removeFromCart, menu: storeMenu } = useStore();
+  const menu = storeMenu || MENU;
   const [activeCategory, setActiveCategory] = useState('classiques');
   const [cartOpen, setCartOpen] = useState(false);
   const scrollRef = useRef(null);
@@ -161,8 +171,8 @@ export default function MenuScreen() {
           <section id="cat-classiques" className="menu-section">
             <h2 className="display menu-heading">Les classiques</h2>
             <p className="muted small menu-lead">Riz vinaigré, carotte, concombre, edamame, avocat, ananas, sésame. Vous choisissez la sauce.</p>
-            {MENU.classiques.map(item => {
-              const proteinId = MENU.proteines.find(p => p.name === item.defaultProtein)?.id;
+            {(menu.classiques || []).map(item => {
+              const proteinId = (menu.proteines || []).find(p => p.name === item.defaultProtein)?.id;
               const soldOut = outOfStock.includes(proteinId);
               return (
                 <motion.button
@@ -172,9 +182,20 @@ export default function MenuScreen() {
                   onClick={() => navigate('/builder', { state: { baseItem: item } })}
                   {...reveal}
                 >
-                  <span className={`classic-swatch sm s-${item.id}`} />
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,0.08)' }}
+                    />
+                  ) : (
+                    <span className={`classic-swatch sm s-${item.id}`} />
+                  )}
                   <div className="grow col gap-1">
-                    <span className="menu-name">{item.name}</span>
+                    <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
+                      <span className="menu-name">{item.name}</span>
+                      {item.badge && <span className="tag tag-green">{item.badge}</span>}
+                    </div>
                     <span className="muted small">{item.description}</span>
                     <span className="price small">M {formatPrice(item.priceM)} · L {formatPrice(item.priceL)}</span>
                   </div>
@@ -190,7 +211,7 @@ export default function MenuScreen() {
               <div className="col gap-1" style={{ textAlign: 'left' }}>
                 <span className="menu-name" style={{ color: 'var(--cream)' }}>Le Sur Mesure</span>
                 <span className="small" style={{ opacity: 0.75 }}>1 base, 5 fruits & légumes, 1 protéine, 1 sauce, 2 toppings</span>
-                <span className="price small" style={{ color: 'var(--gold)' }}>dès {formatPrice(MENU.surMesureBase.priceM)}</span>
+                <span className="price small" style={{ color: 'var(--gold)' }}>dès {formatPrice(menu.surMesureBase?.priceM || 12.90)}</span>
               </div>
               <span className="custom-cta">Composer <ArrowRight size={14} /></span>
             </motion.button>
@@ -198,17 +219,17 @@ export default function MenuScreen() {
 
           <section id="cat-sides" className="menu-section">
             <h2 className="display menu-heading">Sides</h2>
-            {MENU.sides.map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            {(menu.sides || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
           </section>
 
           <section id="cat-desserts" className="menu-section">
             <h2 className="display menu-heading">Desserts du moment</h2>
-            {MENU.desserts.map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            {(menu.desserts || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
           </section>
 
           <section id="cat-boissons" className="menu-section">
             <h2 className="display menu-heading">Boissons</h2>
-            {MENU.boissons.map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            {(menu.boissons || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
           </section>
         </div>
       </div>

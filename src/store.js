@@ -1,6 +1,41 @@
 import { create } from 'zustand';
-import { INITIAL_ORDERS } from './data';
+import { INITIAL_ORDERS, MENU } from './data';
 import { supabase } from './supabase';
+
+const loadInitialMenu = () => {
+  if (typeof window === 'undefined') return MENU;
+  try {
+    const saved = localStorage.getItem('hoya_custom_menu');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return {
+        ...MENU,
+        ...parsed,
+        classiques: parsed.classiques || MENU.classiques,
+        sides: parsed.sides || MENU.sides,
+        desserts: parsed.desserts || MENU.desserts,
+        boissons: parsed.boissons || MENU.boissons,
+        bases: parsed.bases || MENU.bases,
+        fruitsLegumes: parsed.fruitsLegumes || MENU.fruitsLegumes,
+        proteines: parsed.proteines || MENU.proteines,
+        sauces: parsed.sauces || MENU.sauces,
+        toppings: parsed.toppings || MENU.toppings
+      };
+    }
+  } catch (e) {
+    console.warn('Error loading custom menu:', e);
+  }
+  return MENU;
+};
+
+const loadCaisseHistory = () => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem('hoya_caisse_history');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return [];
+};
 
 const SAMPLE_CUSTOMERS = [
   { name: 'Camille', phone: '06 41 22 87 10', address: '12 cours Jean Jaurès, Pézenas' },
@@ -176,6 +211,75 @@ export const useStore = create((set, get) => {
         ? state.outOfStock.filter(id => id !== itemId)
         : [...state.outOfStock, itemId]
     })),
+
+    // Menu Management State
+    menu: loadInitialMenu(),
+
+    addMenuItem: (category, item) => {
+      set(state => {
+        const currentList = state.menu[category] || [];
+        const newItem = {
+          ...item,
+          id: item.id || `custom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+        };
+        const updatedMenu = {
+          ...state.menu,
+          [category]: [newItem, ...currentList]
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hoya_custom_menu', JSON.stringify(updatedMenu));
+        }
+        return { menu: updatedMenu };
+      });
+    },
+
+    updateMenuItem: (category, id, updatedFields) => {
+      set(state => {
+        const currentList = state.menu[category] || [];
+        const updatedMenu = {
+          ...state.menu,
+          [category]: currentList.map(item => item.id === id ? { ...item, ...updatedFields } : item)
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hoya_custom_menu', JSON.stringify(updatedMenu));
+        }
+        return { menu: updatedMenu };
+      });
+    },
+
+    deleteMenuItem: (category, id) => {
+      set(state => {
+        const currentList = state.menu[category] || [];
+        const updatedMenu = {
+          ...state.menu,
+          [category]: currentList.filter(item => item.id !== id)
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hoya_custom_menu', JSON.stringify(updatedMenu));
+        }
+        return { menu: updatedMenu };
+      });
+    },
+
+    resetMenu: () => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('hoya_custom_menu');
+      }
+      set({ menu: MENU });
+    },
+
+    // Caisse & Bilan Z History
+    caisseHistory: loadCaisseHistory(),
+
+    saveCaisseCloture: (clotureData) => {
+      set(state => {
+        const nextHistory = [clotureData, ...state.caisseHistory];
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('hoya_caisse_history', JSON.stringify(nextHistory));
+        }
+        return { caisseHistory: nextHistory };
+      });
+    },
 
     // Demo Controls
     resetDemo: async () => {

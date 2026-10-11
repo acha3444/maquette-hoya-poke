@@ -1,13 +1,14 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete, Printer, LockKeyhole } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete, Printer, LockKeyhole, FileText, Sparkles } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
 import { ease } from '../motion';
 import { playNewOrderSound, playSuccessSound, isSoundEnabled, setSoundEnabled, unlockAudio, getAudioStatus } from '../sound';
 import TicketPrintModal from '../components/TicketPrintModal';
+import CaisseClotureModal from '../components/CaisseClotureModal';
 import { lockStaffApp } from '../components/StaffGuard';
 import './restaurant.css';
 
@@ -349,6 +350,8 @@ export default function RestaurantView() {
   const navigate = useNavigate();
   const [hideRevenue, setHideRevenue] = useState(() => localStorage.getItem('hoya_hide_ca') !== 'false');
   const [showCaPinModal, setShowCaPinModal] = useState(false);
+  const [showZModal, setShowZModal] = useState(false);
+  const [pendingPinAction, setPendingPinAction] = useState(null);
   const [activeTab, setActiveTab] = useState('NOUVELLE');
   const [showSettings, setShowSettings] = useState(false);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
@@ -363,6 +366,7 @@ export default function RestaurantView() {
   const handleRevenueClick = () => {
     if (hideRevenue) {
       // Require PIN to reveal
+      setPendingPinAction(null);
       setShowCaPinModal(true);
     } else {
       // Hide instantly without code
@@ -371,10 +375,23 @@ export default function RestaurantView() {
     }
   };
 
+  const handleOpenCaisse = () => {
+    if (hideRevenue) {
+      setPendingPinAction(() => () => setShowZModal(true));
+      setShowCaPinModal(true);
+    } else {
+      setShowZModal(true);
+    }
+  };
+
   const handleUnlockCa = () => {
     setHideRevenue(false);
     localStorage.setItem('hoya_hide_ca', 'false');
     setShowCaPinModal(false);
+    if (pendingPinAction) {
+      pendingPinAction();
+      setPendingPinAction(null);
+    }
   };
 
   // Auto unlock audio on any user interaction
@@ -469,6 +486,15 @@ export default function RestaurantView() {
               <Bike size={13} />
               <span>Livreur</span>
             </button>
+            <button 
+              className="btn btn-sm btn-ghost row gap-1"
+              style={{ height: 32, padding: '0 10px', fontSize: 12 }}
+              onClick={() => navigate('/admin')}
+              title="Gérer la carte des produits et clôturer la caisse"
+            >
+              <Sparkles size={13} style={{ color: 'var(--gold)' }} />
+              <span>Admin / Carte</span>
+            </button>
           </div>
         </div>
 
@@ -487,6 +513,15 @@ export default function RestaurantView() {
               </span>
               <span>{hideRevenue ? 'CA protégé 🔒' : 'encaissé'}</span>
             </div>
+            <button
+              className="btn btn-sm btn-ghost row gap-1"
+              style={{ height: 32, padding: '0 8px', fontSize: 11, border: '1px solid var(--line)', background: 'var(--paper)', borderRadius: 'var(--r-sm)' }}
+              onClick={handleOpenCaisse}
+              title="Clôture de caisse & Impression du Ticket Z (Code PIN requis)"
+            >
+              <FileText size={13} style={{ color: 'var(--gold-ink)' }} />
+              <span>Ticket Z</span>
+            </button>
           </div>
         )}
 
@@ -759,6 +794,52 @@ export default function RestaurantView() {
                   </div>
                 </section>
 
+                <section className="col gap-2">
+                  <h3 className="eyebrow">Gestion & Clôture</h3>
+                  <div className="col gap-2">
+                    <button
+                      className="btn btn-sm btn-ghost row gap-2"
+                      style={{
+                        background: 'var(--gold-soft)',
+                        color: 'var(--gold-ink)',
+                        borderColor: 'rgba(217, 165, 79, 0.4)',
+                        justifyContent: 'flex-start',
+                        padding: '10px 14px'
+                      }}
+                      onClick={() => {
+                        setShowSettings(false);
+                        handleOpenCaisse();
+                      }}
+                    >
+                      <FileText size={16} />
+                      <div className="col" style={{ textAlign: 'left' }}>
+                        <strong style={{ fontSize: 13 }}>Clôture de Caisse (Ticket Z)</strong>
+                        <span className="small" style={{ opacity: 0.8 }}>Bilan du CA, encaissements et impression ticket 80mm</span>
+                      </div>
+                    </button>
+
+                    <button
+                      className="btn btn-sm btn-ghost row gap-2"
+                      style={{
+                        background: 'var(--cream-2)',
+                        borderColor: 'var(--line)',
+                        justifyContent: 'flex-start',
+                        padding: '10px 14px'
+                      }}
+                      onClick={() => {
+                        setShowSettings(false);
+                        navigate('/admin');
+                      }}
+                    >
+                      <SlidersHorizontal size={16} />
+                      <div className="col" style={{ textAlign: 'left' }}>
+                        <strong style={{ fontSize: 13 }}>Gérer la Carte & Produits</strong>
+                        <span className="muted small">Ajouter des produits, photos, modifier les prix</span>
+                      </div>
+                    </button>
+                  </div>
+                </section>
+
                 <section className="col gap-2" style={{ marginTop: 8 }}>
                   <h3 className="eyebrow">Sécurité & Session Staff</h3>
                   <button
@@ -802,6 +883,9 @@ export default function RestaurantView() {
               setPrintingOrder(null);
             }}
           />
+        )}
+        {showZModal && (
+          <CaisseClotureModal onClose={() => setShowZModal(false)} />
         )}
       </AnimatePresence>
     </div>
