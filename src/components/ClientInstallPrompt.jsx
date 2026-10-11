@@ -9,12 +9,10 @@ import { useStore } from '../store';
 const DISMISS_KEY = 'hoya_pwa_prompt_dismissed';
 
 export default function ClientInstallPrompt({ forceOpen, onOpenChange }) {
-  const { addLoyaltyStamp, loyaltyStamps } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
-  const [stampAwarded, setStampAwarded] = useState(false);
 
   useEffect(() => {
     // 1. Check if already running in standalone mode (already installed)
@@ -68,21 +66,9 @@ export default function ClientInstallPrompt({ forceOpen, onOpenChange }) {
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice;
       if (choice.outcome === 'accepted') {
-        grantBonus();
+        closePrompt();
       }
       setDeferredPrompt(null);
-    } else {
-      grantBonus();
-    }
-  };
-
-  const grantBonus = () => {
-    if (!stampAwarded) {
-      addLoyaltyStamp(1);
-      setStampAwarded(true);
-      setTimeout(() => {
-        closePrompt();
-      }, 1500);
     } else {
       closePrompt();
     }
@@ -113,14 +99,14 @@ export default function ClientInstallPrompt({ forceOpen, onOpenChange }) {
                 <div>
                   <div className="row gap-2">
                     <span className="tag tag-gold" style={{ fontSize: 10, padding: '2px 8px' }}>
-                      🎁 Cadeau de bienvenue
+                      ⚡ Application Hoya Poké
                     </span>
                   </div>
                   <h3 className="display" style={{ fontSize: 19, margin: '4px 0 0', color: 'var(--cream)' }}>
-                    Installez l'App Hoya Poké
+                    Ajoutez l'App sur votre téléphone
                   </h3>
                   <span className="small" style={{ color: 'rgba(250,245,240,0.75)' }}>
-                    Pézenas · Vos pokés en 1 clic sur votre écran
+                    Pézenas · Vos pokés en 1 clic sur votre écran d'accueil
                   </span>
                 </div>
               </div>
@@ -135,13 +121,13 @@ export default function ClientInstallPrompt({ forceOpen, onOpenChange }) {
               {/* Marketing Incentive Box */}
               <div className="pwa-reward-highlight">
                 <div className="row gap-2">
-                  <Gift size={22} style={{ color: 'var(--gold)', flexShrink: 0 }} />
+                  <Sparkles size={22} style={{ color: 'var(--gold)', flexShrink: 0 }} />
                   <div>
                     <strong style={{ fontSize: 14, color: 'var(--green-900)' }}>
-                      +1 Tampon fidélité offert à l'installation !
+                      Commandez plus vite & profitez de -10% !
                     </strong>
                     <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(15,26,20,0.75)' }}>
-                      Ajoutez l'application sur votre écran d'accueil et recevez immédiatement votre premier tampon dans votre Poké Club (actuellement {loyaltyStamps}/10).
+                      Retrouvez vos recettes favorites en 1 clic et utilisez le code promo <strong>BIENVENUE10</strong> lors de votre commande.
                     </p>
                   </div>
                 </div>
@@ -252,25 +238,26 @@ export default function ClientInstallPrompt({ forceOpen, onOpenChange }) {
                 Plus tard
               </button>
 
-              <button 
-                className={`btn btn-gold row gap-2 ${stampAwarded ? 'btn-success' : ''}`}
-                onClick={grantBonus}
-                disabled={stampAwarded}
-                style={{ minWidth: 200 }}
-              >
-                {stampAwarded ? (
-                  <>
-                    <CheckCircle2 size={16} />
-                    <span>+1 Tampon crédité ! 🎉</span>
-                  </>
-                ) : (
-                  <>
-                    <Gift size={16} />
-                    <span>J'ai installé (+1 Tampon)</span>
-                    <ArrowRight size={14} />
-                  </>
-                )}
-              </button>
+              {deferredPrompt ? (
+                <button 
+                  className="btn btn-gold row gap-2"
+                  onClick={handleNativeInstall}
+                  style={{ minWidth: 180 }}
+                >
+                  <Download size={16} />
+                  <span>Installer l'App</span>
+                  <ArrowRight size={14} />
+                </button>
+              ) : (
+                <button 
+                  className="btn btn-primary row gap-2"
+                  onClick={closePrompt}
+                  style={{ minWidth: 150 }}
+                >
+                  <Check size={16} />
+                  <span>J'ai compris</span>
+                </button>
+              )}
             </div>
           </motion.div>
         </div>

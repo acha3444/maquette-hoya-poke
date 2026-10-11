@@ -67,11 +67,11 @@ const HomeScreen = () => {
             <button 
               className="client-pwa-badge"
               onClick={() => setInstallPromptOpen(true)}
-              title="Installer l'application sur votre téléphone (+1 tampon offert)"
+              title="Ajouter l'application sur votre écran d'accueil"
             >
               <Smartphone size={13} style={{ color: 'var(--green-700)' }} />
               <span>Installer l'App</span>
-              <span className="tag tag-gold" style={{ fontSize: 9, padding: '0 5px', height: 16 }}>+1 🎁</span>
+              <span className="tag tag-gold" style={{ fontSize: 9, padding: '0 5px', height: 16 }}>1 clic</span>
             </button>
             <button 
               className="btn btn-sm btn-ghost row gap-1"
