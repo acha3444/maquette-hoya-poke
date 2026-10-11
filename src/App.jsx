@@ -10,6 +10,7 @@ import { playNewOrderSound, unlockAudio } from './sound';
 import ClientView from './views/ClientView';
 import RestaurantView from './views/RestaurantView';
 import DeliveryView from './views/DeliveryView';
+import StaffGuard from './components/StaffGuard';
 
 function FloatingProNav() {
   const [open, setOpen] = useState(false);
@@ -183,9 +184,30 @@ function AppContent() {
   return (
     <>
       <Routes>
-        <Route path="/cuisine" element={<RestaurantView />} />
-        <Route path="/admin" element={<RestaurantView />} />
-        <Route path="/livreur" element={<DeliveryView />} />
+        <Route 
+          path="/cuisine" 
+          element={
+            <StaffGuard title="Écran Cuisine / KDS" defaultPin="1234">
+              <RestaurantView />
+            </StaffGuard>
+          } 
+        />
+        <Route 
+          path="/admin" 
+          element={
+            <StaffGuard title="Administration Hoya Poké" defaultPin="1234">
+              <RestaurantView />
+            </StaffGuard>
+          } 
+        />
+        <Route 
+          path="/livreur" 
+          element={
+            <StaffGuard title="Espace Livreur" defaultPin="1234">
+              <DeliveryView />
+            </StaffGuard>
+          } 
+        />
         <Route path="/*" element={<ClientView />} />
       </Routes>
       <FloatingProNav />
