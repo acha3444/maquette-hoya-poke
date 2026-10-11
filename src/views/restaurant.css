@@ -195,3 +195,153 @@
   .kitchen-head .display + .muted { display: none; }
   .service-toggle span:last-child { display: none; }
 }
+
+/* ---------- Kitchen Thermal Ticket Printing ---------- */
+.thermal-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 26, 20, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 998;
+}
+
+.thermal-preview-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  width: min(440px, 94vw);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-radius: var(--r-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.thermal-ticket {
+  background: #ffffff;
+  color: #111111;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 20px 18px;
+  border: 1px dashed #d0c8be;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  user-select: text;
+}
+
+.thermal-ticket-header {
+  text-align: center;
+  border-bottom: 2px dashed #000;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.thermal-ticket-title {
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+.thermal-ticket-order {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #666;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.thermal-ticket-badge {
+  font-weight: 900;
+  font-size: 13px;
+  padding: 3px 8px;
+  background: #000;
+  color: #fff;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.thermal-item {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dotted #ccc;
+}
+.thermal-item:last-child {
+  border-bottom: none;
+}
+
+.thermal-item-title {
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.thermal-item-detail {
+  font-size: 12px;
+  color: #333;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.thermal-item-without {
+  font-size: 12px;
+  font-weight: 800;
+  color: #c8463d;
+  margin-top: 2px;
+}
+
+.thermal-total {
+  border-top: 2px dashed #000;
+  padding-top: 10px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+/* Print Media Query (80mm standard receipt paper) */
+@media print {
+  body, html {
+    background: #fff !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  body * {
+    visibility: hidden !important;
+  }
+  
+  .thermal-print-area, .thermal-print-area * {
+    visibility: visible !important;
+  }
+  
+  .thermal-print-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 2mm 3mm !important;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    z-index: 9999999 !important;
+  }
+  
+  @page {
+    size: 80mm auto;
+    margin: 0mm;
+  }
+}

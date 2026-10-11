@@ -1,12 +1,13 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete } from 'lucide-react';
+import { Clock, Phone, Bike, MapPin, SlidersHorizontal, X, ShoppingBag, Volume2, VolumeX, ArrowLeft, Eye, EyeOff, Lock, Delete, Printer } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
 import { ease } from '../motion';
 import { playNewOrderSound, playSuccessSound, isSoundEnabled, setSoundEnabled, unlockAudio, getAudioStatus } from '../sound';
+import TicketPrintModal from '../components/TicketPrintModal';
 import './restaurant.css';
 
 const STATUS_COLUMNS = [
@@ -38,7 +39,7 @@ function useContainerWidth(ref) {
   return width;
 }
 
-function OrderCard({ order }) {
+function OrderCard({ order, onPrint }) {
   const updateOrderStatus = useStore(s => s.updateOrderStatus);
   const isNew = order.status === 'NOUVELLE';
   const done = order.status === 'TERMINEE';
@@ -62,7 +63,23 @@ function OrderCard({ order }) {
       className={`ticket ${isNew ? 'is-new' : ''} ${order.isLate && !done ? 'is-late' : ''} ${done ? 'is-done' : ''}`}
     >
       <header className="ticket-head">
-        <span className="ticket-id tnum">#{order.id}</span>
+        <div className="row gap-2">
+          <span className="ticket-id tnum">#{order.id}</span>
+          {onPrint && (
+            <button
+              className="icon-btn"
+              style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--cream-2)', color: 'var(--ink)' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrint(order);
+              }}
+              title="Imprimer le bon de commande (ticket thermique)"
+              aria-label="Imprimer le bon"
+            >
+              <Printer size={13} />
+            </button>
+          )}
+        </div>
         <span className={`ticket-time tnum ${order.isLate && !done ? 'text-danger' : ''}`}>
           <Clock size={13} /> {order.time}
         </span>
@@ -327,6 +344,8 @@ export default function RestaurantView() {
   const [activeTab, setActiveTab] = useState('NOUVELLE');
   const [showSettings, setShowSettings] = useState(false);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
+  const [printingOrder, setPrintingOrder] = useState(null);
+  const [autoPrint, setAutoPrint] = useState(() => localStorage.getItem('hoya_auto_print') === 'true');
   const [audioReady, setAudioReady] = useState(() => getAudioStatus() === 'running');
   const [today] = useState(() => new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
   const rootRef = useRef(null);
@@ -391,6 +410,10 @@ export default function RestaurantView() {
         playNewOrderSound();
       }
       setActiveTab('NOUVELLE');
+      if (autoPrint) {
+        const latest = orders.find(o => o.status === 'NOUVELLE');
+        if (latest) setPrintingOrder(latest);
+      }
     }
 
     knownOrderIds.current = new Set(orders.map(o => o.id));
@@ -576,7 +599,7 @@ export default function RestaurantView() {
                   </div>
                   <div className="board-col-body scroll">
                     <AnimatePresence mode="popLayout">
-                      {colOrders.map(o => <OrderCard key={o.id} order={o} />)}
+                      {colOrders.map(o => <OrderCard key={o.id} order={o} onPrint={setPrintingOrder} />)}
                     </AnimatePresence>
                     {colOrders.length === 0 && <EmptyColumn />}
                   </div>
@@ -612,7 +635,7 @@ export default function RestaurantView() {
             >
               <div className="col gap-3">
                 <AnimatePresence mode="popLayout">
-                  {byStatus(activeTab).map(o => <OrderCard key={o.id} order={o} />)}
+                  {byStatus(activeTab).map(o => <OrderCard key={o.id} order={o} onPrint={setPrintingOrder} />)}
                 </AnimatePresence>
                 {byStatus(activeTab).length === 0 && <EmptyColumn />}
               </div>
@@ -674,6 +697,30 @@ export default function RestaurantView() {
                 </section>
 
                 <section className="col gap-2">
+                  <h3 className="eyebrow">Impression des Bons (KDS)</h3>
+                  <p className="muted small">Impression thermique standard 80mm pour la cuisine.</p>
+                  <div 
+                    className="stock-row" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      setAutoPrint(prev => {
+                        const next = !prev;
+                        localStorage.setItem('hoya_auto_print', String(next));
+                        return next;
+                      });
+                    }}
+                  >
+                    <div className="col">
+                      <span>Impression automatique (Auto-Print)</span>
+                      <span className="muted small">Ouvre le bon dès réception d'une commande.</span>
+                    </div>
+                    <span className={`switch ${autoPrint ? 'on' : ''}`}>
+                      <motion.span layout transition={spring} className="switch-knob" />
+                    </span>
+                  </div>
+                </section>
+
+                <section className="col gap-2">
                   <h3 className="eyebrow">Confidentialité Équipe</h3>
                   <div className="stock-row" style={{ cursor: 'pointer' }} onClick={handleRevenueClick}>
                     <div className="col">
@@ -703,6 +750,16 @@ export default function RestaurantView() {
           <CaUnlockModal 
             onClose={() => setShowCaPinModal(false)} 
             onUnlock={handleUnlockCa} 
+          />
+        )}
+        {printingOrder && (
+          <TicketPrintModal
+            order={printingOrder}
+            onClose={() => setPrintingOrder(null)}
+            onAdvanceStatus={(id, st) => {
+              updateOrderStatus(id, st);
+              setPrintingOrder(null);
+            }}
           />
         )}
       </AnimatePresence>
