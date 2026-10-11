@@ -304,7 +304,7 @@ export default function BuilderScreen() {
 
       <div className="scroll">
         <div style={{ padding: '14px var(--gutter) 0' }}>
-          <BowlVisualizer selections={selections} isCustom={isCustom} baseItem={baseItem} />
+          <BowlVisualizer selections={selections} isCustom={isCustom} baseItem={baseItem} classicIngredients={REMOVABLE} />
           {favToast && (
             <motion.div 
               initial={{ opacity: 0, y: -6 }} 

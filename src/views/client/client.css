@@ -1185,113 +1185,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 0;
+  padding: 4px 0 0;
 }
 
-.bowl-outer {
-  position: relative;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #5a3825 0%, #301d12 85%);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22), inset 0 3px 6px rgba(255, 255, 255, 0.2);
-  display: grid;
-  place-items: center;
+.bowl-svg {
+  width: min(100%, 300px);
+  aspect-ratio: 1;
+  overflow: visible;
 }
 
-.bowl-rim {
-  position: relative;
-  width: 196px;
-  height: 196px;
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.35);
-  display: grid;
-  place-items: center;
-}
-
-.bowl-base-layer {
-  position: absolute;
-  inset: 0;
+.bowl-legend {
   display: flex;
-  align-items: flex-end;
+  flex-wrap: wrap;
   justify-content: center;
-  padding-bottom: 8px;
-  transition: background 0.4s var(--ease);
+  gap: 6px;
+  min-height: 24px;
 }
 
-.base-tag-pill {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  background: rgba(0, 0, 0, 0.25);
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 8px;
-  letter-spacing: 0.5px;
-}
-
-.bowl-veggies-container {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-}
-
-.bowl-topping-bubble {
-  position: absolute;
-  padding: 3px 7px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
+.bowl-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.035);
+  font-size: 11px;
+  font-weight: 600;
   color: var(--ink);
-  font-size: 9px;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   white-space: nowrap;
 }
-
-.bowl-protein-center {
-  position: relative;
-  z-index: 2;
-  width: 72px;
-  height: 72px;
+.bowl-legend-chip i {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 4px;
-}
-
-.protein-label {
-  font-size: 10px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.1;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-
-.bowl-sauce-drizzle {
-  position: absolute;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  border: 3.5px dashed;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.bowl-toppings-sprinkle {
-  position: absolute;
-  top: 16px;
-  font-size: 10px;
-  font-weight: 700;
-  background: rgba(0, 0, 0, 0.4);
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 10px;
-  z-index: 4;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
 .bowl-nutrition-strip {
@@ -1637,24 +1564,8 @@
   .bowl-visualizer-card {
     padding: 12px 10px;
   }
-  .bowl-outer {
-    width: 195px;
-    height: 195px;
-  }
-  .bowl-rim {
-    width: 172px;
-    height: 172px;
-  }
-  .bowl-protein-center {
-    width: 66px;
-    height: 66px;
-  }
-  .protein-label {
-    font-size: 9.5px;
-  }
-  .bowl-sauce-drizzle {
-    width: 124px;
-    height: 124px;
+  .bowl-svg {
+    width: min(100%, 250px);
   }
   .bowl-nutrition-strip {
     gap: 4px;
