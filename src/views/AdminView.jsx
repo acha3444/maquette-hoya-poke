@@ -5,7 +5,7 @@ import {
   Plus, Edit2, Trash2, Image, Upload, Check, X, Search, 
   ChefHat, ShoppingBag, ArrowLeft, LockKeyhole, RefreshCw, 
   SlidersHorizontal, Sparkles, AlertCircle, FileText, Printer,
-  Eye, EyeOff, KeyRound, Smartphone
+  Eye, EyeOff, KeyRound, Smartphone, CreditCard
 } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
@@ -13,6 +13,7 @@ import { lockStaffApp, getStaffPin } from '../components/StaffGuard';
 import CaisseClotureModal from '../components/CaisseClotureModal';
 import ChangePinModal from '../components/ChangePinModal';
 import InstallPwaModal from '../components/InstallPwaModal';
+import PosRegister from '../components/PosRegister';
 import './admin.css';
 
 const PRESET_IMAGES = [
@@ -41,7 +42,7 @@ const CATEGORY_TABS = [
 export default function AdminView() {
   const navigate = useNavigate();
   const { menu, addMenuItem, updateMenuItem, deleteMenuItem, resetMenu, outOfStock, toggleStock } = useStore();
-  const [activeMainTab, setActiveMainTab] = useState('carte'); // 'carte' | 'caisse'
+  const [activeMainTab, setActiveMainTab] = useState('pos'); // 'pos' | 'carte' | 'caisse'
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [editingItem, setEditingItem] = useState(null); // null or { category, item }
@@ -230,6 +231,10 @@ export default function AdminView() {
       {/* Main Mode Navigation Bar */}
       <div className="admin-subnav">
         <div className="tabs">
+          <button className={activeMainTab === 'pos' ? 'active' : ''} onClick={() => setActiveMainTab('pos')}>
+            <CreditCard size={14} />
+            <span>Caisse Comptoir (POS)</span>
+          </button>
           <button className={activeMainTab === 'carte' ? 'active' : ''} onClick={() => setActiveMainTab('carte')}>
             <SlidersHorizontal size={14} />
             <span>Carte & Produits ({filteredItems.length})</span>
@@ -251,6 +256,11 @@ export default function AdminView() {
           </button>
         )}
       </div>
+
+      {/* View 0: Caisse Enregistreuse Tactile (POS Comptoir) */}
+      {activeMainTab === 'pos' && (
+        <PosRegister />
+      )}
 
       {/* View 1: Gestion de la Carte */}
       {activeMainTab === 'carte' && (
