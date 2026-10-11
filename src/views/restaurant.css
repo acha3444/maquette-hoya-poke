@@ -5,14 +5,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 20px;
+  padding: 12px 20px;
   background: var(--cream);
   border-bottom: 1px solid var(--line);
   flex-shrink: 0;
 }
 .kitchen-head .muted::first-letter { text-transform: uppercase; }
 
-@media (max-width: 768px) {
+/* Mobile (< 768px) */
+@media (max-width: 767px) {
   .kitchen-head {
     flex-direction: column;
     align-items: stretch;
@@ -48,12 +49,95 @@
   }
 }
 
-.kitchen-stats { display: flex; gap: 28px; }
+/* iPad / Tablet Portrait (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .kitchen-head {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 18px;
+    gap: 10px;
+  }
+
+  .kitchen-head-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .kitchen-head-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .kitchen-stats {
+    gap: 16px !important;
+  }
+
+  .kitchen-stats div span:first-child {
+    font-size: 16px !important;
+  }
+
+  .board {
+    scroll-snap-type: x mandatory;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .board-col {
+    scroll-snap-align: start;
+    flex: 0 0 230px !important;
+    min-width: 230px !important;
+  }
+}
+
+/* iPad Landscape & Desktop (>= 1024px) */
+@media (min-width: 1024px) {
+  .kitchen-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .kitchen-head-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .kitchen-head-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .board {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  /* All 5 columns fit without horizontal scroll on iPad Landscape! */
+  .board-col {
+    flex: 1 1 0 !important;
+    min-width: 175px !important;
+  }
+
+  .board-col.muted-col {
+    flex: 0.85 1 0 !important;
+    min-width: 155px !important;
+  }
+}
+
+.kitchen-stats { display: flex; gap: 24px; align-items: center; }
 .kitchen-stats div { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
 .kitchen-stats div span:first-child { font-weight: 800; font-size: 18px; }
 .kitchen-stats div span:last-child { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
 
-.service-toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.service-toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; user-select: none; }
 
 .new-banner {
   overflow: hidden;
@@ -72,6 +156,7 @@
   gap: 14px;
   padding: 16px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .board-col {
   flex: 1 0 220px;
@@ -86,6 +171,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 4px 4px 10px;
+  user-select: none;
 }
 .board-col-head h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
 

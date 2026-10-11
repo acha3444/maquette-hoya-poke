@@ -61,8 +61,8 @@
   gap: 14px;
 }
 
-/* Mobile Optimizations (Smartphones & Tablets < 768px) */
-@media (max-width: 768px) {
+/* Mobile Optimizations (Smartphones < 768px) */
+@media (max-width: 767px) {
   .admin-head {
     flex-direction: column;
     align-items: stretch;
@@ -140,3 +140,44 @@
     padding: 16px !important;
   }
 }
+
+/* iPad / Tablet Portrait (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .admin-head {
+    padding: 14px 18px;
+    gap: 12px;
+  }
+
+  .admin-subnav {
+    padding: 0 18px;
+  }
+
+  .admin-products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px;
+  }
+
+  .admin-controls-row {
+    gap: 12px;
+  }
+
+  .admin-caisse-card {
+    padding: 20px !important;
+  }
+}
+
+/* iPad Landscape & Desktop (>= 1024px) */
+@media (min-width: 1024px) {
+  .admin-head {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .admin-products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+}
+

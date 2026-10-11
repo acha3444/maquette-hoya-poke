@@ -149,7 +149,7 @@ export default function StaffGuard({ children, title = 'Accès Équipe Cuisine',
     return (
       <div 
         style={{
-          minHeight: '100vh',
+          minHeight: '100dvh',
           width: '100%',
           background: 'radial-gradient(ellipse at 50% 20%, #18291f 0%, #0f1a14 100%)',
           color: 'var(--cream)',
