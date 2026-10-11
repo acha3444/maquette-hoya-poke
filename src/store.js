@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { INITIAL_ORDERS } from './data';
+import { supabase } from './supabase';
 
 const SAMPLE_CUSTOMERS = [
   { name: 'Camille', phone: '06 41 22 87 10', address: '12 cours Jean Jaurès, Pézenas' },
@@ -26,50 +27,101 @@ const initialViewMode = () => {
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-const getApiUrl = () => `/api`;
+function mapFromDb(row) {
+  return {
+    id: String(row.id),
+    status: row.status,
+    type: row.type || 'RETRAIT',
+    time: row.time || '12:00',
+    customerName: row.customer_name || row.customerName || 'Client',
+    customerPhone: row.customer_phone || row.customerPhone || '06 00 00 00 00',
+    address: row.address || '7 rue Anatole France, Pézenas',
+    zone: row.zone,
+    deliveryFee: Number(row.delivery_fee ?? row.deliveryFee ?? 0),
+    total: Number(row.total || 0),
+    paymentStatus: row.payment_status || row.paymentStatus || 'PAYÉ',
+    items: row.items || [],
+    driver: row.driver || 'Alex',
+    isLate: Boolean(row.is_late ?? row.isLate ?? false),
+    created_at: row.created_at
+  };
+}
+
+function mapToDb(order) {
+  return {
+    id: String(order.id),
+    status: order.status || 'NOUVELLE',
+    type: order.type || 'RETRAIT',
+    time: order.time || '12:00',
+    customer_name: order.customerName || 'Client',
+    customer_phone: order.customerPhone || '06 00 00 00 00',
+    address: order.address || null,
+    zone: order.zone || null,
+    delivery_fee: order.deliveryFee || 0,
+    total: Number(order.total || 0),
+    payment_status: order.paymentStatus || 'PAYÉ',
+    items: order.items || [],
+    driver: order.driver || null,
+    is_late: Boolean(order.isLate || false)
+  };
+}
 
 export const useStore = create((set, get) => {
-  // Sync with local express server for the demo across devices
   if (typeof window !== 'undefined') {
-    const pollState = () => {
-      fetch(`${getApiUrl()}/state`, {
-        headers: { 'Bypass-Tunnel-Reminder': 'true' }
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data && data.orders) {
-            set({ orders: data.orders, restaurantOpen: data.restaurantOpen });
-          }
-        })
-        .catch(() => {});
+    // 1. Initial fetch from Supabase Cloud
+    const initSupabase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          set({ orders: data.map(mapFromDb) });
+        }
+      } catch (e) {
+        console.warn('Supabase initial fetch fallback:', e);
+      }
     };
 
-    // Initial fetch + fast interval
-    pollState();
-    setInterval(pollState, 1500);
+    initSupabase();
 
-    // Instant Real-Time SSE Stream (Zero delay sync between phone and mac)
+    // 2. Realtime WebSocket subscription from Supabase
     try {
-      const evt = new EventSource(`${getApiUrl()}/events`);
-      evt.onmessage = (e) => {
-        try {
-          const data = JSON.parse(e.data);
-          if (data && data.orders) {
-            set({ orders: data.orders, restaurantOpen: data.restaurantOpen });
+      supabase
+        .channel('public:orders_realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newOrder = mapFromDb(payload.new);
+            set(state => {
+              if (state.orders.some(o => o.id === newOrder.id)) return state;
+              return { orders: [newOrder, ...state.orders] };
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updated = mapFromDb(payload.new);
+            set(state => ({
+              orders: state.orders.map(o => o.id === updated.id ? updated : o)
+            }));
+          } else if (payload.eventType === 'DELETE') {
+            set(state => ({
+              orders: state.orders.filter(o => o.id !== String(payload.old?.id))
+            }));
           }
-        } catch (_) {}
-      };
-    } catch (_) {}
+        })
+        .subscribe();
+    } catch (e) {
+      console.warn('Supabase realtime fallback:', e);
+    }
   }
 
   return {
     // App State
-    viewMode: initialViewMode(), // 'client', 'restaurant', 'delivery', 'split'
+    viewMode: initialViewMode(),
     setViewMode: (mode) => set({ viewMode: mode }),
 
     // Client State
     cart: [],
-    orderType: null, // 'RETRAIT' or 'LIVRAISON'
+    orderType: null,
     setOrderType: (type) => set({ orderType: type }),
     addToCart: (item) => set((state) => ({ cart: [...state.cart, { ...item, id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}` }] })),
     removeFromCart: (id) => set((state) => ({ cart: state.cart.filter(item => item.id !== id) })),
@@ -78,26 +130,18 @@ export const useStore = create((set, get) => {
     // Restaurant State
     orders: INITIAL_ORDERS,
     restaurantOpen: true,
-    setRestaurantOpen: async (isOpen) => {
-      set({ restaurantOpen: isOpen }); // optimistic update
-      try {
-        await fetch(`${getApiUrl()}/toggle-restaurant`, { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } });
-      } catch (e) {
-        // if error, it will just stick to the local optimistic state
-      }
-    },
+    setRestaurantOpen: (isOpen) => set({ restaurantOpen: isOpen }),
+
     addOrder: async (order) => {
       set((state) => ({ orders: [order, ...state.orders] })); // optimistic update
       try {
-        await fetch(`${getApiUrl()}/orders`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
-          body: JSON.stringify(order)
-        });
+        const { error } = await supabase.from('orders').insert(mapToDb(order));
+        if (error) console.error('Supabase insert error:', error);
       } catch (e) {
-        // already added optimistically
+        console.error('Supabase insert exception:', e);
       }
     },
+
     placeOrder: async (orderData) => {
       const newOrder = {
         id: Math.floor(1000 + Math.random() * 9000).toString(),
@@ -109,25 +153,23 @@ export const useStore = create((set, get) => {
       get().clearCart();
       return newOrder.id;
     },
+
     updateOrderStatus: async (id, status) => {
       set((state) => ({
         orders: state.orders.map(o => o.id === id ? { ...o, status } : o)
       })); // optimistic update
       try {
-        await fetch(`${getApiUrl()}/orders/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
-          body: JSON.stringify({ status })
-        });
+        const { error } = await supabase.from('orders').update({ status }).eq('id', String(id));
+        if (error) console.error('Supabase update error:', error);
       } catch (e) {
-        // already updated optimistically
+        console.error('Supabase update exception:', e);
       }
     },
 
     // Delivery State
     deliveryActiveOrderId: '1045',
 
-    // Out of stock ingredients (local for now)
+    // Out of stock
     outOfStock: [],
     toggleStock: (itemId) => set((state) => ({
       outOfStock: state.outOfStock.includes(itemId)
@@ -137,19 +179,15 @@ export const useStore = create((set, get) => {
 
     // Demo Controls
     resetDemo: async () => {
+      set({ cart: [], orders: INITIAL_ORDERS, outOfStock: [], restaurantOpen: true, deliveryActiveOrderId: '1045' });
       try {
-        await fetch(`${getApiUrl()}/reset`, { method: 'POST', headers: { 'Bypass-Tunnel-Reminder': 'true' } });
-        set({ cart: [], outOfStock: [], deliveryActiveOrderId: '1045' });
-      } catch (e) {
-        set({
-          cart: [],
-          orders: INITIAL_ORDERS,
-          outOfStock: [],
-          restaurantOpen: true,
-          deliveryActiveOrderId: '1045'
-        });
-      }
+        await supabase.from('orders').delete().neq('id', '0');
+        for (const init of INITIAL_ORDERS) {
+          await supabase.from('orders').insert(mapToDb(init));
+        }
+      } catch (e) {}
     },
+
     simulateNewOrder: () => {
       const customer = pick(SAMPLE_CUSTOMERS);
       const items = [pick(SAMPLE_ITEMS.slice(0, 2)), pick(SAMPLE_ITEMS.slice(2))];

@@ -1,6 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { INITIAL_ORDERS } from './src/data.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DB_FILE = path.join(__dirname, 'database.json');
 
 const app = express();
 app.use(cors());
@@ -13,9 +20,33 @@ app.use(express.static('dist', {
   }
 }));
 
-let orders = [...INITIAL_ORDERS];
+// Load or initialize persistent database
+function loadDb() {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+      return {
+        orders: data.orders || [...INITIAL_ORDERS],
+        restaurantOpen: typeof data.restaurantOpen === 'boolean' ? data.restaurantOpen : true
+      };
+    }
+  } catch (e) {
+    console.error('Error reading db, using defaults:', e);
+  }
+  return { orders: [...INITIAL_ORDERS], restaurantOpen: true };
+}
 
-let restaurantOpen = true;
+function saveDb(data) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('Error saving db:', e);
+  }
+}
+
+let db = loadDb();
+let orders = db.orders;
+let restaurantOpen = db.restaurantOpen;
 let clients = [];
 
 // API endpoints
@@ -27,6 +58,7 @@ app.post('/api/orders', (req, res) => {
   const newOrder = req.body;
   console.log(`[COMMANDE REÇUE] #${newOrder.id} - ${newOrder.customerName} (${newOrder.total}€)`);
   orders = [newOrder, ...orders];
+  saveDb({ orders, restaurantOpen });
   notifyClients();
   res.json(newOrder);
 });
@@ -35,19 +67,22 @@ app.patch('/api/orders/:id', (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   orders = orders.map(o => o.id === id ? { ...o, status } : o);
+  saveDb({ orders, restaurantOpen });
   notifyClients();
   res.json({ success: true });
 });
 
 app.post('/api/toggle-restaurant', (req, res) => {
   restaurantOpen = !restaurantOpen;
+  saveDb({ orders, restaurantOpen });
   notifyClients();
   res.json({ restaurantOpen });
 });
 
 app.post('/api/reset', (req, res) => {
-  orders = [];
+  orders = [...INITIAL_ORDERS];
   restaurantOpen = true;
+  saveDb({ orders, restaurantOpen });
   notifyClients();
   res.json({ success: true });
 });
