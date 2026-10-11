@@ -5,12 +5,13 @@ import {
   Plus, Edit2, Trash2, Image, Upload, Check, X, Search, 
   ChefHat, ShoppingBag, ArrowLeft, LockKeyhole, RefreshCw, 
   SlidersHorizontal, Sparkles, AlertCircle, FileText, Printer,
-  Eye, EyeOff
+  Eye, EyeOff, KeyRound
 } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
-import { lockStaffApp } from '../components/StaffGuard';
+import { lockStaffApp, getStaffPin } from '../components/StaffGuard';
 import CaisseClotureModal from '../components/CaisseClotureModal';
+import ChangePinModal from '../components/ChangePinModal';
 
 const PRESET_IMAGES = [
   { label: 'Poké Saumon Mariné', url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80' },
@@ -44,6 +45,7 @@ export default function AdminView() {
   const [editingItem, setEditingItem] = useState(null); // null or { category, item }
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showZModal, setShowZModal] = useState(false);
+  const [showChangePinModal, setShowChangePinModal] = useState(false);
 
   // Form State
   const [formCategory, setFormCategory] = useState('classiques');
@@ -188,10 +190,19 @@ export default function AdminView() {
           </button>
 
           <button 
+            className="btn btn-sm btn-ghost row gap-1"
+            onClick={() => setShowChangePinModal(true)}
+            title="Modifier le code PIN staff"
+          >
+            <KeyRound size={14} />
+            <span>Code PIN</span>
+          </button>
+
+          <button 
             className="icon-btn"
             style={{ boxShadow: 'inset 0 0 0 1px var(--line)', color: '#c8463d' }}
             onClick={lockStaffApp}
-            title="Verrouiller l'accès admin (Code 1234 requis)"
+            title="Verrouiller l'accès staff"
           >
             <LockKeyhole size={16} />
           </button>
@@ -425,6 +436,29 @@ export default function AdminView() {
               <FileText size={18} />
               <span>Accéder à la Clôture de Caisse (Ticket Z)</span>
             </button>
+
+            {/* Sécurité Code PIN */}
+            <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--line)' }} className="col gap-3">
+              <div className="row between">
+                <div className="row gap-2">
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--green-700)', color: 'var(--cream)', display: 'grid', placeItems: 'center' }}>
+                    <KeyRound size={18} />
+                  </div>
+                  <div>
+                    <strong style={{ fontSize: 14 }}>Sécurité & Code PIN Staff</strong>
+                    <div className="muted small">Protège les écrans Cuisine, Caisse et Administration</div>
+                  </div>
+                </div>
+                <button 
+                  className="btn btn-sm btn-ghost row gap-1" 
+                  onClick={() => setShowChangePinModal(true)} 
+                  style={{ borderColor: 'var(--line)', background: 'var(--cream-2)' }}
+                >
+                  <KeyRound size={14} />
+                  <span>Modifier le code PIN</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -621,6 +655,9 @@ export default function AdminView() {
       <AnimatePresence>
         {showZModal && (
           <CaisseClotureModal onClose={() => setShowZModal(false)} />
+        )}
+        {showChangePinModal && (
+          <ChangePinModal onClose={() => setShowChangePinModal(false)} />
         )}
       </AnimatePresence>
     </div>

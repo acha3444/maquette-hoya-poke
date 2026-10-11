@@ -4,6 +4,26 @@ import { Lock, ShieldAlert, ArrowLeft, Delete, Check, LockKeyhole } from 'lucide
 import { useNavigate } from 'react-router-dom';
 
 const PIN_STORAGE_KEY = 'hoya_staff_authenticated';
+const PIN_CODE_KEY = 'hoya_staff_pin';
+export const DEFAULT_PIN = '1234';
+
+export function getStaffPin() {
+  if (typeof window === 'undefined') return DEFAULT_PIN;
+  return localStorage.getItem(PIN_CODE_KEY) || DEFAULT_PIN;
+}
+
+export function setStaffPin(newPin) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(PIN_CODE_KEY, String(newPin));
+    window.dispatchEvent(new CustomEvent('hoya_pin_changed', { detail: String(newPin) }));
+  }
+}
+
+export function isStaffPinValid(inputPin) {
+  const currentPin = getStaffPin();
+  const quoteVariant = currentPin.slice(0, -1) + "'";
+  return inputPin === currentPin || inputPin === quoteVariant;
+}
 
 export default function StaffGuard({ children, title = 'Accès Équipe Cuisine', defaultPin = '1234' }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -14,11 +34,6 @@ export default function StaffGuard({ children, title = 'Accès Équipe Cuisine',
   const [rememberMe, setRememberMe] = useState(true);
   const navigate = useNavigate();
 
-  // Allowed PINs: 1234 and 123' (in case user types the apostrophe key on mobile/keyboard)
-  const isPinValid = (pin) => {
-    return pin === defaultPin || pin === '1234' || pin === "123'";
-  };
-
   const handleKeyPress = (num) => {
     if (enteredPin.length >= 4) return;
     const next = enteredPin + num;
@@ -26,7 +41,7 @@ export default function StaffGuard({ children, title = 'Accès Équipe Cuisine',
     setHasError(false);
 
     if (next.length === 4) {
-      if (isPinValid(next)) {
+      if (isStaffPinValid(next)) {
         if (rememberMe) {
           localStorage.setItem(PIN_STORAGE_KEY, 'true');
         } else {
@@ -203,7 +218,7 @@ export default function StaffGuard({ children, title = 'Accès Équipe Cuisine',
               }}
             >
               <ShieldAlert size={14} />
-              <span>Code PIN incorrect (par défaut : 1234)</span>
+              <span>Code PIN incorrect {getStaffPin() === DEFAULT_PIN ? '(par défaut : 1234)' : ''}</span>
             </motion.div>
           )}
 
