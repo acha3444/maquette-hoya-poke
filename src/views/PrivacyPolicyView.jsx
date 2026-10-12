@@ -7,35 +7,35 @@ export default function PrivacyPolicyView() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--cream)', color: 'var(--ink)', paddingBottom: 60 }}>
+    <div style={{ minHeight: '100vh', minHeight: '100dvh', background: 'var(--cream)', color: 'var(--ink)', paddingBottom: 60 }}>
       {/* Header */}
-      <header style={{ background: 'var(--green-900)', color: 'var(--cream)', padding: '24px 20px', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }}>
+      <header style={{ background: 'var(--green-900)', color: 'var(--cream)', padding: 'max(20px, env(safe-area-inset-top, 20px)) clamp(16px, 4vw, 24px) clamp(20px, 4vw, 28px)', borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
         <div style={{ maxWidth: 760, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 14 }}>
           <button 
             onClick={() => navigate(-1)} 
             aria-label="Retour"
-            style={{ background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', padding: 8, borderRadius: 12, cursor: 'pointer' }}
+            style={{ background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', padding: 8, borderRadius: 12, cursor: 'pointer', flexShrink: 0 }}
           >
             <ArrowLeft size={20} />
           </button>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 20, color: 'var(--cream)', fontWeight: 800 }}>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{ margin: 0, fontSize: 'clamp(17px, 4.2vw, 21px)', color: 'var(--cream)', fontWeight: 800, lineHeight: 1.25 }}>
               Politique de Confidentialité & RGPD
             </h1>
             <span style={{ fontSize: 12, color: 'var(--curry)', opacity: 0.9 }}>
-              Hoya Poké – Pézenas · Dernière mise à jour : 12 octobre 2026
+              Hoya Poké – Pézenas · Mise à jour : 12 oct. 2026
             </span>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main style={{ maxWidth: 760, margin: '24px auto 0', padding: '0 20px', lineHeight: 1.7, fontSize: 15 }}>
-        <div style={{ background: '#ffffff', borderRadius: 20, padding: '32px 28px', boxShadow: '0 2px 14px rgba(15,26,20,0.06)' }}>
+      <main style={{ maxWidth: 760, margin: 'clamp(16px, 3vw, 24px) auto 0', padding: '0 clamp(12px, 3.5vw, 20px)', lineHeight: 1.7, fontSize: 15 }}>
+        <div style={{ background: '#ffffff', borderRadius: 20, padding: 'clamp(20px, 4.5vw, 32px) clamp(16px, 4.5vw, 28px)', boxShadow: '0 2px 14px rgba(15,26,20,0.06)' }}>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, color: 'var(--green-800)' }}>
-            <ShieldCheck size={28} />
-            <h2 style={{ margin: 0, fontSize: 22, color: 'var(--green-900)' }}>Engagement de protection de vos données</h2>
+            <ShieldCheck size={28} style={{ flexShrink: 0 }} />
+            <h2 style={{ margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', color: 'var(--green-900)' }}>Engagement de protection de vos données</h2>
           </div>
 
           <p>
@@ -55,7 +55,8 @@ export default function PrivacyPolicyView() {
           </ul>
 
           <h3 style={{ color: 'var(--green-900)', fontSize: 18, marginTop: 24 }}>2. Finalités et bases légales</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', margin: '14px 0', fontSize: 14 }}>
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', margin: '14px 0' }}>
+            <table style={{ width: '100%', minWidth: 460, borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{ background: 'var(--cream)', borderBottom: '2px solid #ebd9c8' }}>
                 <th style={{ padding: '10px 12px', textAlign: 'left' }}>Finalité</th>
@@ -81,6 +82,7 @@ export default function PrivacyPolicyView() {
               </tr>
             </tbody>
           </table>
+          </div>
 
           <h3 style={{ color: 'var(--green-900)', fontSize: 18, marginTop: 24 }}>3. Durée de conservation</h3>
           <ul>

@@ -123,7 +123,7 @@ export default function AdminCampagnesTab() {
     <div className="col gap-4">
       {/* Jauge Quota Resend Journalier */}
       <div className="card" style={{ background: '#fdf8f2', border: '1.5px solid var(--curry)', padding: 18 }}>
-        <div className="row between" style={{ marginBottom: 8 }}>
+        <div className="row between" style={{ marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
           <div className="row gap-2">
             <Sparkles size={18} style={{ color: 'var(--curry)' }} />
             <strong style={{ fontSize: 14, color: '#8c5e2d' }}>Quota d'envoi journalier Resend</strong>
@@ -140,7 +140,7 @@ export default function AdminCampagnesTab() {
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 16 }}>
+      <div className="admin-campagnes-layout">
         {/* Créateur de campagne */}
         <div className="card" style={{ padding: 22, background: '#fff' }}>
           <div className="row gap-2" style={{ marginBottom: 16 }}>
@@ -278,7 +278,7 @@ export default function AdminCampagnesTab() {
                   <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>
                     {c.target} · {c.sentAt}
                   </div>
-                  <div className="row between" style={{ fontSize: 12, fontWeight: 700, borderTop: '1px dashed var(--line)', paddingTop: 6 }}>
+                  <div className="admin-camp-stats" style={{ fontSize: 12, fontWeight: 700, borderTop: '1px dashed var(--line)', paddingTop: 8, marginTop: 4 }}>
                     <span>📤 {c.stats.sent} envoyés</span>
                     <span>👀 {c.stats.opened} ouverts</span>
                     <span>🖱️ {c.stats.clicked} clics</span>

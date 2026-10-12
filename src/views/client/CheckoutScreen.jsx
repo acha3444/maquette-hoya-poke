@@ -270,7 +270,7 @@ export default function CheckoutScreen() {
                       type="checkbox" 
                       checked={marketingConsent} 
                       onChange={e => setMarketingConsent(e.target.checked)}
-                      style={{ marginTop: 2, accentColor: 'var(--green-700)' }} 
+                      style={{ marginTop: 2, accentColor: 'var(--green-700)', flexShrink: 0 }} 
                     />
                     <span>
                       Je souhaite recevoir les nouveautés et offres exclusives de Hoya Poké par email.<br />

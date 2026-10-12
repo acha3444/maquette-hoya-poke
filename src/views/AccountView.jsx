@@ -76,7 +76,7 @@ export default function AccountView() {
     return (
       <div className="account-root" style={{ display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center' }}>
         <div className="account-card" style={{ maxWidth: 460 }}>
-          <div style="font-size: 40px; margin-bottom: 12px;">🥗</div>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🥗</div>
           <h2>Espace client non disponible</h2>
           <p style={{ color: 'var(--muted)', lineHeight: 1.6 }}>
             Le restaurant Hoya Poké propose actuellement la commande directe en ligne sans compte obligatoire.
@@ -215,20 +215,20 @@ export default function AccountView() {
     <div className="account-root">
       {/* Top Header */}
       <header className="account-header">
-        <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="account-header-inner">
           <button 
             className="icon-btn-light" 
             onClick={() => navigate('/')} 
             aria-label="Retour au restaurant"
-            style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: 8, borderRadius: 12, cursor: 'pointer' }}
+            style={{ background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', padding: 8, borderRadius: 12, cursor: 'pointer', flexShrink: 0 }}
           >
             <ArrowLeft size={20} />
           </button>
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', minWidth: 0 }}>
             <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5, color: 'var(--curry)', fontWeight: 800 }}>
               Hoya Poké Pézenas
             </span>
-            <h1 style={{ margin: '2px 0 0 0', fontSize: 20, color: 'var(--cream)', fontWeight: 800 }}>
+            <h1 className="account-header-title">
               {currentUser ? 'Mon Espace Client' : 'Connexion Client'}
             </h1>
           </div>
@@ -236,11 +236,11 @@ export default function AccountView() {
             <button 
               onClick={handleSignOut} 
               title="Se déconnecter" 
-              style={{ background: 'transparent', border: 'none', color: 'var(--cream)', cursor: 'pointer', opacity: 0.8 }}
+              style={{ background: 'transparent', border: 'none', color: 'var(--cream)', cursor: 'pointer', opacity: 0.85, flexShrink: 0 }}
             >
               <LogOut size={20} />
             </button>
-          ) : <div style={{ width: 36 }} />}
+          ) : <div style={{ width: 36, flexShrink: 0 }} />}
         </div>
       </header>
 
@@ -356,9 +356,9 @@ export default function AccountView() {
               </div>
 
               {loyaltyCard.rewards > 0 || loyaltyCard.stamps >= 10 ? (
-                <div style={{ background: '#fdf8f2', border: '1.5px solid var(--curry)', padding: 14, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+                <div className="account-reward-banner">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Sparkles size={20} style={{ color: 'var(--curry)' }} />
+                    <Sparkles size={20} style={{ color: 'var(--curry)', flexShrink: 0 }} />
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#8c5e2d' }}>
                       Vous avez 1 bol offert disponible !
                     </span>
@@ -366,7 +366,7 @@ export default function AccountView() {
                   <button 
                     className="btn btn-sm btn-primary"
                     onClick={() => navigate('/menu')}
-                    style={{ fontSize: 12, padding: '6px 14px' }}
+                    style={{ fontSize: 12, padding: '8px 16px' }}
                   >
                     Commander mon bol
                   </button>
@@ -446,7 +446,7 @@ export default function AccountView() {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div className="account-address-row">
               <input 
                 type="text" 
                 placeholder="Ex: 7 rue Anatole France, Pézenas"
@@ -468,7 +468,7 @@ export default function AccountView() {
               <h2 style={{ margin: 0, fontSize: 18, color: 'var(--green-900)' }}>Informations & Préférences</h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="account-grid-2col">
               <div className="account-input-group" style={{ margin: 0 }}>
                 <label>Prénom (facultatif)</label>
                 <input 
@@ -531,7 +531,7 @@ export default function AccountView() {
               Conformément à la réglementation européenne, vous disposez d'un droit d'accès, d'exportation et d'effacement de vos données personnelles.
             </p>
 
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div className="account-rgpd-actions">
               <button 
                 className="btn btn-sm btn-ghost" 
                 onClick={handleExportData}

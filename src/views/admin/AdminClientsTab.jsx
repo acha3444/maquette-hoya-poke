@@ -109,21 +109,21 @@ export default function AdminClientsTab() {
   return (
     <div className="col gap-4">
       {/* Top Controls */}
-      <div className="row between" style={{ flexWrap: 'wrap', gap: 12 }}>
-        <div className="row gap-2 grow" style={{ maxWidth: 400 }}>
-          <div className="search-box grow" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <div className="admin-clients-controls">
+        <div style={{ maxWidth: 400, width: '100%' }}>
+          <div className="search-box" style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%' }}>
             <Search size={16} style={{ position: 'absolute', left: 12, color: 'var(--muted)' }} />
             <input 
               type="text" 
               placeholder="Rechercher par nom, téléphone, email..." 
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: 12, border: '1px solid var(--line)', background: '#fff' }}
+              style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: 12, border: '1px solid var(--line)', background: '#fff', boxSizing: 'border-box' }}
             />
           </div>
         </div>
 
-        <div className="row gap-2">
+        <div className="admin-clients-actions">
           {/* Filtres */}
           <select 
             value={filter} 
@@ -148,9 +148,8 @@ export default function AdminClientsTab() {
       </div>
 
       {/* Table Clients */}
-      <div style={{ background: '#fff', borderRadius: 16, border: '1px solid var(--line)', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+      <div className="admin-clients-table-wrapper">
+        <table className="admin-clients-table">
             <thead>
               <tr style={{ background: 'var(--cream)', borderBottom: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase' }}>
                 <th style={{ padding: '12px 16px' }}>Client</th>
@@ -215,7 +214,6 @@ export default function AdminClientsTab() {
               )}
             </tbody>
           </table>
-        </div>
       </div>
 
       {/* Modal Ajustement Fidélité au comptoir */}

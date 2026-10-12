@@ -62,10 +62,10 @@ export default function AdminFeaturesTab() {
 
         <div className="col gap-3">
           {/* Option 1 : Comptes Clients */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--cream)', borderRadius: 14, border: '1px solid var(--line)' }}>
+          <div className="admin-feature-card">
             <div className="col gap-1">
               <div className="row gap-2">
-                <UserCheck size={18} style={{ color: 'var(--green-800)' }} />
+                <UserCheck size={18} style={{ color: 'var(--green-800)', flexShrink: 0 }} />
                 <strong style={{ fontSize: 14, color: 'var(--ink)' }}>Module 1 · Comptes Clients</strong>
               </div>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>
@@ -75,17 +75,17 @@ export default function AdminFeaturesTab() {
             <button 
               className={`btn btn-sm ${featuresConfig?.accounts ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => toggleFeature('accounts')}
-              style={{ minWidth: 100 }}
+              style={{ minWidth: 110 }}
             >
               {featuresConfig?.accounts ? 'Activé ✅' : 'Désactivé'}
             </button>
           </div>
 
           {/* Option 2 : Carte de Fidélité */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--cream)', borderRadius: 14, border: '1px solid var(--line)', opacity: featuresConfig?.accounts ? 1 : 0.6 }}>
+          <div className="admin-feature-card" style={{ opacity: featuresConfig?.accounts ? 1 : 0.6 }}>
             <div className="col gap-1">
               <div className="row gap-2">
-                <Sparkles size={18} style={{ color: 'var(--curry)' }} />
+                <Sparkles size={18} style={{ color: 'var(--curry)', flexShrink: 0 }} />
                 <strong style={{ fontSize: 14, color: 'var(--ink)' }}>Module 2 · Carte de Fidélité en ligne</strong>
               </div>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>
@@ -96,17 +96,17 @@ export default function AdminFeaturesTab() {
               className={`btn btn-sm ${featuresConfig?.loyalty ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => toggleFeature('loyalty')}
               disabled={!featuresConfig?.accounts}
-              style={{ minWidth: 100 }}
+              style={{ minWidth: 110 }}
             >
               {featuresConfig?.loyalty ? 'Activé ✅' : 'Désactivé'}
             </button>
           </div>
 
           {/* Option 3 : Fichier Clients & Emailing Resend */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'var(--cream)', borderRadius: 14, border: '1px solid var(--line)' }}>
+          <div className="admin-feature-card">
             <div className="col gap-1">
               <div className="row gap-2">
-                <Mail size={18} style={{ color: '#1e40af' }} />
+                <Mail size={18} style={{ color: '#1e40af', flexShrink: 0 }} />
                 <strong style={{ fontSize: 14, color: 'var(--ink)' }}>Module 3 · Fichier Clients & Emailing (Resend)</strong>
               </div>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>
@@ -116,7 +116,7 @@ export default function AdminFeaturesTab() {
             <button 
               className={`btn btn-sm ${featuresConfig?.emailing ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => toggleFeature('emailing')}
-              style={{ minWidth: 100 }}
+              style={{ minWidth: 110 }}
             >
               {featuresConfig?.emailing ? 'Activé ✅' : 'Désactivé'}
             </button>
@@ -140,7 +140,7 @@ export default function AdminFeaturesTab() {
             </h3>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div className="admin-features-grid">
             <div>
               <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 4 }}>
                 Nombre de tampons requis pour la récompense :
@@ -200,7 +200,7 @@ export default function AdminFeaturesTab() {
           Conformément aux recommandations de la CNIL, les clients inactifs sans commande pendant plus de <strong>3 ans</strong> sont automatiquement purgés ou anonymisés.
         </p>
 
-        <div className="row gap-3">
+        <div className="admin-retention-row">
           <div style={{ flex: 1 }}>
             <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 4 }}>
               Délai d'inactivité avant anonymisation :
