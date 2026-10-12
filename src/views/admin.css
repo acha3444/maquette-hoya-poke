@@ -100,19 +100,28 @@
   .admin-subnav {
     flex-direction: column;
     align-items: stretch;
-    padding: 8px 14px;
-    gap: 10px;
+    padding: 6px 12px;
+    gap: 8px;
   }
 
   .admin-subnav .tabs {
     width: 100%;
     padding: 0;
     justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    scrollbar-width: none;
+    flex-wrap: nowrap;
+    gap: 12px;
   }
+  .admin-subnav .tabs::-webkit-scrollbar { display: none; }
 
   .admin-subnav .tabs button {
-    padding: 10px 4px;
+    padding: 8px 4px;
     font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .admin-add-btn {

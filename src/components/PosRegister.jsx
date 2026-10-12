@@ -32,6 +32,7 @@ export default function PosRegister() {
   const [selectedCat, setSelectedCat] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0); // 0, 10, 20, 50
+  const [mobileView, setMobileView] = useState('catalog'); // 'catalog' | 'ticket' on mobile
 
   // Modals & Sub-views
   const [payModalOpen, setPayModalOpen] = useState(false);
@@ -241,8 +242,26 @@ export default function PosRegister() {
 
   return (
     <div className="pos-container">
+      {/* --- Mobile View Toggle (Visible on smartphones <= 860px) --- */}
+      <div className="pos-mobile-nav">
+        <button
+          className={`pos-mobile-tab-btn ${mobileView === 'catalog' ? 'active' : ''}`}
+          onClick={() => setMobileView('catalog')}
+        >
+          <Utensils size={15} />
+          <span>Catalogue ({filteredProducts.length})</span>
+        </button>
+        <button
+          className={`pos-mobile-tab-btn ${mobileView === 'ticket' ? 'active' : ''}`}
+          onClick={() => setMobileView('ticket')}
+        >
+          <ShoppingBag size={15} />
+          <span>Ticket ({ticketLines.reduce((acc, l) => acc + l.qty, 0)}) · {formatPrice(totalTTC)}</span>
+        </button>
+      </div>
+
       {/* --- Left Catalog Pane --- */}
-      <div className="pos-catalog-pane">
+      <div className={`pos-catalog-pane ${mobileView === 'ticket' ? 'pos-mobile-hidden' : ''}`}>
         <div className="pos-catalog-header">
           <div className="row between">
             <div className="pos-search-bar grow">
@@ -356,7 +375,7 @@ export default function PosRegister() {
       </div>
 
       {/* --- Right Ticket Pane --- */}
-      <div className="pos-ticket-pane">
+      <div className={`pos-ticket-pane ${mobileView === 'catalog' ? 'pos-mobile-hidden' : ''}`}>
         <div className="pos-ticket-head">
           <div className="pos-order-type-tabs">
             <button
@@ -484,6 +503,25 @@ export default function PosRegister() {
           </div>
         </div>
       </div>
+
+      {/* --- Mobile Floating Checkout Bar (When on Catalog on smartphones) --- */}
+      {ticketLines.length > 0 && mobileView === 'catalog' && (
+        <div className="pos-mobile-floating-bar">
+          <button 
+            className="pos-mobile-floating-btn"
+            onClick={() => setMobileView('ticket')}
+          >
+            <div className="row gap-2" style={{ alignItems: 'center' }}>
+              <span className="pos-floating-badge">{ticketLines.reduce((acc, l) => acc + l.qty, 0)}</span>
+              <span style={{ fontWeight: 700 }}>Voir Ticket ({formatPrice(totalTTC)})</span>
+            </div>
+            <div className="row gap-1" style={{ alignItems: 'center', fontWeight: 800 }}>
+              <span>Encaisser</span>
+              <ArrowRight size={16} />
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* --- Payment Modal --- */}
       <AnimatePresence>

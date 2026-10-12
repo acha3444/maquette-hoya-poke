@@ -163,7 +163,7 @@ export default function AdminView() {
   });
 
   return (
-    <div className="screen" style={{ background: 'var(--cream-2)' }}>
+    <div className="screen" style={{ background: 'var(--cream-2)', height: '100dvh', minHeight: '100dvh' }}>
       {/* Top Header */}
       <header className="admin-head">
         <div className="admin-head-top-row">
