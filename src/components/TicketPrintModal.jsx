@@ -74,8 +74,8 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
             {/* Ticket Header */}
             <div className="thermal-ticket-header">
               <div className="thermal-ticket-title">HOYA POKÉ</div>
-              <div style={{ fontSize: 11, color: '#444' }}>7 rue Anatole France, 34120 Pézenas</div>
-              <div style={{ fontSize: 11, color: '#444' }}>Tél: 04 67 XX XX XX · hoyapoke.fr</div>
+              <div style={{ fontSize: 11, color: '#444' }}>7 Rue Anatole France, 34120 Pézenas</div>
+              <div style={{ fontSize: 11, color: '#444' }}>Tél: 04 67 21 42 98 · SIREN 981 349 723</div>
             </div>
 
             {/* Order Number & Type */}

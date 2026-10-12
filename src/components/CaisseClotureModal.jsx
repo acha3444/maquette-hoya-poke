@@ -311,8 +311,8 @@ export default function CaisseClotureModal({ onClose }) {
         <div style={{ fontFamily: 'Courier New, Courier, monospace', fontSize: '12px', lineHeight: 1.35, color: '#000' }}>
           <div style={{ textAlign: 'center', borderBottom: '2px dashed #000', paddingBottom: '6px', marginBottom: '8px' }}>
             <div style={{ fontSize: '18px', fontWeight: 'bold' }}>HOYA POKÉ</div>
-            <div>7 rue Anatole France, 34120 Pézenas</div>
-            <div style={{ fontSize: '10px', marginTop: '2px' }}>Tél: 04 67 XX XX XX · hoyapoke.fr</div>
+            <div>7 Rue Anatole France, 34120 Pézenas</div>
+            <div style={{ fontSize: '10px', marginTop: '2px' }}>Tél: 04 67 21 42 98 · SIREN 981 349 723</div>
             <div style={{ fontSize: '14px', fontWeight: 'bold', marginTop: '6px' }}>*** CLOTURE DE CAISSE (TICKET Z) ***</div>
             <div style={{ fontSize: '11px' }}>Date : {dateFormatted} {timeFormatted}</div>
           </div>

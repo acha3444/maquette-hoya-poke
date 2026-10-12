@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, ShoppingBag, Bike, ShoppingBasket, Star, MapPin, Clock, AtSign } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ShoppingBag, Bike, ShoppingBasket, Star, MapPin, Clock, AtSign, Phone, Wifi } from 'lucide-react';
 import { useStore } from '../../store';
 import { MENU, FORMULES, CUSTOMER_REVIEWS } from '../../data';
 import { RESTAURANT } from '../../restaurant';
@@ -188,13 +188,13 @@ export default function HomeScreen() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease }}
             >
-              <span className="h-eyebrow">Spécialité hawaïenne · Pézenas</span>
+              <span className="h-eyebrow">Poké bowls & coffee · Healthy food · Vegan & végé friendly</span>
               <h1 className="h-hero-title">
                 Des poké bowls <em>frais & sains</em>, faits minute.
               </h1>
               <p className="h-hero-lead">
-                Saumon mariné, poulet croustillant ou falafels maison, des légumes coupés le matin et des sauces faites ici.
-                Commandez en ligne : on s'occupe du reste.
+                Saumon mariné, thon, poulet croustillant ou falafels maison, des légumes coupés le matin et des sauces faites ici.
+                Sur place (terrasse & Wi-Fi), à emporter ou en livraison directe du restaurant.
               </p>
               <div className="h-hero-ctas">
                 <button className="h-btn h-btn-curry h-btn-lg" onClick={() => start('RETRAIT')}>
@@ -207,8 +207,9 @@ export default function HomeScreen() {
                   <span className={`live-dot ${restaurantOpen ? '' : 'off'}`} />
                   {restaurantOpen ? 'Ouvert, prêt en 15 min' : 'Fermé, précommande possible'}
                 </li>
-                <li><Star size={14} fill="currentColor" /> {RESTAURANT.rating} / 5</li>
-                <li>Végé friendly</li>
+                <li><Star size={14} fill="currentColor" /> {RESTAURANT.googleRating} ({RESTAURANT.googleReviewsCount} avis Google)</li>
+                <li>TripAdvisor {RESTAURANT.tripadvisorRating} ({RESTAURANT.tripadvisorReviewsCount} avis)</li>
+                <li>{RESTAURANT.priceRange} · Plats végétaliens</li>
               </ul>
             </motion.div>
 
@@ -382,30 +383,65 @@ export default function HomeScreen() {
         {/* ───────── Reviews ───────── */}
         <section className="h-section">
           <motion.div className="h-reviews-head" {...reveal}>
-            <div className="h-google-badge">
-              <svg viewBox="0 0 24 24" width="16" height="16">
-                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-              </svg>
-              <span>Avis Google vérifiés</span>
+            <div className="h-badges-row">
+              <a 
+                className="h-google-badge" 
+                href={RESTAURANT.googleReviewUrl} 
+                target="_blank" 
+                rel="noreferrer"
+                title="Consulter la fiche Google de Hoya Poké Pézenas"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                </svg>
+                <span>Google · {RESTAURANT.googleRating} ({RESTAURANT.googleReviewsCount} avis)</span>
+              </a>
+
+              <a 
+                className="h-tripadvisor-badge" 
+                href={RESTAURANT.tripadvisorUrl} 
+                target="_blank" 
+                rel="noreferrer"
+                title="Consulter la page TripAdvisor de Hoya Poké Pézenas"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <circle cx="12" cy="12" r="10" fill="none" stroke="#00aa6c" strokeWidth="2"/>
+                  <circle cx="8.5" cy="11.5" r="2.5" fill="#00aa6c"/>
+                  <circle cx="15.5" cy="11.5" r="2.5" fill="#00aa6c"/>
+                </svg>
+                <span>TripAdvisor · {RESTAURANT.tripadvisorRating} ({RESTAURANT.tripadvisorReviewsCount} avis)</span>
+              </a>
             </div>
+
             <span className="h-rating">{RESTAURANT.rating}</span>
             <span className="h-stars" aria-label={`${RESTAURANT.rating} sur 5`}>
               {[0, 1, 2, 3, 4].map(i => <Star key={i} size={22} fill="currentColor" strokeWidth={0} />)}
             </span>
-            <span className="h-reviews-count">Note moyenne sur plus de {RESTAURANT.reviewsCount || 120} avis clients</span>
+            <span className="h-reviews-count">Note maximale de {RESTAURANT.googleRating}/5 sur Google ({RESTAURANT.googleReviewsCount} avis) et {RESTAURANT.tripadvisorRating}/5 sur TripAdvisor ({RESTAURANT.tripadvisorReviewsCount} avis)</span>
             <p className="h-lead">Merci pour votre fidélité, vos retours chaleureux et votre confiance au quotidien.</p>
-            <a 
-              className="h-btn-outline" 
-              href={RESTAURANT.googleReviewUrl || RESTAURANT.mapsUrl} 
-              target="_blank" 
-              rel="noreferrer"
-            >
-              <span>Voir tous les avis sur Google Maps</span>
-              <ArrowUpRight size={14} />
-            </a>
+            <div className="h-reviews-links">
+              <a 
+                className="h-btn-outline" 
+                href={RESTAURANT.googleReviewUrl || RESTAURANT.mapsUrl} 
+                target="_blank" 
+                rel="noreferrer"
+              >
+                <span>Voir les 140 avis sur Google</span>
+                <ArrowUpRight size={14} />
+              </a>
+              <a 
+                className="h-btn-outline" 
+                href={RESTAURANT.tripadvisorUrl} 
+                target="_blank" 
+                rel="noreferrer"
+              >
+                <span>Voir les 20 avis TripAdvisor</span>
+                <ArrowUpRight size={14} />
+              </a>
+            </div>
           </motion.div>
           <div className="h-reviews">
             {CUSTOMER_REVIEWS.map((r, i) => (
@@ -431,27 +467,57 @@ export default function HomeScreen() {
           <motion.div className="h-infos" {...reveal}>
             <div className="h-info">
               <MapPin size={20} />
-              <h3>Nous trouver</h3>
-              <p>{RESTAURANT.street}<br />{RESTAURANT.city}</p>
-              <span className="h-info-note">Sur place ou à emporter</span>
-              <a className="h-link" href={RESTAURANT.mapsUrl} target="_blank" rel="noreferrer">Itinéraire <ArrowUpRight size={15} /></a>
+              <h3>Nous trouver & Contact</h3>
+              <p className="h-nap-text"><strong>{RESTAURANT.nap}</strong></p>
+              <div className="h-contact-actions">
+                <a className="h-contact-call" href={RESTAURANT.phoneRaw}>
+                  <Phone size={15} /> {RESTAURANT.phone}
+                </a>
+              </div>
+              <ul className="h-services-list">
+                <li><Wifi size={14} /> Sur place (terrasse & Wi-Fi)</li>
+                <li>À emporter & Livraison directe du site</li>
+                <li>Plats végétaliens (vegan & végé friendly)</li>
+                <li>Prix moyen : {RESTAURANT.priceRange} par personne</li>
+              </ul>
+              <a className="h-link" href={RESTAURANT.mapsUrl} target="_blank" rel="noreferrer">
+                Itinéraire Google Maps <ArrowUpRight size={15} />
+              </a>
             </div>
+
             <div className="h-info">
               <Clock size={20} />
-              <h3>Horaires</h3>
+              <h3>Horaires d'ouverture</h3>
               <p>{RESTAURANT.days}</p>
               <dl className="h-hours">
-                {RESTAURANT.services.map(s => (
-                  <div key={s.label}><dt>{s.label}</dt><dd>{s.hours}</dd></div>
+                {RESTAURANT.scheduleRows.map(s => (
+                  <div key={s.day} className={s.hours === 'Fermé' ? 'closed' : ''}>
+                    <dt>{s.day}</dt>
+                    <dd>{s.hours}</dd>
+                  </div>
                 ))}
               </dl>
               <span className="h-info-note">{RESTAURANT.closed}</span>
             </div>
+
             <div className="h-info">
               <AtSign size={20} />
-              <h3>Instagram</h3>
-              <p>Les bols du jour, les desserts du moment et les nouveautés.</p>
-              <a className="h-link" href={RESTAURANT.instagramUrl} target="_blank" rel="noreferrer">@{RESTAURANT.instagram} <ArrowUpRight size={15} /></a>
+              <h3>Réseaux & Communauté</h3>
+              <p>Rejoignez la communauté Hoya Poké à Pézenas et suivez nos bols de saison.</p>
+              <div className="h-social-links">
+                <a className="h-social-link" href={RESTAURANT.instagramUrl} target="_blank" rel="noreferrer">
+                  <span>Instagram @{RESTAURANT.instagram}</span>
+                  <strong>{RESTAURANT.instagramFollowers} abonnés</strong>
+                </a>
+                <a className="h-social-link" href={RESTAURANT.facebookUrl} target="_blank" rel="noreferrer">
+                  <span>Facebook {RESTAURANT.facebook}</span>
+                  <strong>{RESTAURANT.facebookFollowers} abonnés</strong>
+                </a>
+                <a className="h-social-link" href={RESTAURANT.tripadvisorUrl} target="_blank" rel="noreferrer">
+                  <span>TripAdvisor (20 avis)</span>
+                  <strong>{RESTAURANT.tripadvisorRating}/5</strong>
+                </a>
+              </div>
             </div>
           </motion.div>
         </section>
@@ -464,19 +530,39 @@ export default function HomeScreen() {
               <div>
                 <h4>Commander</h4>
                 <button onClick={() => start('RETRAIT')}>À emporter</button>
-                <button onClick={() => start('LIVRAISON')}>Livraison</button>
+                <button onClick={() => start('LIVRAISON')}>Livraison en direct du site</button>
                 <button onClick={compose}>Composer son poké</button>
                 <button onClick={() => navigate('/tracking')}>Suivre ma commande</button>
               </div>
               <div>
                 <h4>Le restaurant</h4>
-                <span>{RESTAURANT.street}, {RESTAURANT.city}</span>
-                <span>{RESTAURANT.days}</span>
-                {RESTAURANT.services.map(s => <span key={s.label}>{s.hours}</span>)}
+                <p className="h-footer-nap">
+                  <strong>{RESTAURANT.nap}</strong>
+                </p>
+                <a href={RESTAURANT.phoneRaw} style={{ color: 'var(--cream)', fontWeight: 600 }}>
+                  Tél : {RESTAURANT.phone}
+                </a>
+                <span style={{ marginTop: '8px' }}>Lundi : 9h30 – 15h00</span>
+                <span>Mardi au samedi : 9h30–15h00 et 18h00–21h30</span>
+                <span style={{ color: '#ffb3a1', fontWeight: 600 }}>{RESTAURANT.closed}</span>
+                <span style={{ fontSize: '12px', marginTop: '6px', opacity: 0.75 }}>
+                  Sur place (terrasse & Wi-Fi) · À emporter · Livraison · {RESTAURANT.priceRange}
+                </span>
               </div>
               <div>
-                <h4>Suivre</h4>
-                <a href={RESTAURANT.instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
+                <h4>Réseaux & Avis</h4>
+                <a href={RESTAURANT.instagramUrl} target="_blank" rel="noreferrer">
+                  Instagram @{RESTAURANT.instagram} ({RESTAURANT.instagramFollowers} abonnés)
+                </a>
+                <a href={RESTAURANT.facebookUrl} target="_blank" rel="noreferrer">
+                  Facebook ({RESTAURANT.facebookFollowers} abonnés)
+                </a>
+                <a href={RESTAURANT.googleReviewUrl} target="_blank" rel="noreferrer">
+                  Google ({RESTAURANT.googleRating}/5 · {RESTAURANT.googleReviewsCount} avis)
+                </a>
+                <a href={RESTAURANT.tripadvisorUrl} target="_blank" rel="noreferrer">
+                  TripAdvisor ({RESTAURANT.tripadvisorRating}/5 · {RESTAURANT.tripadvisorReviewsCount} avis)
+                </a>
                 <button onClick={() => setInstallPromptOpen(true)}>Installer l'application</button>
               </div>
             </div>
@@ -484,8 +570,8 @@ export default function HomeScreen() {
               <span>Hoya</span><HoyaMark size={72} strokeWidth={11} /><span>Poké</span>
             </div>
             <div className="h-footer-bottom">
-              <span>© {new Date().getFullYear()} Hoya Poké · Pézenas</span>
-              <span>Depuis {RESTAURANT.since}</span>
+              <span>{RESTAURANT.nap}</span>
+              <span>{RESTAURANT.company} · SIREN {RESTAURANT.siren} · © {new Date().getFullYear()}</span>
             </div>
           </div>
         </footer>
