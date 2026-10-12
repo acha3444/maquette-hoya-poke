@@ -1,8 +1,9 @@
 export const MENU = {
   classiques: [
-    { id: 'c1', name: 'Le Saumon', description: 'Saumon cru mariné, ananas', priceM: 11.90, priceL: 14.90, defaultProtein: 'Saumon cru mariné' },
-    { id: 'c2', name: 'Le Poulet', description: 'Poulet frit maison, ananas', priceM: 11.90, priceL: 14.90, defaultProtein: 'Poulet frit maison' },
-    { id: 'c3', name: 'Le Falafel', description: 'Falafels maison, ananas', priceM: 11.90, priceL: 14.90, defaultProtein: 'Falafels maison' }
+    { id: 'c1', name: 'Le Saumon', description: 'Saumon cru mariné, ananas, avocat, edamame', priceM: 11.90, priceL: 14.90, defaultProtein: 'Saumon cru mariné', defaultSauce: 'Soja sucrée', ingredients: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Ananas', 'Graines de sésame'] },
+    { id: 'c2', name: 'Le Poulet', description: 'Poulet frit maison, carotte, concombre, sriracha mayo', priceM: 11.90, priceL: 14.90, defaultProtein: 'Poulet frit maison', defaultSauce: 'Sriracha mayo', ingredients: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Ananas', 'Graines de sésame'] },
+    { id: 'c3', name: 'Le Falafel', description: 'Falafels maison, tzatziki, grenade, concombre', priceM: 11.90, priceL: 14.90, defaultProtein: 'Falafels maison', defaultSauce: 'Tzatziki', ingredients: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Ananas', 'Graines de sésame'] },
+    { id: 'c4', name: 'Le Thon Rouge', description: 'Thon rouge mariné, mangue, avocat, sésames noirs', priceM: 12.90, priceL: 15.90, defaultProtein: 'Thon rouge mariné', defaultSauce: 'Soja salée', ingredients: ['Riz vinaigré', 'Carotte', 'Concombre', 'Edamame', 'Avocat', 'Mangue', 'Graines de sésame'] }
   ],
   surMesureBase: { name: 'Le Sur Mesure', priceM: 12.90, priceL: 15.90 },
   bases: [
@@ -29,7 +30,8 @@ export const MENU = {
   proteines: [
     { id: 'p1', name: 'Saumon cru mariné', supplementPrice: 1.90 },
     { id: 'p2', name: 'Poulet frit maison', supplementPrice: 1.90 },
-    { id: 'p3', name: 'Falafel maison', supplementPrice: 1.90 }
+    { id: 'p3', name: 'Falafel maison', supplementPrice: 1.90 },
+    { id: 'p4', name: 'Thon rouge mariné', supplementPrice: 1.90 }
   ],
   sauces: [
     { id: 's1', name: 'Soja sucrée', spice: 0, supplementPrice: 0.50 },

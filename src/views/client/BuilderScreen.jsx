@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Flame, X, Heart } from 'lucide-react';
@@ -70,24 +70,50 @@ function CheckMark({ on }) {
 export default function BuilderScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { addToCart, outOfStock, favorites, toggleFavorite } = useStore();
+  const { addToCart, outOfStock, favorites, toggleFavorite, menu } = useStore();
+  const currentMenu = menu || MENU;
 
   const isCustom = !!location.state?.isCustom;
   const baseItem = location.state?.baseItem;
-  const steps = isCustom ? CUSTOM_STEPS : CLASSIC_STEPS;
+
+  const customSteps = useMemo(() => [
+    { id: 'size', title: 'Taille du bol' },
+    { id: 'base', title: 'Base', limit: 1, single: true, items: currentMenu.bases || MENU.bases },
+    { id: 'fruitsLegumes', title: 'Fruits & légumes', limit: 5, extraPrice: 1.00, items: currentMenu.fruitsLegumes || MENU.fruitsLegumes },
+    { id: 'proteine', title: 'Protéine', limit: 1, extraPrice: 1.90, items: currentMenu.proteines || MENU.proteines },
+    { id: 'sauce', title: 'Sauce', limit: 1, extraPrice: 0.50, items: currentMenu.sauces || MENU.sauces },
+    { id: 'toppings', title: 'Toppings', limit: 2, extraPrice: 0.50, items: currentMenu.toppings || MENU.toppings },
+    { id: 'gourmand', title: 'Touche gourmande', hint: 'Facultatif', items: currentMenu.toppingGourmand || MENU.toppingGourmand }
+  ], [currentMenu]);
+
+  const classicSteps = useMemo(() => [
+    { id: 'size', title: 'Taille du bol' },
+    { id: 'sauce', title: 'Sauce', limit: 1, extraPrice: 0.50, items: currentMenu.sauces || MENU.sauces },
+    { id: 'remove', title: 'Personnaliser les ingrédients', hint: 'Facultatif' }
+  ], [currentMenu]);
+
+  const steps = isCustom ? customSteps : classicSteps;
+
+  const removableList = useMemo(() => {
+    if (!baseItem) return REMOVABLE;
+    if (baseItem.ingredients && Array.isArray(baseItem.ingredients) && baseItem.ingredients.length > 0) {
+      return baseItem.ingredients.filter(name => !name.toLowerCase().includes('riz') && !name.toLowerCase().includes('base'));
+    }
+    return REMOVABLE;
+  }, [baseItem]);
 
   const [[stepIndex, direction], setStep] = useState([0, 1]);
   const [favToast, setFavToast] = useState(false);
-  const [selections, setSelections] = useState({
+  const [selections, setSelections] = useState(() => ({
     size: 'M',
     base: [],
     fruitsLegumes: [],
     proteine: [],
-    sauce: [],
+    sauce: !isCustom && baseItem?.defaultSauce ? [(currentMenu.sauces || []).find(s => s.name === baseItem.defaultSauce) || { id: 'def-sauce', name: baseItem.defaultSauce }] : [],
     toppings: [],
     gourmand: [],
     removed: []
-  });
+  }));
 
   const bowlTitle = isCustom ? 'Mon Poké Sur Mesure' : `Poké ${baseItem?.name?.replace('Le ', '') || ''}`;
   const isFav = favorites.some(f => f.name === bowlTitle);
@@ -118,7 +144,14 @@ export default function BuilderScreen() {
   const isLast = stepIndex === steps.length - 1;
 
   const getPrice = () => {
-    const extra = (list, included, unit) => Math.max(0, (list?.length || 0) - included) * (unit || 0);
+    const extra = (list, included, defaultUnit) => {
+      if (!list || list.length <= included) return 0;
+      const extraItems = list.slice(included);
+      return extraItems.reduce((sum, item) => {
+        const itemPrice = item.supplementPrice !== undefined ? Number(item.supplementPrice) : (item.price !== undefined ? Number(item.price) : defaultUnit);
+        return sum + (isNaN(itemPrice) ? defaultUnit : itemPrice);
+      }, 0);
+    };
     if (isCustom) {
       let price = selections.size === 'M' ? MENU.surMesureBase.priceM : MENU.surMesureBase.priceL;
       selections.base.forEach(b => { price += b.price || 0; });
@@ -243,7 +276,7 @@ export default function BuilderScreen() {
     if (step.id === 'remove') {
       return (
         <motion.div className="option-list" variants={list} initial="initial" animate="animate">
-          {REMOVABLE.map(name => {
+          {removableList.map(name => {
             const removed = selections.removed.includes(name);
             return (
               <motion.button key={name} variants={itemVariant} whileTap={{ scale: 0.98 }} className={`option ${removed ? 'removed' : ''}`} onClick={() => toggleRemoved(name)}>
