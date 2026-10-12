@@ -1,0 +1,577 @@
+/* =========================================================
+   HOYA POKÉ — BORNE TACTILE KIOSK STYLESHEET
+   Optimisé pour tablette 10" à 13" (Portrait & Paysage)
+   ========================================================= */
+
+:root {
+  --kiosk-touch-min: 64px;
+}
+
+/* Kiosk base screen - Disable selection, gestures & system context */
+.borne-root {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--green-900);
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Accessibility Mode: Drops the UI down into bottom 50% for wheelchair reach */
+.borne-root.is-accessible {
+  justify-content: flex-end;
+}
+.borne-root.is-accessible .borne-main-container {
+  max-height: 60vh;
+  font-size: 110%;
+}
+.borne-root.is-accessible .borne-top-bar {
+  top: auto;
+  bottom: 60vh;
+}
+
+/* Hidden secret exit hotspot in top right corner (5 seconds press) */
+.borne-secret-exit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 90px;
+  height: 90px;
+  z-index: 9999;
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+/* Top persistent kiosk status bar */
+.borne-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: var(--green-900);
+  color: var(--cream);
+  min-height: 72px;
+  z-index: 50;
+  box-shadow: 0 4px 18px rgba(15, 26, 20, 0.12);
+}
+.borne-top-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.borne-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.borne-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--cream);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.borne-pill-btn:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.22);
+}
+.borne-pill-btn.active {
+  background: var(--gold);
+  color: var(--green-900);
+  border-color: var(--gold);
+}
+
+/* Main Container */
+.borne-main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Attract Screen (Veille) */
+.borne-attract-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 48px 32px 64px;
+  text-align: center;
+  position: relative;
+  background: radial-gradient(circle at 50% 30%, #f4f0e6 0%, #ebe4d3 100%);
+  cursor: pointer;
+}
+.borne-attract-hero {
+  position: relative;
+  width: min(80vw, 440px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  box-shadow: 0 24px 60px rgba(15, 26, 20, 0.18);
+  overflow: hidden;
+  margin: 20px 0;
+  border: 6px solid var(--cream);
+}
+.borne-attract-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.borne-attract-title {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 6vw, 56px);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--green-900);
+  margin-bottom: 12px;
+}
+.borne-attract-sub {
+  font-size: clamp(18px, 2.5vw, 24px);
+  color: var(--muted);
+  max-width: 600px;
+}
+.borne-attract-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 76px;
+  padding: 0 48px;
+  border-radius: 999px;
+  background: var(--forest);
+  color: var(--cream);
+  font-size: 24px;
+  font-weight: 800;
+  box-shadow: 0 12px 32px rgba(28, 58, 51, 0.3);
+  animation: bornePulse 2.4s infinite ease-in-out;
+}
+@keyframes bornePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 12px 32px rgba(28, 58, 51, 0.3); }
+  50% { transform: scale(1.04); box-shadow: 0 18px 44px rgba(28, 58, 51, 0.42); }
+}
+
+/* Mode Selection (Sur place vs À emporter) */
+.borne-modes-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 32px;
+}
+.borne-modes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  width: min(90vw, 760px);
+}
+.borne-mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 32px;
+  border-radius: 36px;
+  background: var(--paper);
+  border: 3px solid var(--line);
+  box-shadow: 0 12px 36px rgba(15, 26, 20, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 280px;
+  text-align: center;
+  gap: 20px;
+}
+.borne-mode-card:active {
+  transform: scale(0.96);
+  border-color: var(--forest);
+  box-shadow: 0 6px 18px rgba(15, 26, 20, 0.12);
+}
+.borne-mode-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--cream-2);
+  color: var(--forest);
+  display: grid;
+  place-items: center;
+}
+.borne-mode-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--green-900);
+}
+.borne-mode-desc {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+/* Catalog View */
+.borne-catalog-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.borne-category-bar {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--paper);
+  border-bottom: 2px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.borne-category-bar::-webkit-scrollbar { display: none; }
+
+.borne-cat-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 0 26px;
+  border-radius: 18px;
+  font-size: 18px;
+  font-weight: 800;
+  border: 2px solid var(--line);
+  background: var(--cream-2);
+  color: var(--green-900);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.borne-cat-tab.active {
+  background: var(--forest);
+  color: var(--cream);
+  border-color: var(--forest);
+  box-shadow: 0 6px 16px rgba(28, 58, 51, 0.2);
+}
+.borne-cat-tab:active {
+  transform: scale(0.96);
+}
+
+.borne-products-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  align-content: start;
+}
+
+/* Product Card */
+.borne-product-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-radius: 24px;
+  border: 2px solid var(--line);
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 26, 20, 0.06);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+.borne-product-card:active {
+  transform: scale(0.97);
+  border-color: var(--forest);
+}
+.borne-product-art {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--cream-2);
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.borne-product-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.borne-badge-corner {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--forest);
+  color: var(--cream);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.borne-product-info {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8px;
+}
+.borne-product-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--green-900);
+}
+.borne-product-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+  flex: 1;
+}
+.borne-product-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+.borne-product-price {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--forest);
+}
+.borne-product-add-btn {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--green-900);
+  font-weight: 800;
+  font-size: 15px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Out of stock overlay */
+.borne-product-card.is-soldout {
+  opacity: 0.6;
+  filter: grayscale(0.8);
+  pointer-events: none;
+}
+.borne-soldout-badge {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 26, 20, 0.65);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  z-index: 5;
+}
+
+/* Bottom Floating Cart Bar on Kiosk */
+.borne-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  background: var(--paper);
+  border-top: 2px solid var(--line);
+  box-shadow: 0 -8px 24px rgba(15, 26, 20, 0.08);
+  z-index: 40;
+}
+.borne-cart-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.borne-cart-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--forest);
+  color: var(--cream);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 20px;
+}
+.borne-cart-total-info {
+  display: flex;
+  flex-direction: column;
+}
+.borne-cart-label {
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.borne-cart-amount {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--green-900);
+}
+.borne-validate-btn {
+  min-height: 64px;
+  padding: 0 36px;
+  border-radius: 999px;
+  background: var(--curry);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 20px rgba(196, 92, 40, 0.35);
+  cursor: pointer;
+}
+.borne-validate-btn:active {
+  transform: scale(0.96);
+}
+
+/* Modals & Overlays */
+.borne-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 26, 20, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.borne-modal-box {
+  background: var(--paper);
+  border-radius: 32px;
+  width: min(92vw, 680px);
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(15, 26, 20, 0.28);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 3px solid var(--line);
+}
+.borne-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px;
+  border-bottom: 2px solid var(--line);
+}
+.borne-modal-body {
+  padding: 28px;
+  flex: 1;
+  overflow-y: auto;
+}
+.borne-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-top: 2px solid var(--line);
+  background: var(--cream-2);
+}
+
+/* Giant On-screen Numeric Keypad for Loyalty / Phone */
+.borne-numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: min(100%, 360px);
+  margin: 20px auto 0;
+}
+.borne-numkey {
+  min-height: 72px;
+  border-radius: 20px;
+  font-size: 28px;
+  font-weight: 800;
+  background: var(--cream-2);
+  color: var(--green-900);
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.borne-numkey:active {
+  transform: scale(0.94);
+  background: var(--forest);
+  color: var(--cream);
+}
+
+/* Inactivity Countdown Warning */
+.borne-idle-alert {
+  text-align: center;
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.borne-idle-countdown {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 6px solid var(--curry);
+  color: var(--curry);
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  animation: countdownPop 1s infinite alternate;
+}
+@keyframes countdownPop {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+/* Confirmation Screen */
+.borne-confirm-box {
+  text-align: center;
+  padding: 48px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.borne-order-number-banner {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 96px);
+  font-weight: 900;
+  color: var(--forest);
+  line-height: 1;
+  background: var(--cream-2);
+  padding: 24px 48px;
+  border-radius: 28px;
+  border: 3px dashed var(--forest);
+  margin: 12px 0;
+}

@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { INITIAL_ORDERS, MENU, PROMO_CODES } from './data';
 import { supabase } from './supabase';
+import { loadLocalTables, loadLocalTablesConfig, saveLocalTables, saveLocalTablesConfig, syncTablesToCloud, fetchTablesFromCloud } from './services/tableService';
+import { loadLocalKioskConfig, saveLocalKioskConfig, syncKioskConfigToCloud, fetchKioskConfigFromCloud } from './services/kioskService';
 
 const loadInitialMenu = () => {
   if (typeof window === 'undefined') return MENU;
@@ -93,10 +95,15 @@ function mapFromDb(row) {
     id: String(row.id),
     status: row.status,
     type: row.type || 'RETRAIT',
+    source: row.source || (row.table_name ? 'TABLE' : (row.kiosk_id || String(row.id).startsWith('B-')) ? 'BORNE' : (row.type === 'LIVRAISON' ? 'LIVRAISON' : 'RETRAIT')),
+    tableName: row.table_name || null,
+    tableToken: row.table_token || null,
+    kioskId: row.kiosk_id || null,
+    dailyNumber: row.daily_number || (String(row.id).startsWith('B-') ? row.id : null),
     time: row.time || '12:00',
     customerName: row.customer_name || row.customerName || 'Client',
     customerPhone: row.customer_phone || row.customerPhone || '06 00 00 00 00',
-    address: row.address || '7 rue Anatole France, Pézenas',
+    address: row.address || '7 Rue Anatole France, Pézenas',
     zone: row.zone,
     deliveryFee: Number(row.delivery_fee ?? row.deliveryFee ?? 0),
     total: Number(row.total || 0),
@@ -113,10 +120,15 @@ function mapToDb(order) {
     id: String(order.id),
     status: order.status || 'NOUVELLE',
     type: order.type || 'RETRAIT',
+    source: order.source || (order.tableName ? 'TABLE' : order.kioskId ? 'BORNE' : 'WEB'),
+    table_name: order.tableName || null,
+    table_token: order.tableToken || null,
+    kiosk_id: order.kioskId || null,
+    daily_number: order.dailyNumber || null,
     time: order.time || '12:00',
-    customer_name: order.customerName || 'Client',
+    customer_name: order.customerName || (order.tableName ? `Client ${order.tableName}` : 'Client'),
     customer_phone: order.customerPhone || '06 00 00 00 00',
-    address: order.address || null,
+    address: order.address || (order.tableName ? `Sur place (${order.tableName})` : null),
     zone: order.zone || null,
     delivery_fee: order.deliveryFee || 0,
     total: Number(order.total || 0),
@@ -138,8 +150,29 @@ export const useStore = create((set, get) => {
           .order('created_at', { ascending: false });
 
         if (!error && data && data.length > 0) {
-          const validOrders = data.filter(row => row.id !== '__pin_config__' && row.status !== 'SYSTEM');
+          const validOrders = data.filter(row => row.id !== '__pin_config__' && row.id !== '__tables_config__' && row.id !== '__kiosk_config__' && row.status !== 'SYSTEM');
           set({ orders: validOrders.map(mapFromDb) });
+
+          // Fetch tables config from cloud record
+          const tablesRow = data.find(r => r.id === '__tables_config__');
+          if (tablesRow?.items && Array.isArray(tablesRow.items)) {
+            saveLocalTables(tablesRow.items);
+            let cfg = loadLocalTablesConfig();
+            if (tablesRow.customer_phone) {
+              try { cfg = JSON.parse(tablesRow.customer_phone); saveLocalTablesConfig(cfg); } catch (e) {}
+            }
+            set({ tables: tablesRow.items, tablesConfig: cfg });
+          }
+
+          // Fetch kiosk config from cloud record
+          const kioskRow = data.find(r => r.id === '__kiosk_config__');
+          if (kioskRow?.customer_phone) {
+            try {
+              const kcfg = JSON.parse(kioskRow.customer_phone);
+              saveLocalKioskConfig(kcfg);
+              set({ kioskConfig: kcfg });
+            } catch (e) {}
+          }
         }
       } catch (e) {
         console.warn('Supabase initial fetch fallback:', e);
@@ -155,6 +188,28 @@ export const useStore = create((set, get) => {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
           if (payload.new?.id === '__pin_config__' || payload.old?.id === '__pin_config__') {
             return; // Managed by StaffGuard PIN sync
+          }
+          if (payload.new?.id === '__tables_config__') {
+            const items = payload.new.items;
+            if (Array.isArray(items)) {
+              saveLocalTables(items);
+              let cfg = loadLocalTablesConfig();
+              if (payload.new.customer_phone) {
+                try { cfg = JSON.parse(payload.new.customer_phone); saveLocalTablesConfig(cfg); } catch (e) {}
+              }
+              set({ tables: items, tablesConfig: cfg });
+            }
+            return;
+          }
+          if (payload.new?.id === '__kiosk_config__') {
+            if (payload.new.customer_phone) {
+              try {
+                const kcfg = JSON.parse(payload.new.customer_phone);
+                saveLocalKioskConfig(kcfg);
+                set({ kioskConfig: kcfg });
+              } catch (e) {}
+            }
+            return;
           }
           if (payload.eventType === 'INSERT') {
             const newOrder = mapFromDb(payload.new);
@@ -183,6 +238,30 @@ export const useStore = create((set, get) => {
     // App State
     viewMode: initialViewMode(),
     setViewMode: (mode) => set({ viewMode: mode }),
+
+    // Table Session State (QR code /t/:token)
+    currentTable: null,
+    setCurrentTable: (table) => set({ currentTable: table }),
+    tables: loadLocalTables(),
+    tablesConfig: loadLocalTablesConfig(),
+    updateTables: (newTables) => {
+      saveLocalTables(newTables);
+      syncTablesToCloud(newTables, get().tablesConfig);
+      set({ tables: newTables });
+    },
+    updateTablesConfig: (cfg) => {
+      saveLocalTablesConfig(cfg);
+      syncTablesToCloud(get().tables, cfg);
+      set({ tablesConfig: cfg });
+    },
+
+    // Kiosk State & Config (/borne)
+    kioskConfig: loadLocalKioskConfig(),
+    updateKioskConfig: (cfg) => {
+      saveLocalKioskConfig(cfg);
+      syncKioskConfigToCloud(cfg);
+      set({ kioskConfig: cfg });
+    },
 
     // Client State
     cart: [],

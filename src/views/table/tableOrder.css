@@ -1,0 +1,331 @@
+/* =========================================================
+   Hoya Poké — Commande à Table par QR Code (/t/:token)
+   Design System : Épuré, Mobile-First, Expérience fluide
+   ========================================================= */
+
+.table-order-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--cream, #f7f4ee);
+  color: var(--ink, #1f2a24);
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 100px;
+}
+
+/* --- Persistent Top Banner & Header --- */
+.table-order-header {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  background: rgba(247, 244, 238, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line, #e2ded5);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.table-order-banner {
+  background: var(--green-900, #0f1a14);
+  color: var(--cream, #f7f4ee);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.table-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #fff;
+}
+
+.table-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.table-header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+}
+
+/* Category Sticky Scroller */
+.table-cat-scroll {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.table-cat-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.table-cat-chip {
+  padding: 8px 16px;
+  border-radius: 24px;
+  border: 1px solid var(--line, #e2ded5);
+  background: var(--paper, #fff);
+  color: var(--ink, #1f2a24);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.table-cat-chip.active {
+  background: var(--green-800, #1b382b);
+  color: #fff;
+  border-color: var(--green-800, #1b382b);
+  box-shadow: 0 4px 12px rgba(27, 56, 43, 0.2);
+}
+
+/* Product Cards */
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+@media (max-width: 640px) {
+  .table-grid {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+}
+
+.table-card {
+  background: var(--paper, #fff);
+  border-radius: 16px;
+  border: 1px solid var(--line, #e2ded5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.table-card-img-wrap {
+  width: 100%;
+  height: 160px;
+  position: relative;
+  background: var(--cream-2, #ede8dc);
+  overflow: hidden;
+}
+
+.table-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.table-card:hover .table-card-img {
+  transform: scale(1.03);
+}
+
+.table-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--green-800, #1b382b);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-card-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.table-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--ink, #1f2a24);
+}
+
+.table-card-desc {
+  font-size: 12.5px;
+  color: var(--muted, #6f7872);
+  line-height: 1.4;
+  margin: 0 0 12px;
+  flex: 1;
+}
+
+.table-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--cream-2, #ede8dc);
+}
+
+.table-card-price {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--green-900, #0f1a14);
+}
+
+/* Sticky Bottom Cart Bar */
+.table-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 800;
+  background: rgba(247, 244, 238, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line, #e2ded5);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.table-cart-trigger {
+  background: var(--green-800, #1b382b);
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(27, 56, 43, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.table-cart-trigger:active {
+  transform: scale(0.97);
+}
+
+/* Bottom Sheet / Cart Drawer */
+.table-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 950;
+}
+
+.table-drawer-content {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 88vh;
+  background: var(--paper, #fff);
+  border-radius: 24px 24px 0 0;
+  z-index: 960;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.table-drawer-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--line, #e2ded5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--cream, #f7f4ee);
+}
+
+.table-drawer-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.table-cart-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line, #e2ded5);
+}
+
+/* Live Tracking Card */
+.table-tracking-box {
+  background: var(--paper, #fff);
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid var(--line, #e2ded5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  max-width: 520px;
+  margin: 20px auto;
+}
+
+.table-status-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: var(--cream-2, #ede8dc);
+  transition: all 0.25s ease;
+}
+
+.table-status-step.active {
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  color: #065f46;
+}
+
+.table-status-step.past {
+  opacity: 0.6;
+}

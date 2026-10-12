@@ -72,6 +72,11 @@ function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
     >
       <header className="ticket-head">
         <div className="row gap-2">
+          {order.dailyNumber && (
+            <span className="ticket-id tnum" style={{ background: '#059669', color: '#fff', padding: '2px 8px', borderRadius: 6, fontWeight: 900 }}>
+              {order.dailyNumber}
+            </span>
+          )}
           <span className="ticket-id tnum">#{order.id}</span>
           {onPrint && (
             <button
@@ -94,10 +99,31 @@ function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
       </header>
 
       <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
-        <span className={`tag ${order.type === 'LIVRAISON' ? 'tag-green' : 'tag-gold'}`}>
-          {order.type === 'LIVRAISON' ? <Bike size={11} /> : <ShoppingBag size={11} />}
-          {order.type === 'LIVRAISON' ? 'Livraison' : 'Retrait'}
-        </span>
+        {(order.source === 'TABLE' || order.tableName) && (
+          <span className="tag" style={{ background: '#7c3aed', color: '#fff', fontWeight: 800 }}>
+            🍽️ {order.tableName || 'Table'} · Sur place
+          </span>
+        )}
+
+        {(order.source === 'BORNE' || order.kioskId || String(order.id).startsWith('B-')) && (
+          <span className="tag" style={{ background: '#059669', color: '#fff', fontWeight: 800 }}>
+            🖥️ {order.kioskId || 'Borne'} · Sur place
+          </span>
+        )}
+
+        {!order.tableName && !order.kioskId && !String(order.id).startsWith('B-') && order.source !== 'TABLE' && order.source !== 'BORNE' && (
+          <span className={`tag ${order.type === 'LIVRAISON' ? 'tag-green' : 'tag-gold'}`}>
+            {order.type === 'LIVRAISON' ? <Bike size={11} /> : <ShoppingBag size={11} />}
+            {order.type === 'LIVRAISON' ? 'Livraison' : 'Retrait'}
+          </span>
+        )}
+
+        {order.paymentStatus !== 'PAYÉ' && !done && (
+          <span className="tag" style={{ fontWeight: 800, background: '#ef4444', color: '#fff' }}>
+            ⚠️ À ENCAISSER
+          </span>
+        )}
+
         {order.isLate && !done && <span className="tag tag-danger">En retard</span>}
       </div>
 
@@ -149,7 +175,8 @@ function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
           )}
           {order.status === 'PREPARATION' && action('Prête', 'PRETE')}
           {order.status === 'PRETE' && order.type === 'LIVRAISON' && action('Confier au livreur', 'LIVRAISON', 'btn-primary', <Bike size={14} />)}
-          {order.status === 'PRETE' && order.type === 'RETRAIT' && action('Remise au client', 'TERMINEE', 'btn-ok')}
+          {order.status === 'PRETE' && (order.source === 'TABLE' || order.tableName) && action('Servie à table', 'TERMINEE', 'btn-ok')}
+          {order.status === 'PRETE' && order.type === 'RETRAIT' && !(order.source === 'TABLE' || order.tableName) && action('Remise au client', 'TERMINEE', 'btn-ok')}
           {order.status === 'LIVRAISON' && action('Livrée', 'TERMINEE', 'btn-ok')}
         </div>
       </footer>

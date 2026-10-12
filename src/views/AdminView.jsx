@@ -5,7 +5,8 @@ import {
   Plus, Edit2, Trash2, Image, Upload, Check, X, Search, 
   ChefHat, ShoppingBag, ArrowLeft, LockKeyhole, RefreshCw, 
   SlidersHorizontal, Sparkles, AlertCircle, FileText, Printer,
-  Eye, EyeOff, KeyRound, Smartphone, CreditCard, Flame
+  Eye, EyeOff, KeyRound, Smartphone, CreditCard, Flame,
+  QrCode, Tv
 } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
@@ -16,6 +17,8 @@ import InstallPwaModal from '../components/InstallPwaModal';
 import PosRegister from '../components/PosRegister';
 import ProductThumb from '../components/brand/ProductThumb';
 import StaffBrand from '../components/brand/StaffBrand';
+import AdminTablesTab from './admin/AdminTablesTab';
+import AdminBorneTab from './admin/AdminBorneTab';
 import './admin.css';
 
 const PRESET_IMAGES = [
@@ -400,6 +403,14 @@ export default function AdminView() {
             <SlidersHorizontal size={14} />
             <span>Carte & Produits ({filteredItems.length})</span>
           </button>
+          <button className={activeMainTab === 'tables' ? 'active' : ''} onClick={() => setActiveMainTab('tables')}>
+            <QrCode size={14} />
+            <span>Tables & QR Codes</span>
+          </button>
+          <button className={activeMainTab === 'borne' ? 'active' : ''} onClick={() => setActiveMainTab('borne')}>
+            <Tv size={14} />
+            <span>Borne</span>
+          </button>
           <button className={activeMainTab === 'caisse' ? 'active' : ''} onClick={() => setActiveMainTab('caisse')}>
             <FileText size={14} />
             <span>Clôture Caisse & Bilan Z</span>
@@ -654,6 +665,16 @@ export default function AdminView() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* View 3: Tables & QR Codes */}
+      {activeMainTab === 'tables' && (
+        <AdminTablesTab />
+      )}
+
+      {/* View 4: Borne Tactile */}
+      {activeMainTab === 'borne' && (
+        <AdminBorneTab />
       )}
 
       {/* Modal: Add / Edit Product */}

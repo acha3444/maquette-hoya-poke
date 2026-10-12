@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Printer, X, Check, ShieldCheck, TrendingUp, ShoppingBag, 
   CreditCard, Banknote, Bike, Utensils, Calendar, Clock, 
-  Archive, FileText, ChevronRight
+  Archive, FileText, ChevronRight, QrCode, Tv
 } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
@@ -34,11 +34,17 @@ export default function CaisseClotureModal({ onClose }) {
   const onSiteLivreurTotal = onSiteLivreur.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
   // Channel breakdown
+  const tableOrders = validOrders.filter(o => o.source === 'TABLE' || Boolean(o.tableName));
+  const tableTotal = tableOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
+  const kioskOrders = validOrders.filter(o => o.source === 'BORNE' || Boolean(o.kioskId) || String(o.id).startsWith('B-'));
+  const kioskTotal = kioskOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+
   const deliveryOrders = validOrders.filter(o => o.type === 'LIVRAISON');
   const deliveryTotal = deliveryOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const deliveryFeesTotal = deliveryOrders.reduce((sum, o) => sum + (Number(o.deliveryFee) || 0), 0);
 
-  const takeawayOrders = validOrders.filter(o => o.type !== 'LIVRAISON');
+  const takeawayOrders = validOrders.filter(o => o.type !== 'LIVRAISON' && o.source !== 'TABLE' && o.source !== 'BORNE' && !o.tableName && !o.kioskId && !String(o.id).startsWith('B-'));
   const takeawayTotal = takeawayOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
   // Item sales breakdown
@@ -206,8 +212,16 @@ export default function CaisseClotureModal({ onClose }) {
                   <h3 className="eyebrow" style={{ marginBottom: 12 }}>Canaux de Vente</h3>
                   <div className="col gap-2">
                     <div className="row between small">
-                      <span className="row gap-2"><ShoppingBag size={14} className="muted" /> À Emporter / Retrait Boutique ({takeawayOrders.length})</span>
+                      <span className="row gap-2"><ShoppingBag size={14} className="muted" /> Ventes Web / Caisse Comptoir ({takeawayOrders.length})</span>
                       <strong className="tnum">{formatPrice(takeawayTotal)}</strong>
+                    </div>
+                    <div className="row between small">
+                      <span className="row gap-2" style={{ color: '#059669', fontWeight: 600 }}><Tv size={14} /> Borne Tactile Kiosque ({kioskOrders.length})</span>
+                      <strong className="tnum" style={{ color: '#059669' }}>{formatPrice(kioskTotal)}</strong>
+                    </div>
+                    <div className="row between small">
+                      <span className="row gap-2" style={{ color: '#7c3aed', fontWeight: 600 }}><QrCode size={14} /> Commandes à Table QR ({tableOrders.length})</span>
+                      <strong className="tnum" style={{ color: '#7c3aed' }}>{formatPrice(tableTotal)}</strong>
                     </div>
                     <div className="row between small">
                       <span className="row gap-2"><Bike size={14} className="muted" /> Livraisons à Domicile ({deliveryOrders.length})</span>

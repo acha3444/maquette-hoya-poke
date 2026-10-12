@@ -11,6 +11,8 @@ import ClientView from './views/ClientView';
 import RestaurantView from './views/RestaurantView';
 import DeliveryView from './views/DeliveryView';
 import AdminView from './views/AdminView';
+import BorneView from './views/BorneView';
+import TableOrderView from './views/TableOrderView';
 import StaffGuard from './components/StaffGuard';
 import { usePwaManager } from './utils/usePwaManager';
 
@@ -48,7 +50,14 @@ function FloatingProNav() {
 
   const isKitchen = location.pathname.startsWith('/cuisine') || location.pathname.startsWith('/admin');
   const isDelivery = location.pathname.startsWith('/livreur');
-  const isClient = !isKitchen && !isDelivery;
+  const isBorne = location.pathname.startsWith('/borne');
+  const isTable = location.pathname.startsWith('/t/');
+  const isClient = !isKitchen && !isDelivery && !isBorne && !isTable;
+
+  // Never display floating staff widget on client kiosk tablet or table ordering phone
+  if (isBorne || isTable) {
+    return null;
+  }
 
   const isStandalone = typeof window !== 'undefined' && (
     window.matchMedia('(display-mode: standalone)').matches || 
@@ -134,7 +143,25 @@ function FloatingProNav() {
                   onClick={() => { navigate('/admin'); setOpen(false); }}
                 >
                   <Sparkles size={15} />
-                  <span>Admin · Carte & Clôture Caisse</span>
+                  <span>Admin · Carte & Caisse & Tables</span>
+                </button>
+
+                <button
+                  className="btn btn-sm btn-ghost"
+                  style={{ justifyContent: 'flex-start', gap: 10, color: 'var(--green-700)' }}
+                  onClick={() => { navigate('/borne'); setOpen(false); }}
+                >
+                  <span>🖥️</span>
+                  <span>Borne de Commande Tactile (/borne)</span>
+                </button>
+
+                <button
+                  className="btn btn-sm btn-ghost"
+                  style={{ justifyContent: 'flex-start', gap: 10, color: '#7c3aed' }}
+                  onClick={() => { navigate('/t/hp_t1_9a2b'); setOpen(false); }}
+                >
+                  <span>🍽️</span>
+                  <span>Démo Commande Table 1 (/t/...)</span>
                 </button>
               </div>
 
@@ -231,6 +258,15 @@ function AppContent() {
             </StaffGuard>
           } 
         />
+        <Route 
+          path="/borne" 
+          element={
+            <StaffGuard title="Borne de commande Hoya Poké" defaultPin="1234">
+              <BorneView />
+            </StaffGuard>
+          } 
+        />
+        <Route path="/t/:token" element={<TableOrderView />} />
         <Route path="/*" element={<ClientView />} />
       </Routes>
       <FloatingProNav />
