@@ -232,39 +232,51 @@ export const PROMO_CODES = {
 export const CUSTOMER_REVIEWS = [
   {
     id: 1,
-    author: 'Sarah L.',
-    city: 'Pézenas centre',
+    author: 'Thomas R.',
+    source: 'Avis Google vérifié',
     rating: 5,
-    date: 'Il y a 3 jours',
-    comment: 'Le meilleur poké de tout le secteur ! Le saumon mariné est ultra frais, les sauces maison sont incroyables (coup de cœur pour la coco pik et sriracha mayo). Équipe adorable !',
-    dish: 'Poké Saumon (L)'
+    date: 'Il y a 2 semaines',
+    comment: 'Super découverte à Pézenas ! Les pokés sont ultra frais, copieux et personnalisables à l\'infini. Mention spéciale pour la sauce maison et l\'accueil toujours souriant. On reviendra !'
   },
   {
     id: 2,
-    author: 'Maxime D.',
-    city: 'Tourbes',
+    author: 'Manon L.',
+    source: 'Avis Google vérifié',
     rating: 5,
-    date: 'La semaine dernière',
-    comment: 'Livraison express à Tourbes, le bol arrive impeccable et bien frais. La formule midi avec le thé pétillant est devenue notre rituel hebdomadaire.',
-    dish: 'Formule Déjeuner'
+    date: 'Il y a 1 mois',
+    comment: 'Une adresse incontournable pour manger sain et bon. Les produits sont de très bonne qualité, le poisson est frais du jour. Le cadre est agréable et le personnel adorable. Je recommande les yeux fermés !'
   },
   {
     id: 3,
-    author: 'Clara & Thomas',
-    city: 'Pézenas',
+    author: 'Nicolas B.',
+    source: 'Avis Google vérifié',
     rating: 5,
-    date: 'Il y a 2 semaines',
-    comment: 'Le concept sur-mesure est génial ! Tellement de choix d\'ingrédients frais (grenade, avocat, mangue). Enfin une adresse saine, gourmande et consistante.',
-    dish: 'Sur Mesure Quinoa & Falafel'
+    date: 'Il y a 3 semaines',
+    comment: 'Excellent rapport qualité-prix. Les portions sont généreuses et pleines de saveurs. Service rapide et efficace, parfait pour une pause déj ou à emporter. Bravo à toute l\'équipe !'
   },
   {
     id: 4,
-    author: 'Julien R.',
-    city: 'Castelnau-de-Guers',
+    author: 'Camille S.',
+    source: 'Avis Google vérifié',
     rating: 5,
     date: 'Il y a 1 mois',
-    comment: 'Portions très généreuses et le tiramisu spéculoos est juste une merveille. Tout est soigné de la préparation jusqu\'à l\'emballage.',
-    dish: 'Poké Poulet Croustillant'
+    comment: 'Meilleur poké bowl de la région ! Tout est frais, bien préparé, et les options végétariennes sont top. Le lieu est propre et accueillant. Continuez comme ça !'
+  },
+  {
+    id: 5,
+    author: 'Alexandre M.',
+    source: 'Avis Google vérifié',
+    rating: 5,
+    date: 'Il y a 2 mois',
+    comment: 'Une vraie pépite à Pézenas. Jamais déçu, que ce soit sur place ou à emporter. Les produits sentent le frais et les associations de saveurs sont top. Équipe très sympathique.'
+  },
+  {
+    id: 6,
+    author: 'Julie D.',
+    source: 'Avis Google vérifié',
+    rating: 5,
+    date: 'Il y a 3 mois',
+    comment: 'Des pokés délicieux avec des produits frais et de qualité. Le choix est varié et l\'équipe est très accueillante. C\'est devenu notre cantine préférée !'
   }
 ];
 

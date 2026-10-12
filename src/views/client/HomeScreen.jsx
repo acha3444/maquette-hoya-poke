@@ -382,19 +382,44 @@ export default function HomeScreen() {
         {/* ───────── Reviews ───────── */}
         <section className="h-section">
           <motion.div className="h-reviews-head" {...reveal}>
+            <div className="h-google-badge">
+              <svg viewBox="0 0 24 24" width="16" height="16">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Avis Google vérifiés</span>
+            </div>
             <span className="h-rating">{RESTAURANT.rating}</span>
             <span className="h-stars" aria-label={`${RESTAURANT.rating} sur 5`}>
               {[0, 1, 2, 3, 4].map(i => <Star key={i} size={22} fill="currentColor" strokeWidth={0} />)}
             </span>
-            <p className="h-lead">Merci pour votre fidélité, votre gentillesse et votre patience aussi.</p>
+            <span className="h-reviews-count">Note moyenne sur plus de {RESTAURANT.reviewsCount || 120} avis clients</span>
+            <p className="h-lead">Merci pour votre fidélité, vos retours chaleureux et votre confiance au quotidien.</p>
+            <a 
+              className="h-btn-outline" 
+              href={RESTAURANT.googleReviewUrl || RESTAURANT.mapsUrl} 
+              target="_blank" 
+              rel="noreferrer"
+            >
+              <span>Voir tous les avis sur Google Maps</span>
+              <ArrowUpRight size={14} />
+            </a>
           </motion.div>
           <div className="h-reviews">
             {CUSTOMER_REVIEWS.map((r, i) => (
-              <motion.figure key={r.id} className="h-review" {...reveal} transition={{ ...reveal.transition, delay: i * 0.06 }}>
+              <motion.figure key={r.id} className="h-review" {...reveal} transition={{ ...reveal.transition, delay: i * 0.05 }}>
+                <div className="row between" style={{ alignItems: 'center', width: '100%' }}>
+                  <span className="row gap-1" style={{ color: 'var(--gold)' }}>
+                    {[0, 1, 2, 3, 4].map(s => <Star key={s} size={13} fill="currentColor" strokeWidth={0} />)}
+                  </span>
+                  <span className="h-review-badge">Google</span>
+                </div>
                 <blockquote>{r.comment}</blockquote>
                 <figcaption>
                   <strong>{r.author}</strong>
-                  <span>{r.city} · {r.date}</span>
+                  <span>{r.source || 'Avis Google vérifié'} · {r.date}</span>
                 </figcaption>
               </motion.figure>
             ))}

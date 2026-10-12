@@ -9,6 +9,8 @@ export const RESTAURANT = {
   instagram: 'hoya_poke',
   instagramUrl: 'https://www.instagram.com/hoya_poke/',
   rating: '4,9',
+  reviewsCount: 123,
+  googleReviewUrl: 'https://www.google.com/maps/search/?api=1&query=Hoya+Pok%C3%A9+7+rue+Anatole+France+34120+Pezenas',
   days: 'Du mardi au samedi',
   services: [
     { label: 'Midi', hours: '11h30 – 14h00' },
