@@ -314,6 +314,14 @@
 .spice { display: inline-flex; gap: 1px; color: var(--line-strong); }
 .spice .on { color: var(--danger); }
 
+.tag-green { background: rgba(46, 125, 50, 0.12); color: var(--green-700); }
+.tag-gold-outline { background: rgba(220, 160, 60, 0.12); color: var(--gold-ink); border: 1px solid rgba(200, 140, 50, 0.35); }
+.tag-neutral { background: var(--cream-2); color: var(--muted); }
+.option.option-extra {
+  box-shadow: inset 0 0 0 2px var(--gold) !important;
+  background: rgba(240, 185, 90, 0.08) !important;
+}
+
 /* ---------- Checkout ---------- */
 .chip {
   height: 28px;

@@ -11,7 +11,7 @@ import BowlVisualizer from '../../components/BowlVisualizer';
 const CUSTOM_STEPS = [
   { id: 'size', title: 'Taille du bol' },
   { id: 'base', title: 'Base', limit: 1, single: true, items: MENU.bases },
-  { id: 'fruitsLegumes', title: 'Fruits & légumes', limit: 5, items: MENU.fruitsLegumes },
+  { id: 'fruitsLegumes', title: 'Fruits & légumes', limit: 5, extraPrice: 1.00, items: MENU.fruitsLegumes },
   { id: 'proteine', title: 'Protéine', limit: 1, extraPrice: 1.90, items: MENU.proteines },
   { id: 'sauce', title: 'Sauce', limit: 1, extraPrice: 0.50, items: MENU.sauces },
   { id: 'toppings', title: 'Toppings', limit: 2, extraPrice: 0.50, items: MENU.toppings },
@@ -118,10 +118,11 @@ export default function BuilderScreen() {
   const isLast = stepIndex === steps.length - 1;
 
   const getPrice = () => {
-    const extra = (list, included, unit) => Math.max(0, list.length - included) * unit;
+    const extra = (list, included, unit) => Math.max(0, (list?.length || 0) - included) * (unit || 0);
     if (isCustom) {
       let price = selections.size === 'M' ? MENU.surMesureBase.priceM : MENU.surMesureBase.priceL;
       selections.base.forEach(b => { price += b.price || 0; });
+      price += extra(selections.fruitsLegumes, 5, 1.00);
       price += extra(selections.proteine, 1, 1.90);
       price += extra(selections.sauce, 1, 0.50);
       price += extra(selections.toppings, 2, 0.50);
@@ -137,7 +138,7 @@ export default function BuilderScreen() {
       if (current.some(i => i.id === item.id)) {
         return { ...prev, [step.id]: current.filter(i => i.id !== item.id) };
       }
-      if (step.single || step.id === 'base' || step.id === 'sauce') {
+      if (step.single || step.id === 'base') {
         return { ...prev, [step.id]: [item] };
       }
       return { ...prev, [step.id]: [...current, item] };
@@ -166,10 +167,29 @@ export default function BuilderScreen() {
       setStep([stepIndex + 1, 1]);
       return;
     }
-    const names = (key) => selections[key].map(i => i.name);
-    const composition = isCustom
-      ? [...names('base'), ...names('fruitsLegumes'), ...names('proteine'), ...names('sauce'), ...names('toppings'), ...names('gourmand')]
-      : [...CLASSIC_INGREDIENTS, baseItem.defaultProtein, ...names('sauce')].filter(i => !selections.removed.includes(i));
+
+    let composition = [];
+    if (isCustom) {
+      selections.base.forEach(b => composition.push(b.name));
+      selections.fruitsLegumes.forEach((fl, idx) => {
+        composition.push(idx >= 5 ? `${fl.name} (Supp. +1,00€)` : fl.name);
+      });
+      selections.proteine.forEach((p, idx) => {
+        composition.push(idx >= 1 ? `${p.name} (Supp. +1,90€)` : p.name);
+      });
+      selections.sauce.forEach((s, idx) => {
+        composition.push(idx >= 1 ? `Sauce ${s.name} (Supp. +0,50€)` : `Sauce ${s.name}`);
+      });
+      selections.toppings.forEach((t, idx) => {
+        composition.push(idx >= 2 ? `${t.name} (Supp. +0,50€)` : t.name);
+      });
+      selections.gourmand.forEach(g => {
+        composition.push(`${g.name} (+${formatPrice(g.price)})`);
+      });
+    } else {
+      const names = (key) => selections[key].map(i => i.name);
+      composition = [...CLASSIC_INGREDIENTS, baseItem.defaultProtein, ...names('sauce')].filter(i => !selections.removed.includes(i));
+    }
 
     addToCart({
       cartName: `${isCustom ? 'Poké Sur Mesure' : `Poké ${baseItem.name.replace('Le ', '')}`} (${selections.size})`,
@@ -182,9 +202,19 @@ export default function BuilderScreen() {
 
   const limitText = () => {
     if (!step.limit) return step.hint || null;
-    const count = selections[step.id].length;
-    if (count <= step.limit) return `${count} sur ${step.limit} inclus`;
-    return `${count} choisis · supplément de ${formatPrice((count - step.limit) * step.extraPrice)}`;
+    const count = (selections[step.id] || []).length;
+    const limit = step.limit;
+    const extraPrice = step.extraPrice || 0;
+
+    if (count < limit) {
+      const remaining = limit - count;
+      return `${count} sur ${limit} inclus (${remaining} restant${remaining > 1 ? 's' : ''})`;
+    }
+    if (count === limit) {
+      return `${count} sur ${limit} inclus · Tout ingrédient suivant sera en supplément (+${formatPrice(extraPrice)})`;
+    }
+    const nbSupp = count - limit;
+    return `${count} sélectionnés (${limit} inclus + ${nbSupp} supplément${nbSupp > 1 ? 's' : ''} : +${formatPrice(nbSupp * extraPrice)})`;
   };
 
   const renderOptions = () => {
@@ -226,24 +256,72 @@ export default function BuilderScreen() {
       );
     }
 
-    const current = selections[step.id];
+    const current = selections[step.id] || [];
+    const limit = step.limit || 0;
+    const isLimitReached = limit > 0 && current.length >= limit;
+
     return (
       <motion.div className="option-list" variants={list} initial="initial" animate="animate">
         {step.items.filter(i => !outOfStock.includes(i.id)).map(item => {
-          const on = current.some(i => i.id === item.id);
-          let extraPrice = item.price || 0;
-          if (!extraPrice && step.limit && current.length >= step.limit && !on && step.extraPrice) {
-            extraPrice = step.extraPrice;
+          const selectedIndex = current.findIndex(i => i.id === item.id);
+          const isSelected = selectedIndex !== -1;
+          const isExtraItem = isSelected && limit > 0 && selectedIndex >= limit;
+
+          let badgeText = null;
+          let badgeClass = 'tag-neutral';
+
+          if (isSelected) {
+            if (isExtraItem) {
+              const extraCost = item.supplementPrice || step.extraPrice || 0;
+              badgeText = `Supplément +${formatPrice(extraCost)}`;
+              badgeClass = 'tag-gold';
+            } else {
+              badgeText = 'Inclus';
+              badgeClass = 'tag-green';
+            }
+          } else {
+            if (item.price && item.price > 0) {
+              badgeText = `+${formatPrice(item.price)}`;
+              badgeClass = 'tag-gold';
+            } else if (isLimitReached && step.extraPrice) {
+              const extraCost = item.supplementPrice || step.extraPrice;
+              badgeText = `+${formatPrice(extraCost)} (Supplément)`;
+              badgeClass = 'tag-gold-outline';
+            } else if (limit > 0) {
+              badgeText = 'Inclus';
+              badgeClass = 'tag-neutral';
+            }
           }
+
           return (
-            <motion.button key={item.id} variants={itemVariant} whileTap={{ scale: 0.98 }} className={`option ${on ? 'selected' : ''}`} onClick={() => toggle(item)}>
+            <motion.button 
+              key={item.id} 
+              variants={itemVariant} 
+              whileTap={{ scale: 0.98 }} 
+              className={`option ${isSelected ? 'selected' : ''} ${isExtraItem ? 'option-extra' : ''}`} 
+              onClick={() => toggle(item)}
+            >
               <span className="col gap-1">
-                <span className="option-name" style={{ fontWeight: on ? 700 : 500 }}>{item.name}</span>
+                <span className="option-name" style={{ fontWeight: isSelected ? 700 : 500 }}>
+                  {item.name}
+                </span>
                 <Spice level={item.spice} />
               </span>
-              <span className="row gap-3">
-                {extraPrice > 0 && !on && <span className="small" style={{ color: 'var(--gold-ink)', fontWeight: 700 }}>+{formatPrice(extraPrice)}</span>}
-                <CheckMark on={on} />
+
+              <span className="row gap-2" style={{ alignItems: 'center' }}>
+                {badgeText && (
+                  <span 
+                    className={`tag ${badgeClass}`} 
+                    style={{ 
+                      fontSize: 11, 
+                      fontWeight: badgeClass.includes('gold') ? 800 : 600,
+                      padding: '2px 8px' 
+                    }}
+                  >
+                    {badgeText}
+                  </span>
+                )}
+                <CheckMark on={isSelected} />
               </span>
             </motion.button>
           );
