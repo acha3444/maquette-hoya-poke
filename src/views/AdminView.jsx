@@ -14,6 +14,8 @@ import CaisseClotureModal from '../components/CaisseClotureModal';
 import ChangePinModal from '../components/ChangePinModal';
 import InstallPwaModal from '../components/InstallPwaModal';
 import PosRegister from '../components/PosRegister';
+import ProductThumb from '../components/brand/ProductThumb';
+import StaffBrand from '../components/brand/StaffBrand';
 import './admin.css';
 
 const PRESET_IMAGES = [
@@ -331,11 +333,7 @@ export default function AdminView() {
       <header className="admin-head">
         <div className="admin-head-top-row">
           <div className="admin-head-brand">
-            <img src="/logo.jpg" alt="Hoya Poké" style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid var(--line)' }} />
-            <div className="col">
-              <span className="display" style={{ fontSize: 18, color: 'var(--green-700)', lineHeight: 1.1 }}>Hoya Admin</span>
-              <span className="muted small" style={{ fontSize: 11 }}>Carte & Caisse</span>
-            </div>
+            <StaffBrand label="Admin" sub="Carte & caisse" />
           </div>
 
           <div className="row gap-2">
@@ -486,35 +484,14 @@ export default function AdminView() {
                   }}
                 >
                   <div className="row gap-3" style={{ alignItems: 'flex-start' }}>
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        style={{ width: 68, height: 68, borderRadius: 12, objectFit: 'cover', flexShrink: 0, border: '1px solid var(--line)' }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: 68,
-                          height: 68,
-                          borderRadius: 12,
-                          background: 'var(--cream-2)',
-                          display: 'grid',
-                          placeItems: 'center',
-                          flexShrink: 0,
-                          color: 'var(--muted)'
-                        }}
-                      >
-                        <Image size={24} />
-                      </div>
-                    )}
+                    <ProductThumb item={item} className="admin-thumb" />
 
                     <div className="grow col gap-1">
                       <div className="row gap-1" style={{ flexWrap: 'wrap' }}>
                         <span className="eyebrow" style={{ fontSize: 10, textTransform: 'uppercase' }}>{item.category}</span>
                         {item.badge && <span className="tag tag-gold" style={{ fontSize: 10 }}>{item.badge}</span>}
                         {soldOut && <span className="tag tag-danger" style={{ fontSize: 10 }}>Rupture</span>}
-                        {item.spice > 0 && <span className="tag tag-neutral" style={{ fontSize: 10 }}>{'🌶️'.repeat(item.spice)}</span>}
+                        {item.spice > 0 && <span className="tag tag-neutral" style={{ fontSize: 10 }}>Piquant {item.spice}/3</span>}
                       </div>
                       <strong style={{ fontSize: 15, color: 'var(--ink)' }}>{item.name}</strong>
                       {item.description && (
@@ -525,10 +502,10 @@ export default function AdminView() {
                       {isClassic && (
                         <div className="row gap-1" style={{ flexWrap: 'wrap', marginTop: 2 }}>
                           {item.defaultProtein && (
-                            <span className="tag tag-neutral" style={{ fontSize: 10 }}>🐟 {item.defaultProtein}</span>
+                            <span className="tag tag-neutral" style={{ fontSize: 10 }}>{item.defaultProtein}</span>
                           )}
                           {item.defaultSauce && (
-                            <span className="tag tag-neutral" style={{ fontSize: 10 }}>🥢 {item.defaultSauce}</span>
+                            <span className="tag tag-neutral" style={{ fontSize: 10 }}>Sauce {item.defaultSauce.toLowerCase()}</span>
                           )}
                         </div>
                       )}
@@ -758,7 +735,7 @@ export default function AdminView() {
                         {(menu.proteines || []).map(p => (
                           <option key={p.id || p.name} value={p.name}>{p.name}</option>
                         ))}
-                        <option value="__custom__">✨ Autre protéine libre...</option>
+                        <option value="__custom__">Autre protéine…</option>
                       </select>
                       {formProtein === '__custom__' && (
                         <input
@@ -781,7 +758,7 @@ export default function AdminView() {
                       >
                         {(menu.sauces || []).map(s => (
                           <option key={s.id || s.name} value={s.name}>
-                            {s.name} {s.spice ? '🌶️'.repeat(s.spice) : ''}
+                            {s.name}{s.spice ? ` · piquant ${s.spice}/3` : ''}
                           </option>
                         ))}
                       </select>
@@ -902,10 +879,10 @@ export default function AdminView() {
                       <label className="eyebrow" style={{ fontSize: 11 }}>Niveau de piquant</label>
                       <div className="row gap-1" style={{ flexWrap: 'wrap' }}>
                         {[
-                          { level: 0, label: 'Doux', icon: '🟢' },
-                          { level: 1, label: 'Légèrement piquant', icon: '🌶️' },
-                          { level: 2, label: 'Épicé', icon: '🌶️🌶️' },
-                          { level: 3, label: 'Très fort 🔥', icon: '🔥🌶️🌶️' }
+                          { level: 0, label: 'Doux' },
+                          { level: 1, label: 'Légèrement piquant' },
+                          { level: 2, label: 'Épicé' },
+                          { level: 3, label: 'Très fort' }
                         ].map(opt => (
                           <button
                             key={opt.level}
@@ -921,7 +898,7 @@ export default function AdminView() {
                               cursor: 'pointer'
                             }}
                           >
-                            <span>{opt.icon} {opt.label}</span>
+                            <span>{opt.label}</span>
                           </button>
                         ))}
                       </div>
@@ -957,7 +934,7 @@ export default function AdminView() {
                       required
                     />
                     <span className="muted small" style={{ fontSize: 11 }}>
-                      🐟 Cette protéine apparaîtra instantanément dans le configurateur Sur-Mesure et comme choix pour les nouveaux pokés classiques.
+                      Cette protéine apparaîtra instantanément dans le configurateur Sur-Mesure et comme choix pour les nouveaux pokés classiques.
                     </span>
                   </div>
                 )}
@@ -975,7 +952,7 @@ export default function AdminView() {
                       required
                     />
                     <span className="muted small" style={{ fontSize: 11 }}>
-                      🥗 Apparaîtra immédiatement dans le Sur-Mesure client et dans les suggestions de composition.
+                      Apparaîtra immédiatement dans le Sur-Mesure client et dans les suggestions de composition.
                     </span>
                   </div>
                 )}
@@ -993,7 +970,7 @@ export default function AdminView() {
                       required
                     />
                     <span className="muted small" style={{ fontSize: 11 }}>
-                      🌰 Topping croustillant ajouté aux choix sur-mesure.
+                      Topping croustillant ajouté aux choix sur-mesure.
                     </span>
                   </div>
                 )}

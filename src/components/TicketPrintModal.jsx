@@ -136,7 +136,7 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
             <div style={{ marginTop: 6, padding: '8px 10px', borderRadius: 4, background: order.paymentStatus === 'PAYÉ' ? '#e6f4ea' : '#fff3cd', border: `1px solid ${order.paymentStatus === 'PAYÉ' ? '#a8dab5' : '#ffeeba'}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 800, color: order.paymentStatus === 'PAYÉ' ? '#137333' : '#856404' }}>
                 <span>RÈGLEMENT :</span>
-                <span>{order.paymentStatus === 'PAYÉ' ? '✓ PAYÉ EN LIGNE (CB)' : '⚠️ À ENCAISSER SUR PLACE'}</span>
+                <span>{order.paymentStatus === 'PAYÉ' ? '✓ PAYÉ EN LIGNE (CB)' : '⚠ À ENCAISSER SUR PLACE'}</span>
               </div>
               <div style={{ fontSize: 10, color: '#555', marginTop: 3 }}>
                 {order.paymentStatus === 'PAYÉ' 

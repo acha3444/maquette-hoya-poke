@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { X, Phone, Check, Share2, Copy, Sparkles, Gift, Heart } from 'lucide-react';
+import HoyaMark from '../../components/brand/HoyaMark';
 import { useStore } from '../../store';
 import { formatPrice } from '../../format';
 import { ease } from '../../motion';
@@ -101,31 +102,23 @@ export default function TrackingScreen() {
             </span>
           </motion.div>
 
-          {/* Loyalty Stamp Reward Celebration Card */}
-          <motion.div 
-            className="card"
-            style={{
-              background: 'linear-gradient(135deg, #1b3524 0%, #284c33 100%)',
-              color: 'var(--cream)',
-              padding: '14px 16px',
-              borderRadius: 'var(--r)'
-            }}
+          {/* Loyalty stamp earned */}
+          <motion.div
+            className="track-stamp"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="row between">
-              <div className="row gap-2">
-                <Gift size={20} style={{ color: 'var(--gold)' }} />
-                <div>
-                  <div className="row gap-2">
-                    <strong style={{ fontSize: 13 }}>+{earnedStamps} tampon(s) crédité(s) !</strong>
-                    <span className="tag tag-gold" style={{ fontSize: 10 }}>Poké Pass</span>
-                  </div>
-                  <span className="small" style={{ opacity: 0.8, fontSize: 12 }}>
-                    Vous avez <strong>{loyaltyStamps}/10 tampons</strong>. Prochain bol offert à 10 !
-                  </span>
-                </div>
-              </div>
+            <motion.span
+              className="track-stamp-mark"
+              initial={{ scale: 1.8, opacity: 0, rotate: -30 }}
+              animate={{ scale: 1, opacity: 1, rotate: -6 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 380, damping: 18 }}
+            >
+              <HoyaMark size={26} />
+            </motion.span>
+            <div className="col">
+              <strong>+{earnedStamps} tampon{earnedStamps > 1 ? 's' : ''} sur votre carte</strong>
+              <span className="small">{loyaltyStamps}/10 · le 11ᵉ poké est offert</span>
             </div>
           </motion.div>
 
@@ -216,7 +209,7 @@ export default function TrackingScreen() {
 
           {favSaved && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="tag tag-gold" style={{ justifyContent: 'center', padding: '8px 12px' }}>
-              ❤️ Article sauvegardé dans votre Poké Club !
+              Ajouté à vos favoris
             </motion.div>
           )}
 

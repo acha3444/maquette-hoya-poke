@@ -11,6 +11,7 @@ import { MENU } from '../data';
 import { formatPrice } from '../format';
 import { playNewOrderSound, playSuccessSound } from '../sound';
 import TicketPrintModal from './TicketPrintModal';
+import ProductThumb from './brand/ProductThumb';
 import '../views/pos.css';
 
 const POS_CATEGORIES = [
@@ -348,10 +349,7 @@ export default function PosRegister() {
               onClick={() => handleAddItem(p, 'M')}
             >
               {p.badge && <span className="pos-card-badge">{p.badge}</span>}
-              <div 
-                className="pos-card-swatch"
-                style={{ backgroundImage: p.image ? `url(${p.image})` : 'none' }}
-              />
+              <ProductThumb item={p} className="pos-card-swatch" />
               <span className="pos-card-title">{p.name}</span>
               <div className="row between" style={{ marginTop: 'auto', width: '100%' }}>
                 <span className="pos-card-price">{formatPrice(p.price || p.priceM || 11.90)}</span>

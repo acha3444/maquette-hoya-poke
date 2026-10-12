@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Manrope:wght@400;500;600;700;800&family=Grandstander:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Grandstander:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400..800&display=swap');
 
 /* Palette Hoya Poké : Forêt, Papier, Curry, Bleuet, Lilas (charte studio.artim) */
 :root {
@@ -33,12 +33,12 @@
   --danger: #c8463d;
   --danger-soft: #fbeae8;
 
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-display: 'Grandstander', 'DM Sans', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
 
-  --r-sm: 10px;
-  --r: 14px;
-  --r-lg: 22px;
+  --r-sm: 12px;
+  --r: 16px;
+  --r-lg: 24px;
 
   --shadow-sm: 0 1px 2px rgba(20, 33, 26, 0.06);
   --shadow: 0 1px 2px rgba(20, 33, 26, 0.05), 0 6px 18px rgba(20, 33, 26, 0.06);
@@ -84,9 +84,8 @@ h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
 
 .display {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  font-variation-settings: 'opsz' 72;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .eyebrow {
@@ -627,3 +626,148 @@ a.btn { text-decoration: none; }
   z-index: 1;
 }
 
+
+/* ---------- Écran de code équipe ---------- */
+.pin-screen {
+  position: relative;
+  overflow: hidden;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  background: var(--green-700);
+  color: var(--cream);
+  user-select: none;
+}
+.pin-branch {
+  position: absolute;
+  width: 260px;
+  left: -50px;
+  bottom: -60px;
+  color: var(--cream);
+  opacity: 0.1;
+  transform: rotate(24deg);
+  pointer-events: none;
+}
+.pin-panel {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 22px;
+}
+.pin-brand { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.pin-mark {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--cream);
+  color: var(--green-700);
+}
+.pin-word {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.pin-title { font-family: var(--font-display); font-weight: 800; font-size: 28px; line-height: 1.1; margin-bottom: 8px; }
+.pin-sub { font-size: 14px; color: rgba(244, 240, 230, 0.7); }
+.pin-dots { display: flex; gap: 16px; margin: 4px 0; }
+.pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgba(244, 240, 230, 0.35);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.pin-dot.on { background: var(--gold); box-shadow: none; }
+.pin-dot.error { background: var(--danger); box-shadow: none; }
+.pin-error { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #f3a79f; }
+.pin-pad { width: 100%; max-width: 280px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pin-key {
+  height: 60px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(244, 240, 230, 0.08);
+  color: var(--cream);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  transition: background 0.15s, transform 0.1s;
+}
+.pin-key:hover { background: rgba(244, 240, 230, 0.14); }
+.pin-key:active { transform: scale(0.94); background: var(--gold); color: var(--green-700); }
+.pin-key.ghost {
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(244, 240, 230, 0.6);
+}
+.pin-key.ghost:active { background: transparent; color: var(--cream); }
+.pin-remember { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(244, 240, 230, 0.72); cursor: pointer; }
+.pin-remember input { width: 16px; height: 16px; flex: none; accent-color: var(--gold); cursor: pointer; }
+
+/* ---------- Marque dans les apps équipe ---------- */
+.staff-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.staff-brand-mark {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--green-700);
+  color: var(--cream);
+}
+.staff-brand.compact .staff-brand-mark { width: 34px; height: 34px; }
+.staff-brand-text { display: flex; flex-direction: column; min-width: 0; }
+.staff-brand-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--green-700);
+  white-space: nowrap;
+}
+.staff-brand-name em { font-style: normal; color: var(--gold-ink); }
+.staff-brand.compact .staff-brand-name { font-size: 15px; }
+.staff-brand-sub { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.staff-actions .btn { height: 32px; padding: 0 10px; font-size: 12px; }
+@media (max-width: 600px) {
+  .staff-actions .staff-action-label { display: none; }
+  .staff-actions .btn { width: 34px; padding: 0; justify-content: center; }
+}
+
+/* ---------- Vignettes produits (caisse, admin) ---------- */
+.product-thumb {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--cream-2);
+  color: var(--green-700);
+}
+.product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.product-thumb-bowl { width: 150%; height: auto; overflow: visible; }
+.product-thumb.bowl, .product-thumb.cat-boissons { background: var(--bleuet-soft); }
+.product-thumb.cat-desserts, .product-thumb.cat-proteines { background: var(--lilas-soft); }
+.product-thumb.cat-sides, .product-thumb.cat-sauces { background: var(--gold-soft); }
+.product-thumb.cat-fruitsLegumes, .product-thumb.cat-toppings, .product-thumb.cat-formules { background: var(--green-100); }

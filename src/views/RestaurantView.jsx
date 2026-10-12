@@ -12,6 +12,7 @@ import CaisseClotureModal from '../components/CaisseClotureModal';
 import ChangePinModal from '../components/ChangePinModal';
 import InstallPwaModal from '../components/InstallPwaModal';
 import { lockStaffApp, isStaffPinValid, getStaffPin } from '../components/StaffGuard';
+import StaffBrand from '../components/brand/StaffBrand';
 import './restaurant.css';
 
 const STATUS_COLUMNS = [
@@ -135,7 +136,7 @@ function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
             </span>
           ) : (
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--gold-ink)', background: 'var(--gold-soft)', padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              ⚠️ Sur place ({order.type === 'LIVRAISON' ? 'livreur' : 'comptoir'})
+              Sur place ({order.type === 'LIVRAISON' ? 'livreur' : 'comptoir'})
             </span>
           )}
         </div>
@@ -467,10 +468,7 @@ export default function RestaurantView() {
     <div className="screen kitchen" ref={rootRef}>
       <header className="kitchen-head">
         <div className="kitchen-head-top">
-          <div className="col">
-            <span className="display" style={{ fontSize: wide ? 24 : 19, color: 'var(--green-700)', lineHeight: 1.1 }}>Hoya Poké</span>
-            <span className="muted small" style={{ fontSize: wide ? 12 : 11 }}>Cuisine · {today}</span>
-          </div>
+          <StaffBrand label="Cuisine" sub={today} compact={!wide} />
 
           <div className="row gap-2">
             <button
@@ -570,7 +568,7 @@ export default function RestaurantView() {
               style={{ borderColor: 'var(--line)', background: 'var(--paper)' }}
             >
               {hideRevenue ? <Lock size={12} style={{ color: 'var(--gold)' }} /> : <Eye size={12} />}
-              <span>{hideRevenue ? 'CA protégé 🔒' : `${formatPrice(revenue)}`}</span>
+              <span>{hideRevenue ? 'CA protégé' : `${formatPrice(revenue)}`}</span>
             </button>
           )}
 
@@ -599,7 +597,7 @@ export default function RestaurantView() {
                 {hideRevenue ? '•••• €' : formatPrice(revenue)}
                 {hideRevenue ? <Lock size={12} style={{ color: 'var(--gold)' }} /> : <EyeOff size={13} className="muted" />}
               </span>
-              <span>{hideRevenue ? 'CA protégé 🔒' : 'encaissé'}</span>
+              <span>{hideRevenue ? 'CA protégé' : 'encaissé'}</span>
             </div>
             <button
               className="btn btn-sm btn-ghost row gap-1"
@@ -636,7 +634,7 @@ export default function RestaurantView() {
         >
           <div className="row gap-2">
             <Volume2 size={16} />
-            <span>Autorisation requise par votre navigateur : Cliquez ici pour activer le carillon de commande 🔔</span>
+            <span>Autorisation requise par votre navigateur : Cliquez ici pour activer le carillon de commande</span>
           </div>
           <span className="btn btn-sm btn-ghost" style={{ padding: '3px 10px', height: 'auto', fontSize: 11, borderColor: 'var(--gold-ink)', color: 'var(--gold-ink)' }}>
             Activer le son
@@ -661,8 +659,8 @@ export default function RestaurantView() {
                 </span>
               </div>
               <button
-                className="btn btn-sm btn-ghost"
-                style={{ color: 'var(--cream)', borderColor: 'rgba(255,255,255,0.3)', padding: '3px 10px', height: 'auto', fontSize: 12 }}
+                className="btn btn-sm btn-gold"
+                style={{ padding: '0 14px', height: 30, fontSize: 12, borderRadius: 999 }}
                 onClick={() => playNewOrderSound(true)}
                 title="Faire retentir le carillon"
               >

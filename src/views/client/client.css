@@ -1,18 +1,9 @@
 .client-root {
-  --font-display: 'Grandstander', 'DM Sans', system-ui, sans-serif;
-  --font-body: 'DM Sans', system-ui, sans-serif;
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
   background: var(--cream);
-  font-family: var(--font-body);
-}
-.client-root .display {
-  font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  font-variation-settings: normal;
 }
 .client-root .price { font-weight: 700; letter-spacing: 0; }
 
@@ -528,7 +519,7 @@
 
 .loyalty-header, .formule-modal-header {
   padding: 18px 20px;
-  background: var(--green-900);
+  background: var(--green-700);
   color: var(--cream);
   display: flex;
   align-items: center;
@@ -935,10 +926,9 @@
 
 /* --- Upsell In Cart --- */
 .upsell-card {
-  background: linear-gradient(135deg, rgba(200, 140, 50, 0.08) 0%, rgba(45, 80, 56, 0.05) 100%);
+  background: var(--gold-soft);
   border-radius: var(--r);
-  padding: 12px;
-  border: 1px dashed rgba(200, 140, 50, 0.4);
+  padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1001,7 +991,7 @@
 
 .pwa-card-header {
   padding: 16px 20px;
-  background: var(--green-900);
+  background: var(--green-700);
   color: var(--cream);
   display: flex;
   align-items: center;
@@ -1027,8 +1017,7 @@
 }
 
 .pwa-reward-highlight {
-  background: linear-gradient(135deg, rgba(200, 140, 50, 0.15) 0%, rgba(45, 80, 56, 0.08) 100%);
-  border: 1.5px dashed var(--gold);
+  background: var(--bleuet-soft);
   border-radius: var(--r);
   padding: 12px 14px;
 }
@@ -1170,3 +1159,27 @@
 
 
 .custom-card .menu-name { font-family: var(--font-display); font-weight: 800; font-size: 24px; line-height: 1.1; }
+
+/* Tampon gagné (suivi) */
+.track-stamp {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: var(--bleuet-soft);
+  color: var(--green-700);
+}
+.track-stamp strong { font-size: 15px; }
+.track-stamp .small { color: var(--muted); }
+.track-stamp-mark {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--bleuet);
+  border-radius: 3px;
+  background: #f8f5ec;
+  color: var(--gold);
+}

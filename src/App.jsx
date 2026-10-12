@@ -41,7 +41,7 @@ function FloatingProNav() {
         onClick={() => setHidden(false)}
         title="Afficher le menu pro"
       >
-        ⚡ Staff
+        Staff
       </button>
     );
   }

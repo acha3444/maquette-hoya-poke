@@ -161,12 +161,8 @@
 
 .pos-card-swatch {
   width: 100%;
-  height: 48px;
-  border-radius: 6px;
-  background-size: cover;
-  background-position: center;
-  margin-bottom: 8px;
-  background-color: var(--cream-2);
+  height: 64px;
+  margin-bottom: 10px;
 }
 
 .pos-card-title {
@@ -755,3 +751,4 @@
     border-radius: 12px;
   }
 }
+.pos-card-swatch .product-thumb-bowl { width: 104px; }

@@ -404,7 +404,7 @@ export default function CheckoutScreen() {
 
               {loyaltyDiscount > 0 && (
                 <div className="row between small discount-line">
-                  <span>🎁 Bol offert fidélité (10 tampons)</span>
+                  <span>Poké offert, carte de fidélité complète</span>
                   <span className="tnum">- {formatPrice(loyaltyDiscount)}</span>
                 </div>
               )}

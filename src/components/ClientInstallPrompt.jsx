@@ -99,7 +99,7 @@ export default function ClientInstallPrompt({ forceOpen, onOpenChange }) {
                 <div>
                   <div className="row gap-2">
                     <span className="tag tag-gold" style={{ fontSize: 10, padding: '2px 8px' }}>
-                      ⚡ Application Hoya Poké
+                      Application Hoya Poké
                     </span>
                   </div>
                   <h3 className="display" style={{ fontSize: 19, margin: '4px 0 0', color: 'var(--cream)' }}>

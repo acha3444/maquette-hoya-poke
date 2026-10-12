@@ -15,6 +15,7 @@
   align-items: center;
   gap: 12px;
 }
+.admin-head-top-row { display: flex; align-items: center; gap: 16px; }
 
 .admin-head-actions {
   display: flex;
@@ -210,3 +211,5 @@
 }
 
 
+
+.admin-thumb { width: 68px; height: 68px; flex-shrink: 0; }

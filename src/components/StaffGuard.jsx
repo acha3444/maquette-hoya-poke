@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, ShieldAlert, ArrowLeft, Delete, Check, LockKeyhole } from 'lucide-react';
+import { ShieldAlert, ArrowLeft, Delete } from 'lucide-react';
+import HoyaMark from './brand/HoyaMark';
+import Branch from './brand/Branch';
 import { useNavigate } from 'react-router-dom';
 
 import { supabase } from '../supabase';
@@ -146,255 +148,58 @@ export default function StaffGuard({ children, title = 'Accès Équipe Cuisine',
   }, []);
 
   if (!isAuthenticated) {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
     return (
-      <div 
-        style={{
-          minHeight: '100dvh',
-          width: '100%',
-          background: 'radial-gradient(ellipse at 50% 20%, #18291f 0%, #0f1a14 100%)',
-          color: 'var(--cream)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px 20px',
-          userSelect: 'none'
-        }}
-      >
+      <div className="pin-screen">
+        <Branch className="pin-branch" />
         <motion.div
+          className="pin-panel"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          style={{
-            maxWidth: 360,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: 20
-          }}
         >
-          {/* Brand & Security Badge */}
-          <div style={{ position: 'relative' }}>
-            <img 
-              src="/logo.jpg" 
-              alt="Hoya Poké" 
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 18,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                border: '2px solid rgba(227, 163, 69, 0.4)'
-              }}
-            />
-            <div 
-              style={{
-                position: 'absolute',
-                bottom: -6,
-                right: -6,
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                background: 'var(--gold)',
-                color: 'var(--green-900)',
-                display: 'grid',
-                placeItems: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-              }}
-            >
-              <Lock size={14} strokeWidth={2.5} />
-            </div>
+          <div className="pin-brand">
+            <span className="pin-mark"><HoyaMark size={34} /></span>
+            <span className="pin-word">Hoya Poké</span>
           </div>
 
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, margin: '0 0 6px' }}>
-              {title}
-            </h1>
-            <p style={{ fontSize: 13, color: 'rgba(250, 245, 240, 0.7)', margin: 0 }}>
-              Accès réservé au personnel. Veuillez saisir votre code PIN staff à 4 chiffres.
-            </p>
+            <h1 className="pin-title">{title}</h1>
+            <p className="pin-sub">Accès réservé à l'équipe. Saisissez votre code à 4 chiffres.</p>
           </div>
 
-          {/* PIN Indicators Dots */}
           <motion.div
+            className="pin-dots"
             animate={hasError ? { x: [-10, 10, -8, 8, -4, 4, 0] } : {}}
             transition={{ duration: 0.4 }}
-            style={{
-              display: 'flex',
-              gap: 16,
-              margin: '8px 0'
-            }}
           >
-            {[0, 1, 2, 3].map(index => {
-              const filled = enteredPin.length > index;
-              return (
-                <div
-                  key={index}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    borderRadius: '50%',
-                    background: hasError 
-                      ? '#c8463d' 
-                      : filled 
-                        ? 'var(--gold)' 
-                        : 'rgba(250, 245, 240, 0.15)',
-                    border: hasError
-                      ? '2px solid #c8463d'
-                      : filled
-                        ? '2px solid var(--gold)'
-                        : '2px solid rgba(250, 245, 240, 0.3)',
-                    boxShadow: filled && !hasError ? '0 0 12px rgba(227, 163, 69, 0.5)' : 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                />
-              );
-            })}
+            {[0, 1, 2, 3].map(index => (
+              <span key={index} className={`pin-dot ${hasError ? 'error' : enteredPin.length > index ? 'on' : ''}`} />
+            ))}
           </motion.div>
 
           {hasError && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                color: '#ff8a80',
-                fontSize: 12,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6
-              }}
-            >
+            <motion.div className="pin-error" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
               <ShieldAlert size={14} />
-              <span>Code PIN incorrect {getStaffPin() === DEFAULT_PIN ? '(par défaut : 1234)' : ''}</span>
+              <span>Code incorrect {getStaffPin() === DEFAULT_PIN ? '(par défaut : 1234)' : ''}</span>
             </motion.div>
           )}
 
-          {/* Keypad */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 12,
-              width: '100%',
-              maxWidth: 280
-            }}
-          >
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-              <button
-                key={num}
-                onClick={() => handleKeyPress(String(num))}
-                style={{
-                  height: 56,
-                  borderRadius: 16,
-                  background: 'rgba(250, 245, 240, 0.08)',
-                  border: '1px solid rgba(250, 245, 240, 0.12)',
-                  color: 'var(--cream)',
-                  fontSize: 22,
-                  fontWeight: 700,
-                  display: 'grid',
-                  placeItems: 'center',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s ease, transform 0.1s ease',
-                  WebkitTapHighlightColor: 'transparent'
-                }}
-                onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
-                onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                onTouchStart={e => e.currentTarget.style.transform = 'scale(0.95)'}
-                onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                {num}
-              </button>
+          <div className="pin-pad">
+            {keys.map(num => (
+              <button key={num} className="pin-key" onClick={() => handleKeyPress(num)}>{num}</button>
             ))}
-
-            <button
-              onClick={() => navigate('/')}
-              style={{
-                height: 56,
-                borderRadius: 16,
-                background: 'transparent',
-                border: 'none',
-                color: 'rgba(250, 245, 240, 0.6)',
-                fontSize: 12,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                cursor: 'pointer'
-              }}
-              title="Retour au site client"
-            >
+            <button className="pin-key ghost" onClick={() => navigate('/')} title="Retour au site client">
               <ArrowLeft size={16} />
               <span>Retour</span>
             </button>
-
-            <button
-              onClick={() => handleKeyPress('0')}
-              style={{
-                height: 56,
-                borderRadius: 16,
-                background: 'rgba(250, 245, 240, 0.08)',
-                border: '1px solid rgba(250, 245, 240, 0.12)',
-                color: 'var(--cream)',
-                fontSize: 22,
-                fontWeight: 700,
-                display: 'grid',
-                placeItems: 'center',
-                cursor: 'pointer',
-                transition: 'background 0.15s ease, transform 0.1s ease'
-              }}
-              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
-              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-              onTouchStart={e => e.currentTarget.style.transform = 'scale(0.95)'}
-              onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              0
-            </button>
-
-            <button
-              onClick={handleDelete}
-              style={{
-                height: 56,
-                borderRadius: 16,
-                background: 'rgba(250, 245, 240, 0.08)',
-                border: '1px solid rgba(250, 245, 240, 0.12)',
-                color: 'var(--cream)',
-                display: 'grid',
-                placeItems: 'center',
-                cursor: 'pointer',
-                transition: 'background 0.15s ease, transform 0.1s ease'
-              }}
-              aria-label="Effacer"
-              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
-              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-              onTouchStart={e => e.currentTarget.style.transform = 'scale(0.95)'}
-              onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              <Delete size={20} />
-            </button>
+            <button className="pin-key" onClick={() => handleKeyPress('0')}>0</button>
+            <button className="pin-key" onClick={handleDelete} aria-label="Effacer"><Delete size={20} /></button>
           </div>
 
-          {/* Remember me toggle */}
-          <label 
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontSize: 12,
-              color: 'rgba(250, 245, 240, 0.7)',
-              cursor: 'pointer',
-              marginTop: 4
-            }}
-          >
-            <input 
-              type="checkbox" 
-              checked={rememberMe} 
-              onChange={e => setRememberMe(e.target.checked)} 
-              style={{ accentColor: 'var(--gold)', cursor: 'pointer' }}
-            />
-            <span>Mémoriser la session sur cette tablette</span>
+          <label className="pin-remember">
+            <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
+            <span>Rester connecté sur cet appareil</span>
           </label>
         </motion.div>
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import StaffBrand from '../components/brand/StaffBrand';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Phone, Check, TriangleAlert, Navigation, Bike, ChefHat, ShoppingBag, LockKeyhole, Smartphone } from 'lucide-react';
 import { useStore } from '../store';
@@ -78,49 +79,42 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
   return (
     <div className="screen">
       <div className="topbar" style={{ gridTemplateColumns: '1fr auto' }}>
-        <div className="row gap-2" style={{ paddingLeft: 6 }}>
-          <span className="live-dot" />
-          <span style={{ fontWeight: 700 }}>Alex</span>
-          <span className="muted small">· en service</span>
-        </div>
-        <div className="row gap-2">
+        <StaffBrand label="Livreur" sub="Alex · en service" compact />
+        <div className="row gap-2 staff-actions">
           <button 
             className="btn btn-sm btn-ghost row gap-1"
-            style={{ height: 28, padding: '0 8px', fontSize: 11 }}
             onClick={() => setShowInstallModal(true)}
             title="Installer l'App Livreur sur l'écran d'accueil"
           >
             <Smartphone size={12} style={{ color: 'var(--green-700)' }} />
-            <span>App Livreur</span>
+            <span className="staff-action-label">App Livreur</span>
           </button>
           <button 
             className="btn btn-sm btn-ghost row gap-1"
-            style={{ height: 28, padding: '0 8px', fontSize: 11 }}
             onClick={() => navigate('/cuisine')}
             title="Aller à la cuisine"
           >
             <ChefHat size={12} />
-            <span>Cuisine</span>
+            <span className="staff-action-label">Cuisine</span>
           </button>
           <button 
             className="btn btn-sm btn-ghost row gap-1"
-            style={{ height: 28, padding: '0 8px', fontSize: 11 }}
             onClick={() => navigate('/')}
             title="Aller au site client"
           >
             <ShoppingBag size={12} />
-            <span>Client</span>
+            <span className="staff-action-label">Client</span>
           </button>
           <button 
             className="btn btn-sm btn-ghost row gap-1" 
-            style={{ height: 28, padding: '0 8px', fontSize: 11, color: '#c8463d' }}
+            style={{ color: 'var(--danger)' }}
             onClick={lockStaffApp}
             title="Verrouiller l'espace livreur (Code PIN 1234)"
           >
             <LockKeyhole size={12} />
-            <span>Verrouiller</span>
+            <span className="staff-action-label">Verrouiller</span>
           </button>
-          <span className="tag">Course n° {order.id}</span>
+          <span className="tag staff-action-label">Course n° {order.id}</span>
         </div>
       </div>
 
@@ -182,7 +176,7 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
           <div className="row between" style={{ padding: '10px 12px', borderRadius: 'var(--r-sm)', background: order.paymentStatus === 'PAYÉ' ? 'var(--ok-soft)' : 'var(--gold-soft)' }}>
             <span className="small" style={{ fontWeight: 600 }}>Règlement</span>
             <span className="small" style={{ fontWeight: 800, color: order.paymentStatus === 'PAYÉ' ? 'var(--ok)' : 'var(--gold-ink)' }}>
-              {order.paymentStatus === 'PAYÉ' ? '✓ Payé en ligne' : `⚠️ ${formatPrice(order.total)} à encaisser`}
+              {order.paymentStatus === 'PAYÉ' ? '✓ Payé en ligne' : `${formatPrice(order.total)} à encaisser`}
             </span>
           </div>
 
@@ -194,7 +188,7 @@ function Trip({ order, deliveryOrders, onSelectOrder }) {
               rel="noopener noreferrer"
               style={{ justifyContent: 'center' }}
             >
-              <Navigation size={16} /> Lancer GPS (Maps / Waze)
+              <Navigation size={16} /> Itinéraire
             </a>
             <a
               className="btn btn-ghost btn-md grow"

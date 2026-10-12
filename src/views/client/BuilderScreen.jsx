@@ -432,7 +432,7 @@ export default function BuilderScreen() {
                 margin: '8px 0 0'
               }}
             >
-              {isFav ? '❤️ Recette ajoutée à vos favoris Poké Club !' : 'Recette retirée de vos favoris.'}
+              {isFav ? 'Recette ajoutée à vos favoris' : 'Recette retirée de vos favoris.'}
             </motion.div>
           )}
         </div>
