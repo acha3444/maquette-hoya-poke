@@ -213,3 +213,41 @@
 
 
 .admin-thumb { width: 68px; height: 68px; flex-shrink: 0; }
+
+/* Subnav Tabs Clean Overflow */
+.admin-subnav {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-subnav::-webkit-scrollbar { display: none; }
+
+.admin-subnav .tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+/* Print Optimization for A4 QR Easels */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #qr-print-area,
+  #qr-print-area * {
+    visibility: visible;
+  }
+  #qr-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px !important;
+    background: transparent !important;
+  }
+}

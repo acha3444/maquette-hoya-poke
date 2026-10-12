@@ -497,7 +497,7 @@ export default function TableOrderView() {
         )}
 
         {/* Regular Items List (Classiques, Sides, Boissons, Desserts) */}
-        {activeCategory !== 'formules' && (
+        {activeCategory !== 'formules' && activeCategory !== 'surmesure' && (
           <div className="table-grid">
             {(MENU[activeCategory] || []).map(item => (
               <div key={item.name} className="table-card">
@@ -868,8 +868,7 @@ export default function TableOrderView() {
               onClick={() => setShowBuilderModal(false)}
             />
             <motion.div 
-              className="table-card"
-              style={{ position: 'relative', zIndex: 990, width: '92%', maxWidth: 520, maxHeight: '85vh', overflowY: 'auto', padding: 20, borderRadius: 20 }}
+              className="table-modal-card"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -891,16 +890,14 @@ export default function TableOrderView() {
                     <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>1. Choisir la taille</span>
                     <div className="row gap-2">
                       <button 
-                        className={`chip grow ${customSize === 'M' ? 'active' : ''}`}
+                        className={`table-option-chip grow ${customSize === 'M' ? 'active' : ''}`}
                         onClick={() => setCustomSize('M')}
-                        style={{ padding: 10, justifyContent: 'center' }}
                       >
                         Medium (M) · 11,90 €
                       </button>
                       <button 
-                        className={`chip grow ${customSize === 'L' ? 'active' : ''}`}
+                        className={`table-option-chip grow ${customSize === 'L' ? 'active' : ''}`}
                         onClick={() => setCustomSize('L')}
-                        style={{ padding: 10, justifyContent: 'center' }}
                       >
                         Large (L) · 14,90 €
                       </button>
@@ -909,13 +906,13 @@ export default function TableOrderView() {
 
                   <div>
                     <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>2. Choisir votre base</span>
-                    <div className="col gap-1">
+                    <div className="col gap-2">
                       {(MENU.bases || []).map(b => (
                         <button 
                           key={b.name}
-                          className={`chip ${customBase === b.name ? 'active' : ''}`}
+                          className={`table-option-chip ${customBase === b.name ? 'active' : ''}`}
                           onClick={() => setCustomBase(b.name)}
-                          style={{ padding: 10, justifyContent: 'flex-start' }}
+                          style={{ justifyContent: 'flex-start', paddingLeft: 16 }}
                         >
                           {b.name}
                         </button>
@@ -934,11 +931,11 @@ export default function TableOrderView() {
                     return (
                       <button 
                         key={p.name}
-                        className={`chip ${sel ? 'active' : ''}`}
+                        className={`table-option-chip ${sel ? 'active' : ''}`}
                         onClick={() => {
                           setCustomProteins(prev => sel ? prev.filter(x => x !== p.name) : [...prev, p.name]);
                         }}
-                        style={{ padding: 10, justifyContent: 'space-between' }}
+                        style={{ justifyContent: 'space-between' }}
                       >
                         <span>{p.name}</span>
                         {sel && <Check size={14} />}
@@ -952,17 +949,17 @@ export default function TableOrderView() {
               {builderStep === 2 && (
                 <div className="col gap-2">
                   <span className="eyebrow">Choisissez jusqu'à 4 fruits & légumes frais</span>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
                     {(MENU.fruitsLegumes || []).map(f => {
                       const sel = customVeggies.includes(f.name);
                       return (
                         <button 
                           key={f.name}
-                          className={`chip ${sel ? 'active' : ''}`}
+                          className={`table-option-chip ${sel ? 'active' : ''}`}
                           onClick={() => {
                             setCustomVeggies(prev => sel ? prev.filter(x => x !== f.name) : [...prev, f.name]);
                           }}
-                          style={{ padding: 10, fontSize: 12 }}
+                          style={{ fontSize: 12, minHeight: 40, padding: '8px 10px' }}
                         >
                           {f.name}
                         </button>
@@ -979,9 +976,9 @@ export default function TableOrderView() {
                   {(MENU.sauces || []).map(s => (
                     <button 
                       key={s.name}
-                      className={`chip ${customSauce === s.name ? 'active' : ''}`}
+                      className={`table-option-chip ${customSauce === s.name ? 'active' : ''}`}
                       onClick={() => setCustomSauce(s.name)}
-                      style={{ padding: 10, justifyContent: 'space-between' }}
+                      style={{ justifyContent: 'space-between' }}
                     >
                       <span>{s.name}</span>
                       {customSauce === s.name && <Check size={14} />}
@@ -994,17 +991,17 @@ export default function TableOrderView() {
               {builderStep === 4 && (
                 <div className="col gap-2">
                   <span className="eyebrow">Toppings croquants</span>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
                     {(MENU.toppings || []).map(tp => {
                       const sel = customToppings.includes(tp.name);
                       return (
                         <button 
                           key={tp.name}
-                          className={`chip ${sel ? 'active' : ''}`}
+                          className={`table-option-chip ${sel ? 'active' : ''}`}
                           onClick={() => {
                             setCustomToppings(prev => sel ? prev.filter(x => x !== tp.name) : [...prev, tp.name]);
                           }}
-                          style={{ padding: 10, fontSize: 12 }}
+                          style={{ fontSize: 12, minHeight: 40, padding: '8px 10px' }}
                         >
                           {tp.name}
                         </button>

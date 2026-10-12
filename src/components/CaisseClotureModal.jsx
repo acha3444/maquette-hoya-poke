@@ -216,12 +216,12 @@ export default function CaisseClotureModal({ onClose }) {
                       <strong className="tnum">{formatPrice(takeawayTotal)}</strong>
                     </div>
                     <div className="row between small">
-                      <span className="row gap-2" style={{ color: '#059669', fontWeight: 600 }}><Tv size={14} /> Borne Tactile Kiosque ({kioskOrders.length})</span>
-                      <strong className="tnum" style={{ color: '#059669' }}>{formatPrice(kioskTotal)}</strong>
+                      <span className="row gap-2" style={{ color: 'var(--green-700)', fontWeight: 600 }}><Tv size={14} /> Borne Tactile Kiosque ({kioskOrders.length})</span>
+                      <strong className="tnum" style={{ color: 'var(--green-700)' }}>{formatPrice(kioskTotal)}</strong>
                     </div>
                     <div className="row between small">
-                      <span className="row gap-2" style={{ color: '#7c3aed', fontWeight: 600 }}><QrCode size={14} /> Commandes à Table QR ({tableOrders.length})</span>
-                      <strong className="tnum" style={{ color: '#7c3aed' }}>{formatPrice(tableTotal)}</strong>
+                      <span className="row gap-2" style={{ color: '#5d4766', fontWeight: 600 }}><QrCode size={14} /> Commandes à Table QR ({tableOrders.length})</span>
+                      <strong className="tnum" style={{ color: '#5d4766' }}>{formatPrice(tableTotal)}</strong>
                     </div>
                     <div className="row between small">
                       <span className="row gap-2"><Bike size={14} className="muted" /> Livraisons à Domicile ({deliveryOrders.length})</span>

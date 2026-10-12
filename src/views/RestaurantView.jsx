@@ -100,13 +100,13 @@ function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
 
       <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
         {(order.source === 'TABLE' || order.tableName) && (
-          <span className="tag" style={{ background: '#7c3aed', color: '#fff', fontWeight: 800 }}>
+          <span className="tag" style={{ background: '#5d4766', color: '#fff', fontWeight: 800 }}>
             🍽️ {order.tableName || 'Table'} · Sur place
           </span>
         )}
 
         {(order.source === 'BORNE' || order.kioskId || String(order.id).startsWith('B-')) && (
-          <span className="tag" style={{ background: '#059669', color: '#fff', fontWeight: 800 }}>
+          <span className="tag" style={{ background: 'var(--green-800)', color: 'var(--cream)', fontWeight: 800 }}>
             🖥️ {order.kioskId || 'Borne'} · Sur place
           </span>
         )}
@@ -119,7 +119,7 @@ function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
         )}
 
         {order.paymentStatus !== 'PAYÉ' && !done && (
-          <span className="tag" style={{ fontWeight: 800, background: '#ef4444', color: '#fff' }}>
+          <span className="tag" style={{ fontWeight: 800, background: 'var(--danger)', color: '#fff' }}>
             ⚠️ À ENCAISSER
           </span>
         )}
@@ -162,7 +162,7 @@ function OrderCard({ order, onPrint, autoPrintOnAccept = true }) {
             </span>
           ) : (
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--gold-ink)', background: 'var(--gold-soft)', padding: '2px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              Sur place ({order.type === 'LIVRAISON' ? 'livreur' : 'comptoir'})
+              {order.source === 'TABLE' ? 'Table (comptoir)' : order.source === 'BORNE' ? 'Borne (comptoir)' : `Sur place (${order.type === 'LIVRAISON' ? 'livreur' : 'comptoir'})`}
             </span>
           )}
         </div>

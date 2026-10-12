@@ -33,8 +33,15 @@
   --danger: #c8463d;
   --danger-soft: #fbeae8;
 
+  /* Aliases & nuances studio.artim */
+  --forest: #18302a;
+  --forest-dark: #12261f;
+  --curry: #c45c28;
+  --curry-soft: #faeee6;
+
   --font-display: 'Grandstander', 'DM Sans', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
 
   --r-sm: 12px;
   --r: 16px;

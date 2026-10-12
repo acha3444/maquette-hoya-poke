@@ -216,8 +216,8 @@ export default function AdminTablesTab() {
 
       {/* 3. Tables List Table */}
       <div style={{ background: 'var(--paper)', borderRadius: 16, border: '1px solid var(--line)', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', minWidth: 620, borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--cream-2)', borderBottom: '1px solid var(--line)' }}>
                 <th style={{ padding: '12px 16px' }}>QR Code</th>
@@ -330,7 +330,7 @@ export default function AdminTablesTab() {
               id="qr-print-area" 
               style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
                 gap: 20 
               }}
             >

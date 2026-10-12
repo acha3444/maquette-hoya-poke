@@ -617,7 +617,7 @@ export default function BorneView() {
                       >
                         {isSoldOut && <div className="borne-soldout-badge">{t.soldOut}</div>}
                         <div className="borne-product-art">
-                          <HoyaMark size={54} style={{ color: 'var(--forest)', opacity: 0.8 }} />
+                          <HoyaMark size={54} style={{ color: 'var(--green-800)', opacity: 0.8 }} />
                           {item.bestseller && <span className="borne-badge-corner">Best-Seller</span>}
                         </div>
                         <div className="borne-product-info">
@@ -700,7 +700,7 @@ export default function BorneView() {
                     {t.step} {builderStep + 1} / 5
                   </h2>
 
-                  <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--forest)' }}>
+                  <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--green-800)' }}>
                     {formatPrice(customBowl.price)}
                   </span>
                 </div>
@@ -709,10 +709,10 @@ export default function BorneView() {
                 {builderStep === 0 && (
                   <div style={{ width: '100%', maxWidth: 760 }}>
                     <h2 style={{ fontSize: 28, fontWeight: 900, margin: '20px 0', textAlign: 'center' }}>Choisissez votre taille</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                    <div className="borne-grid-responsive-2">
                       <button 
                         className="borne-mode-card"
-                        style={{ borderColor: customBowl.size === 'M' ? 'var(--forest)' : 'var(--line)' }}
+                        style={{ borderColor: customBowl.size === 'M' ? 'var(--green-800)' : 'var(--line)' }}
                         onClick={() => {
                           setCustomBowl(b => ({ ...b, size: 'M', price: 12.90 }));
                           setBuilderStep(1);
@@ -723,7 +723,7 @@ export default function BorneView() {
                       </button>
                       <button 
                         className="borne-mode-card"
-                        style={{ borderColor: customBowl.size === 'L' ? 'var(--forest)' : 'var(--line)' }}
+                        style={{ borderColor: customBowl.size === 'L' ? 'var(--green-800)' : 'var(--line)' }}
                         onClick={() => {
                           setCustomBowl(b => ({ ...b, size: 'L', price: 15.90 }));
                           setBuilderStep(1);
@@ -740,19 +740,19 @@ export default function BorneView() {
                 {builderStep === 1 && (
                   <div style={{ width: '100%', maxWidth: 760 }}>
                     <h2 style={{ fontSize: 28, fontWeight: 900, margin: '20px 0', textAlign: 'center' }}>1. Votre base</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }}>
+                    <div className="borne-grid-responsive-3">
                       {(currentMenu.bases || []).map(b => (
                         <button
                           key={b.id}
                           className="borne-mode-card"
-                          style={{ minHeight: 180, padding: 24, borderColor: customBowl.base === b.name ? 'var(--forest)' : 'var(--line)' }}
+                          style={{ minHeight: 160, padding: 20, borderColor: customBowl.base === b.name ? 'var(--green-800)' : 'var(--line)' }}
                           onClick={() => {
                             const extra = b.price || 0;
                             setCustomBowl(prev => ({ ...prev, base: b.name, price: (prev.size === 'M' ? 12.90 : 15.90) + extra }));
                             setBuilderStep(2);
                           }}
                         >
-                          <div style={{ fontSize: 22, fontWeight: 800 }}>{b.name}</div>
+                          <div style={{ fontSize: 20, fontWeight: 800 }}>{b.name}</div>
                           {b.price > 0 && <div style={{ color: 'var(--curry)', fontWeight: 700 }}>+{formatPrice(b.price)}</div>}
                         </button>
                       ))}
@@ -766,7 +766,7 @@ export default function BorneView() {
                     <h2 style={{ fontSize: 26, fontWeight: 900, margin: '14px 0', textAlign: 'center' }}>
                       2. Fruits & légumes ({customBowl.fruitsLegumes.length}/5 inclus)
                     </h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, maxHeight: '48vh', overflowY: 'auto' }}>
+                    <div className="borne-grid-responsive-3" style={{ maxHeight: '48vh', overflowY: 'auto' }}>
                       {(currentMenu.fruitsLegumes || []).map(fl => {
                         const isSelected = customBowl.fruitsLegumes.includes(fl.name);
                         return (
@@ -775,9 +775,9 @@ export default function BorneView() {
                             className="borne-pill-btn"
                             style={{ 
                               justifyContent: 'space-between',
-                              background: isSelected ? 'var(--forest)' : 'var(--cream-2)',
+                              background: isSelected ? 'var(--green-800)' : 'var(--cream-2)',
                               color: isSelected ? 'var(--cream)' : 'var(--green-900)',
-                              borderColor: isSelected ? 'var(--forest)' : 'var(--line)'
+                              borderColor: isSelected ? 'var(--green-800)' : 'var(--line)'
                             }}
                             onClick={() => {
                               setCustomBowl(prev => {
@@ -808,18 +808,18 @@ export default function BorneView() {
                 {builderStep === 3 && (
                   <div style={{ width: '100%', maxWidth: 760 }}>
                     <h2 style={{ fontSize: 28, fontWeight: 900, margin: '20px 0', textAlign: 'center' }}>3. Votre protéine</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+                    <div className="borne-grid-responsive-2">
                       {(currentMenu.proteines || []).map(prot => (
                         <button
                           key={prot.id}
                           className="borne-mode-card"
-                          style={{ minHeight: 160, padding: 24, borderColor: customBowl.proteine === prot.name ? 'var(--forest)' : 'var(--line)' }}
+                          style={{ minHeight: 140, padding: 20, borderColor: customBowl.proteine === prot.name ? 'var(--green-800)' : 'var(--line)' }}
                           onClick={() => {
                             setCustomBowl(prev => ({ ...prev, proteine: prot.name }));
                             setBuilderStep(4);
                           }}
                         >
-                          <div style={{ fontSize: 22, fontWeight: 800 }}>{prot.name}</div>
+                          <div style={{ fontSize: 20, fontWeight: 800 }}>{prot.name}</div>
                         </button>
                       ))}
                     </div>
@@ -832,13 +832,13 @@ export default function BorneView() {
                     <h2 style={{ fontSize: 28, fontWeight: 900, margin: '20px 0', textAlign: 'center' }}>4. Sauce & Croquant</h2>
                     
                     <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>Sauce maison :</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+                    <div className="borne-grid-responsive-3" style={{ marginBottom: 20 }}>
                       {(currentMenu.sauces || []).map(s => (
                         <button
                           key={s.id}
                           className="borne-pill-btn"
                           style={{ 
-                            background: customBowl.sauce === s.name ? 'var(--forest)' : 'var(--cream-2)',
+                            background: customBowl.sauce === s.name ? 'var(--green-800)' : 'var(--cream-2)',
                             color: customBowl.sauce === s.name ? 'var(--cream)' : 'var(--green-900)'
                           }}
                           onClick={() => setCustomBowl(prev => ({ ...prev, sauce: s.name }))}
@@ -849,7 +849,7 @@ export default function BorneView() {
                     </div>
 
                     <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 10 }}>Croquant :</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                    <div className="borne-grid-responsive-3">
                       {(currentMenu.toppings || []).map(top => {
                         const isSelected = customBowl.toppings.includes(top.name);
                         return (
@@ -857,7 +857,7 @@ export default function BorneView() {
                             key={top.id}
                             className="borne-pill-btn"
                             style={{ 
-                              background: isSelected ? 'var(--forest)' : 'var(--cream-2)',
+                              background: isSelected ? 'var(--green-800)' : 'var(--cream-2)',
                               color: isSelected ? 'var(--cream)' : 'var(--green-900)'
                             }}
                             onClick={() => {
@@ -991,7 +991,7 @@ export default function BorneView() {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, padding: '20px 0', borderTop: '2px solid var(--line)' }}>
                     <div style={{ fontSize: 24, fontWeight: 900 }}>{t.total} TTC :</div>
-                    <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--forest)' }}>{formatPrice(cartTotal)}</div>
+                    <div style={{ fontSize: 36, fontWeight: 900, color: 'var(--green-900)' }}>{formatPrice(cartTotal)}</div>
                   </div>
 
                   <button 
@@ -1112,12 +1112,12 @@ export default function BorneView() {
 
                 <div style={{ background: 'var(--paper)', borderRadius: 28, padding: 36, border: '2px solid var(--line)', textAlign: 'center', width: 'min(90vw, 560px)' }}>
                   <div style={{ fontSize: 18, color: 'var(--muted)', marginBottom: 8 }}>Montant à régler au comptoir :</div>
-                  <div style={{ fontSize: 48, fontWeight: 900, color: 'var(--forest)', marginBottom: 28 }}>
+                  <div style={{ fontSize: 48, fontWeight: 900, color: 'var(--green-900)', marginBottom: 28 }}>
                     {formatPrice(cartTotal)}
                   </div>
 
                   <button 
-                    className="borne-validate-btn"
+                    className="borne-validate-btn" 
                     style={{ width: '100%', justifyContent: 'center' }}
                     onClick={handlePlaceBorneOrder}
                   >
@@ -1142,7 +1142,7 @@ export default function BorneView() {
                 exit={{ opacity: 0 }}
               >
                 <div className="borne-confirm-box">
-                  <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--forest)', color: '#fff', display: 'grid', placeItems: 'center' }}>
+                  <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--green-800)', color: '#fff', display: 'grid', placeItems: 'center' }}>
                     <Check size={48} strokeWidth={3} />
                   </div>
 
@@ -1193,11 +1193,11 @@ export default function BorneView() {
 
                 {/* Size choice */}
                 <h4 style={{ fontSize: 18, fontWeight: 800, marginBottom: 12 }}>Taille :</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 }}>
+                <div className="borne-grid-responsive-2" style={{ marginBottom: 20 }}>
                   <button 
                     className="borne-pill-btn"
                     style={{ 
-                      background: classicOptions.size === 'M' ? 'var(--forest)' : 'var(--cream-2)',
+                      background: classicOptions.size === 'M' ? 'var(--green-800)' : 'var(--cream-2)',
                       color: classicOptions.size === 'M' ? 'var(--cream)' : 'var(--green-900)'
                     }}
                     onClick={() => setClassicOptions(prev => ({ ...prev, size: 'M' }))}
@@ -1207,7 +1207,7 @@ export default function BorneView() {
                   <button 
                     className="borne-pill-btn"
                     style={{ 
-                      background: classicOptions.size === 'L' ? 'var(--forest)' : 'var(--cream-2)',
+                      background: classicOptions.size === 'L' ? 'var(--green-800)' : 'var(--cream-2)',
                       color: classicOptions.size === 'L' ? 'var(--cream)' : 'var(--green-900)'
                     }}
                     onClick={() => setClassicOptions(prev => ({ ...prev, size: 'L' }))}
@@ -1218,14 +1218,14 @@ export default function BorneView() {
 
                 {/* Sauce choice */}
                 <h4 style={{ fontSize: 18, fontWeight: 800, marginBottom: 12 }}>Sauce :</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+                <div className="borne-grid-responsive-3" style={{ marginBottom: 20 }}>
                   {(currentMenu.sauces || []).map(s => (
                     <button
                       key={s.id}
                       className="borne-pill-btn"
                       style={{ 
                         fontSize: 14,
-                        background: classicOptions.sauce === s.name ? 'var(--forest)' : 'var(--cream-2)',
+                        background: classicOptions.sauce === s.name ? 'var(--green-800)' : 'var(--cream-2)',
                         color: classicOptions.sauce === s.name ? 'var(--cream)' : 'var(--green-900)'
                       }}
                       onClick={() => setClassicOptions(prev => ({ ...prev, sauce: s.name }))}

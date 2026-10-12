@@ -157,7 +157,7 @@ function FloatingProNav() {
 
                 <button
                   className="btn btn-sm btn-ghost"
-                  style={{ justifyContent: 'flex-start', gap: 10, color: '#7c3aed' }}
+                  style={{ justifyContent: 'flex-start', gap: 10, color: '#5d4766' }}
                   onClick={() => { navigate('/t/hp_t1_9a2b'); setOpen(false); }}
                 >
                   <span>🍽️</span>
