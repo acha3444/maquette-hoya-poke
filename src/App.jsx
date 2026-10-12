@@ -55,8 +55,8 @@ function FloatingProNav() {
     window.navigator.standalone === true
   );
 
-  // Ne jamais afficher la barre pro / démo sur les pages côté client
-  if (isClient) {
+  // When installed as standalone customer app, don't show developer pro toolbar
+  if (isStandalone && isClient) {
     return null;
   }
 
