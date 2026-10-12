@@ -805,6 +805,39 @@
   .h-footer-bottom { flex-direction: column; gap: 4px; }
 }
 
+/* Contrôles de navigation flèches sur PC */
+.h-arrow-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.h-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  color: var(--green-800);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.h-arrow-btn:hover {
+  background: var(--cream-2);
+  border-color: var(--green-700);
+  transform: scale(1.05);
+}
+.h-arrow-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 600px) {
+  .h-arrow-controls {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .h-ticker-track, .h-sticker-ring { animation: none; }
 }

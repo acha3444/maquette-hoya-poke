@@ -16,6 +16,7 @@ import AnimatedMark from '../components/brand/AnimatedMark';
 import { BowlScene } from '../components/BowlVisualizer';
 import FormuleModal from '../components/FormuleModal';
 import { findTableByToken } from '../services/tableService';
+import { useDragScroll } from '../utils/useDragScroll';
 import './table/tableOrder.css';
 
 const TEXTS = {
@@ -157,6 +158,7 @@ export default function TableOrderView() {
 
   const [lang, setLang] = useState('FR');
   const t = TEXTS[lang];
+  const tabsDrag = useDragScroll();
 
   // Table Resolution and Session Persistence
   const [activeTable, setActiveTable] = useState(() => {
@@ -424,7 +426,7 @@ export default function TableOrderView() {
         </div>
       </header>
 
-      <nav className="to-tabs" aria-label="Catégories">
+      <nav className="to-tabs drag-scroll" ref={tabsDrag.ref} aria-label="Catégories">
         {Object.entries(t.categories).map(([key, label]) => (
           <button
             key={key}

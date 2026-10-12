@@ -7,7 +7,7 @@ export default function PrivacyPolicyView() {
   const navigate = useNavigate();
 
   return (
-    <div style={{ minHeight: '100vh', minHeight: '100dvh', background: 'var(--cream)', color: 'var(--ink)', paddingBottom: 60 }}>
+    <div style={{ minHeight: '100vh', minHeight: '100dvh', width: '100%', background: 'var(--cream)', color: 'var(--ink)', paddingBottom: 60 }}>
       {/* Header */}
       <header style={{ background: 'var(--green-900)', color: 'var(--cream)', padding: 'max(20px, env(safe-area-inset-top, 20px)) clamp(16px, 4vw, 24px) clamp(20px, 4vw, 28px)', borderBottomLeftRadius: 28, borderBottomRightRadius: 28 }}>
         <div style={{ maxWidth: 760, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 14 }}>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight, ShoppingBag, Bike, ShoppingBasket, Star, MapPin, Clock, AtSign, Phone, Wifi } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ShoppingBag, Bike, ShoppingBasket, Star, MapPin, Clock, AtSign, Phone, Wifi, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStore } from '../../store';
 import { MENU, FORMULES, CUSTOMER_REVIEWS } from '../../data';
 import { RESTAURANT } from '../../restaurant';
@@ -14,6 +14,7 @@ import DemoBowl from '../../components/brand/DemoBowl';
 import LoyaltyModal from '../../components/LoyaltyModal';
 import FormuleModal from '../../components/FormuleModal';
 import ClientInstallPrompt from '../../components/ClientInstallPrompt';
+import { useDragScroll } from '../../utils/useDragScroll';
 import './home.css';
 
 const reveal = {
@@ -70,6 +71,8 @@ export default function HomeScreen() {
   const [installPromptOpen, setInstallPromptOpen] = useState(false);
   const reduce = useReducedMotion();
   const scrollRef = useRef(null);
+  const classicsDrag = useDragScroll();
+  const reviewsDrag = useDragScroll();
 
   const start = (type) => {
     setOrderType(type);
@@ -231,10 +234,20 @@ export default function HomeScreen() {
               <h2 className="h-title">Les classiques</h2>
               <p className="h-lead">Riz vinaigré, carotte, concombre, edamame, avocat et sésame. Il ne reste qu'à choisir la protéine.</p>
             </div>
-            <button className="h-link" onClick={() => navigate('/menu')}>Toute la carte <ArrowRight size={16} /></button>
+            <div className="row gap-2" style={{ alignItems: 'center' }}>
+              <button className="h-link" onClick={() => navigate('/menu')}>Toute la carte <ArrowRight size={16} /></button>
+              <div className="row gap-1 h-arrow-controls">
+                <button className="h-arrow-btn" onClick={() => classicsDrag.scrollLeftBy(280)} aria-label="Faire défiler vers la gauche">
+                  <ChevronLeft size={18} />
+                </button>
+                <button className="h-arrow-btn" onClick={() => classicsDrag.scrollRightBy(280)} aria-label="Faire défiler vers la droite">
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
           </motion.div>
 
-          <div className="h-classics">
+          <div className="h-classics drag-scroll" ref={classicsDrag.ref}>
             {(menu.classiques || []).map((c, i) => (
               <motion.button
                 key={c.id}
@@ -400,7 +413,7 @@ export default function HomeScreen() {
               </a>
             </div>
           </motion.div>
-          <div className="h-reviews">
+          <div className="h-reviews drag-scroll" ref={reviewsDrag.ref}>
             {CUSTOMER_REVIEWS.map((r, i) => (
               <motion.figure key={r.id} className="h-review" {...reveal} transition={{ ...reveal.transition, delay: i * 0.05 }}>
                 <div className="row between" style={{ alignItems: 'center', width: '100%' }}>

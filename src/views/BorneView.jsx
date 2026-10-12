@@ -18,6 +18,7 @@ import { BowlScene } from '../components/BowlVisualizer';
 import BowlArt from '../components/brand/BowlArt';
 import { getKioskDeviceId, loadLocalKioskConfig, getNextKioskOrderNumber } from '../services/kioskService';
 import { lockStaffApp } from '../components/StaffGuard';
+import { useDragScroll } from '../utils/useDragScroll';
 import './borne/borne.css';
 
 const TEXTS = {
@@ -145,6 +146,7 @@ export default function BorneView() {
   const [selectedProduct, setSelectedProduct] = useState(null); // for item modal
   const [activeFormuleModal, setActiveFormuleModal] = useState(null);
   const [showAllergensModal, setShowAllergensModal] = useState(false);
+  const borneCatDrag = useDragScroll();
 
   // Kiosk Cart (Dedicated state to ensure complete kiosk isolation)
   const [kioskCart, setKioskCart] = useState([]);
@@ -539,7 +541,7 @@ export default function BorneView() {
                 exit={{ opacity: 0 }}
               >
                 {/* Category Navigation Bar (64px+) */}
-                <div className="borne-category-bar">
+                <div className="borne-category-bar drag-scroll" ref={borneCatDrag.ref}>
                   {Object.entries(t.categories).map(([catKey, catLabel]) => (
                     <button
                       key={catKey}

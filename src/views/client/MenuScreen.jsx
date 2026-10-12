@@ -8,6 +8,7 @@ import { formatPrice } from '../../format';
 import { ease } from '../../motion';
 import FormuleModal from '../../components/FormuleModal';
 import BowlArt from '../../components/brand/BowlArt';
+import { useDragScroll } from '../../utils/useDragScroll';
 
 const CATEGORIES = [
   { id: 'formules', label: 'Formules midi' },
@@ -105,6 +106,8 @@ export default function MenuScreen() {
   const lockSpy = useRef(false);
   const dragControls = useDragControls();
   const isDesktop = useIsDesktop();
+  const catBarDrag = useDragScroll();
+  const dietBarDrag = useDragScroll();
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
 
@@ -169,7 +172,7 @@ export default function MenuScreen() {
         <span />
       </div>
 
-      <div className="cat-bar">
+      <div className="cat-bar drag-scroll" ref={catBarDrag.ref}>
         {CATEGORIES.map(cat => (
           <button
             key={cat.id}
@@ -185,7 +188,7 @@ export default function MenuScreen() {
       </div>
 
       {/* Dietary Filters Pill Strip */}
-      <div className="diet-filter-bar">
+      <div className="diet-filter-bar drag-scroll" ref={dietBarDrag.ref}>
         {[
           { id: 'all', label: 'Tous les plats' },
           { id: 'veggie', label: 'Végétarien' },
@@ -209,29 +212,32 @@ export default function MenuScreen() {
           <section id="cat-formules" className="menu-section">
             <h2 className="display menu-heading">Les formules du midi</h2>
             <p className="muted small menu-lead">Poké au choix + Boisson fraîche (+ Dessert). Économisez jusqu'à 2,50 €.</p>
-            {FORMULES.map(f => (
-              <motion.div
-                key={f.id}
-                className="menu-row clickable"
-                onClick={() => setSelectedFormule(f)}
-                {...reveal}
-              >
-                <div className="grow col gap-1">
-                  <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
-                    <span className="menu-name">{f.name}</span>
-                    <span className="tag tag-gold">{f.badge}</span>
+            <div className="menu-section-grid">
+              {FORMULES.map(f => (
+                <motion.div
+                  key={f.id}
+                  className="menu-row clickable"
+                  onClick={() => setSelectedFormule(f)}
+                  {...reveal}
+                >
+                  <div className="grow col gap-1">
+                    <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
+                      <span className="menu-name">{f.name}</span>
+                      <span className="tag tag-gold">{f.badge}</span>
+                    </div>
+                    <span className="muted small" style={{ fontSize: 11 }}>{f.description}</span>
+                    <span className="price small">M {formatPrice(f.priceM)} · L {formatPrice(f.priceL)}</span>
                   </div>
-                  <span className="muted small" style={{ fontSize: 11 }}>{f.description}</span>
-                  <span className="price small">M {formatPrice(f.priceM)} · L {formatPrice(f.priceL)}</span>
-                </div>
-                <button className="btn btn-sm btn-primary">Composer</button>
-              </motion.div>
-            ))}
+                  <button className="btn btn-sm btn-primary">Composer</button>
+                </motion.div>
+              ))}
+            </div>
           </section>
 
           <section id="cat-classiques" className="menu-section">
             <h2 className="display menu-heading">Les classiques</h2>
             <p className="muted small menu-lead">Riz vinaigré, carotte, concombre, edamame, avocat, ananas, sésame. Vous choisissez la sauce.</p>
+            <div className="menu-section-grid">
             {filterClassiques(menu.classiques || []).map(item => {
               const proteinId = (menu.proteines || []).find(p => p.name === item.defaultProtein)?.id;
               const soldOut = outOfStock.includes(proteinId);
@@ -264,6 +270,7 @@ export default function MenuScreen() {
                 </motion.button>
               );
             })}
+            </div>
           </section>
 
           <section id="cat-surmesure" className="menu-section">
@@ -280,17 +287,23 @@ export default function MenuScreen() {
 
           <section id="cat-sides" className="menu-section">
             <h2 className="display menu-heading">Sides</h2>
-            {(menu.sides || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            <div className="menu-section-grid">
+              {(menu.sides || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            </div>
           </section>
 
           <section id="cat-desserts" className="menu-section">
             <h2 className="display menu-heading">Desserts du moment</h2>
-            {(menu.desserts || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            <div className="menu-section-grid">
+              {(menu.desserts || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            </div>
           </section>
 
           <section id="cat-boissons" className="menu-section">
             <h2 className="display menu-heading">Boissons</h2>
-            {(menu.boissons || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            <div className="menu-section-grid">
+              {(menu.boissons || []).map(item => <SimpleItem key={item.id} item={item} soldOut={outOfStock.includes(item.id)} />)}
+            </div>
           </section>
         </div>
       </div>

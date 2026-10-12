@@ -2,6 +2,7 @@
 .account-root {
   min-height: 100vh;
   min-height: 100dvh;
+  width: 100%;
   background-color: var(--cream);
   color: var(--ink);
   padding-bottom: 80px;

@@ -562,7 +562,26 @@
 
 @media (min-width: 760px) {
   .to-head { border-radius: 0 0 36px 36px; padding-bottom: 34px; }
-  .to-sheet { bottom: 20px; border-radius: 28px; max-height: calc(100dvh - 40px); }
+  .to-head-row, .to-welcome, .to-track-strip, .to-warning { max-width: 960px; }
+  .to-tabs { max-width: 960px; }
+  .to-main { max-width: 960px; }
+  .to-grid { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
+  .to-bar { max-width: 780px; }
+  .to-sheet { 
+    bottom: 24px; 
+    border-radius: 28px; 
+    max-height: min(86dvh, 720px);
+    box-shadow: 0 24px 60px rgba(18, 38, 31, 0.3);
+  }
+}
+
+.to-tabs.drag-scroll {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.to-tabs.drag-scroll.is-dragging {
+  cursor: grabbing;
 }
 
 @media (prefers-reduced-motion: reduce) {

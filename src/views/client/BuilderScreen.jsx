@@ -445,7 +445,18 @@ export default function BuilderScreen() {
             initial="enter"
             animate="center"
             exit="exit"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.25}
+            onDragEnd={(_, { offset, velocity }) => {
+              if (offset.x < -60 || velocity.x < -400) {
+                if (canProceed()) next();
+              } else if (offset.x > 60 || velocity.x > 400) {
+                goBack();
+              }
+            }}
             className="col gap-4 section"
+            style={{ touchAction: 'pan-y' }}
           >
             <div className="col gap-1">
               <span className="eyebrow builder-eyebrow">Étape {stepIndex + 1} sur {steps.length}</span>

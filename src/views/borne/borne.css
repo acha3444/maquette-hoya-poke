@@ -275,8 +275,14 @@
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   flex-shrink: 0;
+  width: 100%;
 }
 .borne-category-bar::-webkit-scrollbar { display: none; }
+@media (min-width: 900px) {
+  .borne-category-bar {
+    justify-content: center;
+  }
+}
 
 .borne-cat-tab {
   display: inline-flex;
@@ -293,6 +299,7 @@
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.18s ease;
+  flex-shrink: 0;
 }
 
 .borne-cat-tab.active {
@@ -309,11 +316,14 @@
 .borne-products-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 24px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
   align-content: start;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 @media (max-width: 640px) {
