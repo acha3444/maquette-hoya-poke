@@ -1,25 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Manrope:wght@400;500;600;700;800&family=Grandstander:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400..800&display=swap');
 
+/* Palette Hoya Poké : Forêt, Papier, Curry, Bleuet, Lilas (charte studio.artim) */
 :root {
-  --green-900: #0f1a14;
-  --green-800: #18291f;
-  --green-700: #294336;
-  --green-600: #365746;
-  --green-100: #e6ede8;
+  --green-900: #12261f;
+  --green-800: #18302a;
+  --green-700: #1c3a33;
+  --green-600: #29493f;
+  --green-100: #e2eae4;
 
-  --cream: #faf5f0;
-  --cream-2: #f3ece4;
-  --paper: #ffffff;
-  --line: #e8dfd5;
-  --line-strong: #d8ccbf;
+  --cream: #f4f0e6;
+  --cream-2: #ebe5d6;
+  --paper: #fbf9f3;
+  --line: #e1dacb;
+  --line-strong: #cdc3ae;
 
-  --ink: #14211a;
-  --muted: #66766c;
-  --faint: #9aa59e;
+  --ink: #15251f;
+  --muted: #5d6a62;
+  --faint: #979f96;
 
-  --gold: #e3a345;
-  --gold-ink: #a8691a;
-  --gold-soft: #fbf0de;
+  --gold: #f0bf55;
+  --gold-ink: #87610f;
+  --gold-soft: #faeecd;
+
+  --bleuet: #a7acdf;
+  --bleuet-soft: #e6e7f6;
+  --lilas: #c7b4da;
+  --lilas-soft: #efe8f5;
+  --kraft: #c9a274;
 
   --ok: #4f8a3a;
   --ok-soft: #e9f2e3;
@@ -106,6 +113,7 @@ h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
 .gap-2 { gap: 8px; }
 .gap-3 { gap: 12px; }
 .gap-4 { gap: 16px; }
+.gap-5 { gap: 20px; }
 .gap-6 { gap: 24px; }
 
 .screen {

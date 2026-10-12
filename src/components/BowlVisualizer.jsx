@@ -1,7 +1,8 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, animate, useMotionValue, useReducedMotion } from 'framer-motion';
-import { Sparkles, Activity, ShieldCheck } from 'lucide-react';
+import { Activity, ShieldCheck } from 'lucide-react';
+import HoyaMark from './brand/HoyaMark';
 import { NUTRITION_ESTIMATES } from '../data';
 
 // Helper to safely extract string name whether item is an Object or a String
@@ -66,6 +67,19 @@ const PROTEINS = {
         <path d={`M${-w / 2 + 1.5} ${-h / 5} Q0 ${-h / 5 - 3.5} ${w / 2 - 1.5} ${-h / 5 + 1}`} stroke="#ffe0d2" strokeWidth={1.3} fill="none" strokeLinecap="round" />
         <path d={`M${-w / 2 + 2} ${h / 6} Q0 ${h / 6 - 3} ${w / 2 - 2} ${h / 6 + 1.5}`} stroke="#ffd2c0" strokeWidth={1} fill="none" strokeLinecap="round" opacity={0.85} />
         {gloss(-w / 6, -h / 2 + 2.4, w / 4, 1.1, 0.45)}
+      </>);
+    }
+  },
+  thon: {
+    color: '#b3313f', count: 11,
+    draw: (rand) => {
+      const w = 14 + rand() * 4, h = 12 + rand() * 3;
+      return (<>
+        {shadow(w * 0.55, h * 0.55)}
+        <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={3} fill="#b3313f" />
+        <rect x={-w / 2} y={h / 8} width={w} height={h * 0.38} rx={3} fill="#8e2232" opacity={0.7} />
+        <path d={`M${-w / 2 + 2} ${-h / 6} Q0 ${-h / 6 - 2.5} ${w / 2 - 2} ${-h / 6 + 0.8}`} stroke="#d9707a" strokeWidth={0.9} fill="none" strokeLinecap="round" opacity={0.8} />
+        {gloss(-w / 6, -h / 2 + 2.2, w / 4, 1, 0.4)}
       </>);
     }
   },
@@ -274,6 +288,7 @@ const proteinKind = (n) => {
   const s = norm(n);
   if (s.includes('poulet')) return 'poulet';
   if (s.includes('falafel')) return 'falafel';
+  if (s.includes('thon')) return 'thon';
   return 'saumon';
 };
 
@@ -568,11 +583,108 @@ function Dollop({ reduce }) {
 
 /* ───────────────────────── Bowl ───────────────────────── */
 
-export default function BowlVisualizer({ selections = {}, isCustom = true, baseItem, classicIngredients = [] }) {
-  const [showNutrition, setShowNutrition] = useState(false);
-  const reduce = useReducedMotion();
+const KRAFT_FIBERS = (() => {
+  const rand = seeded('kraft');
+  return Array.from({ length: 90 }, (_, i) => {
+    const a = rand() * 360;
+    const r = 124 + rand() * 25;
+    return <circle key={i} cx={Math.cos(a * DEG) * r} cy={Math.sin(a * DEG) * r} r={0.35 + rand() * 0.6} fill={rand() > 0.5 ? '#f0dcb8' : '#7a5532'} opacity={0.4} />;
+  });
+})();
+
+// The bowl itself, seen from above. `still` renders it without the drop-in intro (cards, thumbnails).
+export function BowlScene({
+  baseName = 'Riz vinaigré', proteinName = '', veggiesList = [], toppingsList = [], sauceName = '',
+  hasGourmand = false, isLarge = false, still = false, className = 'bowl-svg', label
+}) {
+  const prefersReduced = useReducedMotion();
+  const reduce = prefersReduced || still;
   const [bottleLayer, setBottleLayer] = useState(null);
   const uid = useId().replace(/[^a-zA-Z0-9-]/g, '');
+  const hasSauce = Boolean(sauceName);
+
+  const veggieKey = veggiesList.join('|');
+  const toppingKey = toppingsList.join('|');
+  const vegPieces = useMemo(() => layoutVeggies(veggieKey ? veggieKey.split('|') : []), [veggieKey]);
+  const protPieces = useMemo(
+    () => (proteinName ? layoutProtein(proteinName, isLarge, veggieKey.length > 0) : []),
+    [proteinName, isLarge, veggieKey]
+  );
+  const topPieces = useMemo(() => layoutToppings(toppingKey ? toppingKey.split('|') : []), [toppingKey]);
+
+  // Keep the previous base underneath while the new one spreads over it
+  const [baseLayers, setBaseLayers] = useState([{ name: baseName, id: 0 }]);
+  const topLayer = baseLayers[baseLayers.length - 1];
+  if (topLayer.name !== baseName) {
+    setBaseLayers([topLayer, { name: baseName, id: topLayer.id + 1 }]);
+  }
+
+  return (
+    <svg className={className} viewBox="-170 -170 340 340" role="img" aria-label={label}>
+      <defs>
+        <radialGradient id={`${uid}-kraft`} cx="0.4" cy="0.36" r="0.75">
+          <stop offset="0" stopColor="#dcbd92" />
+          <stop offset="0.7" stopColor="#c9a274" />
+          <stop offset="1" stopColor="#b28659" />
+        </radialGradient>
+        <radialGradient id={`${uid}-wall`} cx="0.58" cy="0.62" r="0.62">
+          <stop offset="0.8" stopColor="#c29868" />
+          <stop offset="1" stopColor="#9c7347" />
+        </radialGradient>
+        <radialGradient id={`${uid}-inner`} cx="0.56" cy="0.6" r="0.58">
+          <stop offset="0.72" stopColor="#000" stopOpacity="0" />
+          <stop offset="0.93" stopColor="#000" stopOpacity="0.22" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.45" />
+        </radialGradient>
+        <filter id={`${uid}-blur`} x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
+        <clipPath id={`${uid}-food`}>
+          <circle r={R} />
+        </clipPath>
+      </defs>
+
+      <motion.g
+        initial={reduce || still ? false : { scale: 0.85, opacity: 0 }}
+        animate={{ scale: isLarge || still ? 1 : 0.9, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 18 }}
+      >
+        {/* Table shadow */}
+        <ellipse cx={8} cy={16} rx={148} ry={144} fill="rgba(30,20,10,0.35)" filter={`url(#${uid}-blur)`} />
+
+        {/* Kraft paper bowl, like the ones used in the shop */}
+        <circle r={150} fill={`url(#${uid}-kraft)`} />
+        <circle r={147} fill="none" stroke="#e6cfa8" strokeWidth="5" />
+        <circle r={143.6} fill="none" stroke="#7a5532" strokeOpacity="0.28" strokeWidth="1.2" />
+        <circle r={141} fill={`url(#${uid}-wall)`} />
+        {KRAFT_FIBERS}
+        <path d="M-120 -76 A142 142 0 0 1 36 -138" stroke="#fff" strokeOpacity="0.35" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <circle r={R + 1.5} fill="none" stroke="#6b4826" strokeOpacity="0.35" strokeWidth="2.5" />
+
+        {/* Food */}
+        <g clipPath={`url(#${uid}-food)`}>
+          {baseLayers.map((b, i) => (
+            <BaseLayer key={b.id} name={b.name} uid={uid} intro={i === baseLayers.length - 1} reduce={reduce} />
+          ))}
+          <Pieces items={vegPieces} reduce={reduce} size={1.45} />
+          <Pieces items={protPieces} reduce={reduce} size={1.5} drop={2.6} spring={{ stiffness: 280, damping: 17 }} />
+          <AnimatePresence>
+            {hasSauce && <SauceDrizzle key={sauceName} name={sauceName} reduce={reduce} bottleLayer={bottleLayer} />}
+          </AnimatePresence>
+          <Pieces items={topPieces} reduce={reduce} size={1.3} drop={3.2} spring={{ stiffness: 380, damping: 24 }} />
+          <AnimatePresence>
+            {hasGourmand && <Dollop key="gourmand" reduce={reduce} />}
+          </AnimatePresence>
+          <circle r={R} fill={`url(#${uid}-inner)`} pointerEvents="none" />
+        </g>
+        <g ref={setBottleLayer} />
+      </motion.g>
+    </svg>
+  );
+}
+
+export default function BowlVisualizer({ selections = {}, isCustom = true, baseItem, classicIngredients = [] }) {
+  const [showNutrition, setShowNutrition] = useState(false);
 
   const removed = selections.removed || [];
   const baseName = getName(selections.base?.[0], 'Riz vinaigré');
@@ -608,31 +720,6 @@ export default function BowlVisualizer({ selections = {}, isCustom = true, baseI
   const totalCalories = Math.round((baseCal + protCal + veggieCal + extraCal) * (isLarge ? 1.25 : 1));
   const totalProtein = Math.round((baseProt + protGrams + Math.round(veggiesCount * 0.8)) * (isLarge ? 1.25 : 1));
 
-  const veggieKey = veggiesList.join('|');
-  const toppingKey = toppingsList.join('|');
-  const vegPieces = useMemo(() => layoutVeggies(veggieKey ? veggieKey.split('|') : []), [veggieKey]);
-  const protPieces = useMemo(
-    () => (proteinName ? layoutProtein(proteinName, isLarge, veggieKey.length > 0) : []),
-    [proteinName, isLarge, veggieKey]
-  );
-  const topPieces = useMemo(() => layoutToppings(toppingKey ? toppingKey.split('|') : []), [toppingKey]);
-
-  // Keep the previous base underneath while the new one spreads over it
-  const [baseLayers, setBaseLayers] = useState([{ name: baseName, id: 0 }]);
-  const topLayer = baseLayers[baseLayers.length - 1];
-  if (topLayer.name !== baseName) {
-    setBaseLayers([topLayer, { name: baseName, id: topLayer.id + 1 }]);
-  }
-
-  const speckles = useMemo(() => {
-    const rand = seeded('glaze');
-    return Array.from({ length: 70 }, (_, i) => {
-      const a = rand() * 360;
-      const r = 126 + rand() * 22;
-      return <circle key={i} cx={Math.cos(a * DEG) * r} cy={Math.sin(a * DEG) * r} r={0.4 + rand() * 0.7} fill={rand() > 0.5 ? '#e9e2cf' : '#0d1a12'} opacity={0.35} />;
-    });
-  }, []);
-
   const legend = [
     { label: baseName, color: BASES[baseKind(baseName)].color },
     ...veggiesList.map(v => ({ label: v, color: VEGGIES[veggieKind(v)].color })),
@@ -646,10 +733,8 @@ export default function BowlVisualizer({ selections = {}, isCustom = true, baseI
     <div className="bowl-visualizer-card">
       <div className="bowl-visualizer-header">
         <div className="row gap-2">
-          <Sparkles size={16} style={{ color: 'var(--gold)' }} />
-          <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--green-900)' }}>
-            Aperçu en direct de votre bol
-          </span>
+          <HoyaMark size={18} />
+          <span className="bowl-visualizer-title">Votre bol</span>
         </div>
         <button
           className={`btn-nutrition-toggle ${showNutrition ? 'active' : ''}`}
@@ -658,65 +743,21 @@ export default function BowlVisualizer({ selections = {}, isCustom = true, baseI
           type="button"
         >
           <Activity size={13} />
-          <span>{showNutrition ? 'Masquer nutrition' : 'Valeurs nutritionnelles'}</span>
+          <span>Nutrition</span>
         </button>
       </div>
 
       <div className="bowl-stage">
-        <svg className="bowl-svg" viewBox="-170 -170 340 340" role="img" aria-label={`Votre bol : ${legend.map(l => l.label).join(', ')}`}>
-          <defs>
-            <radialGradient id={`${uid}-ceramic`} cx="0.36" cy="0.3" r="0.8">
-              <stop offset="0" stopColor="#4c6b57" />
-              <stop offset="0.55" stopColor="#24392c" />
-              <stop offset="1" stopColor="#13211a" />
-            </radialGradient>
-            <radialGradient id={`${uid}-inner`} cx="0.56" cy="0.6" r="0.58">
-              <stop offset="0.72" stopColor="#000" stopOpacity="0" />
-              <stop offset="0.93" stopColor="#000" stopOpacity="0.22" />
-              <stop offset="1" stopColor="#000" stopOpacity="0.45" />
-            </radialGradient>
-            <filter id={`${uid}-blur`} x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="9" />
-            </filter>
-            <clipPath id={`${uid}-food`}>
-              <circle r={R} />
-            </clipPath>
-          </defs>
-
-          <motion.g
-            initial={reduce ? false : { scale: 0.85, opacity: 0 }}
-            animate={{ scale: isLarge ? 1 : 0.9, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 18 }}
-          >
-            {/* Table shadow */}
-            <ellipse cx={8} cy={16} rx={148} ry={144} fill="rgba(30,20,10,0.35)" filter={`url(#${uid}-blur)`} />
-
-            {/* Glazed ceramic bowl */}
-            <circle r={150} fill={`url(#${uid}-ceramic)`} />
-            {speckles}
-            <circle r={148.5} fill="none" stroke="#fff" strokeOpacity="0.14" strokeWidth="2" />
-            <path d="M-118 -78 A142 142 0 0 1 40 -136" stroke="#fff" strokeOpacity="0.28" strokeWidth="3" fill="none" strokeLinecap="round" />
-            <circle r={R + 2.5} fill="none" stroke="#0a120d" strokeOpacity="0.55" strokeWidth="4" />
-
-            {/* Food */}
-            <g clipPath={`url(#${uid}-food)`}>
-              {baseLayers.map((b, i) => (
-                <BaseLayer key={b.id} name={b.name} uid={uid} intro={i === baseLayers.length - 1} reduce={reduce} />
-              ))}
-              <Pieces items={vegPieces} reduce={reduce} size={1.45} />
-              <Pieces items={protPieces} reduce={reduce} size={1.5} drop={2.6} spring={{ stiffness: 280, damping: 17 }} />
-              <AnimatePresence>
-                {hasSauce && <SauceDrizzle key={sauceName} name={sauceName} reduce={reduce} bottleLayer={bottleLayer} />}
-              </AnimatePresence>
-              <Pieces items={topPieces} reduce={reduce} size={1.3} drop={3.2} spring={{ stiffness: 380, damping: 24 }} />
-              <AnimatePresence>
-                {hasGourmand && <Dollop key="gourmand" reduce={reduce} />}
-              </AnimatePresence>
-              <circle r={R} fill={`url(#${uid}-inner)`} pointerEvents="none" />
-            </g>
-            <g ref={setBottleLayer} />
-          </motion.g>
-        </svg>
+        <BowlScene
+          baseName={baseName}
+          proteinName={proteinName}
+          veggiesList={veggiesList}
+          toppingsList={toppingsList}
+          sauceName={sauceName}
+          hasGourmand={hasGourmand}
+          isLarge={isLarge}
+          label={`Votre bol : ${legend.map(l => l.label).join(', ')}`}
+        />
       </div>
 
       <motion.div className="bowl-legend" layout>

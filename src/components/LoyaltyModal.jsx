@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, X, Sparkles, Check, Heart, Trash2, Plus, ArrowRight, Award } from 'lucide-react';
+import { X, Sparkles, Heart, Trash2, Plus, ArrowRight } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
+import HoyaMark from './brand/HoyaMark';
 
 export default function LoyaltyModal({ isOpen, onClose }) {
   const { 
@@ -45,11 +46,11 @@ export default function LoyaltyModal({ isOpen, onClose }) {
           <div className="loyalty-header">
             <div className="row gap-2">
               <span className="loyalty-badge-icon">
-                <Gift size={20} />
+                <HoyaMark size={20} />
               </span>
               <div>
                 <h3 className="display" style={{ fontSize: 20, color: 'var(--cream)', margin: 0 }}>
-                  Poké Club & Fidélité
+                  Carte de fidélité
                 </h3>
                 <span className="small" style={{ color: 'rgba(250,245,240,0.7)' }}>
                   Hoya Poké Pézenas
@@ -67,11 +68,11 @@ export default function LoyaltyModal({ isOpen, onClose }) {
               <div className="row between" style={{ marginBottom: 12 }}>
                 <div>
                   <span className="eyebrow" style={{ color: 'var(--gold)', fontSize: 11 }}>
-                    Carte Tampon Digitale
+                    Le 11ᵉ poké est offert
                   </span>
                   <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>
                     {isRewardReady 
-                      ? '🎉 Félicitations ! Votre bol est offert !' 
+                      ? 'Votre prochain poké est offert' 
                       : `Encore ${remaining} bol${remaining > 1 ? 's' : ''} pour votre bol offert`}
                   </div>
                 </div>
@@ -84,22 +85,19 @@ export default function LoyaltyModal({ isOpen, onClose }) {
               <div className="stamp-grid">
                 {Array.from({ length: stampsNeeded }).map((_, i) => {
                   const stamped = i < loyaltyStamps;
-                  const isLast = i === stampsNeeded - 1;
                   return (
-                    <div 
-                      key={i} 
-                      className={`stamp-slot ${stamped ? 'stamped' : ''} ${isLast ? 'bonus' : ''}`}
-                    >
+                    <div key={i} className={`stamp-slot ${stamped ? 'stamped' : ''}`}>
                       {stamped ? (
-                        <motion.div 
-                          initial={{ scale: 0 }} 
-                          animate={{ scale: 1 }} 
+                        <motion.div
+                          initial={{ scale: 1.8, opacity: 0, rotate: -30 }}
+                          animate={{ scale: 1, opacity: 1, rotate: i % 2 ? 4 : -5 }}
+                          transition={{ delay: 0.1 + i * 0.06, type: 'spring', stiffness: 380, damping: 18 }}
                           className="stamp-icon"
                         >
-                          {isLast ? <Award size={18} /> : <Check size={16} strokeWidth={3} />}
+                          <HoyaMark size={26} />
                         </motion.div>
                       ) : (
-                        <span className="stamp-number">{isLast ? '🎁' : i + 1}</span>
+                        <span className="stamp-number">{i + 1}</span>
                       )}
                     </div>
                   );

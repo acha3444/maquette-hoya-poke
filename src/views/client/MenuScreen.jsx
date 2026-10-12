@@ -7,9 +7,10 @@ import { MENU, FORMULES } from '../../data';
 import { formatPrice } from '../../format';
 import { ease } from '../../motion';
 import FormuleModal from '../../components/FormuleModal';
+import BowlArt from '../../components/brand/BowlArt';
 
 const CATEGORIES = [
-  { id: 'formules', label: '🍱 Formules midi' },
+  { id: 'formules', label: 'Formules midi' },
   { id: 'classiques', label: 'Classiques' },
   { id: 'surmesure', label: 'Sur mesure' },
   { id: 'sides', label: 'Sides' },
@@ -142,8 +143,8 @@ export default function MenuScreen() {
   const filterClassiques = (items = []) => {
     if (dietFilter === 'all') return items;
     if (dietFilter === 'veggie') return items.filter(i => i.id === 'c3'); // Falafel
-    if (dietFilter === 'pesco') return items.filter(i => i.id === 'c1' || i.id === 'c3'); // Saumon & Falafel
-    if (dietFilter === 'protein') return items.filter(i => i.id === 'c1' || i.id === 'c2'); // Saumon & Poulet
+    if (dietFilter === 'pesco') return items.filter(i => ['c1', 'c3', 'c4'].includes(i.id)); // Saumon, Falafel, Thon
+    if (dietFilter === 'protein') return items.filter(i => ['c1', 'c2', 'c4'].includes(i.id)); // Saumon, Poulet, Thon
     if (dietFilter === 'sans_gluten') return items; // bases et garnitures adaptées
     return items;
   };
@@ -187,10 +188,10 @@ export default function MenuScreen() {
       <div className="diet-filter-bar">
         {[
           { id: 'all', label: 'Tous les plats' },
-          { id: 'veggie', label: '🌱 Végétarien' },
-          { id: 'sans_gluten', label: '🌾 Sans gluten' },
-          { id: 'pesco', label: '🐟 Pescétarien' },
-          { id: 'protein', label: '🔥 Protéiné' }
+          { id: 'veggie', label: 'Végétarien' },
+          { id: 'sans_gluten', label: 'Sans gluten' },
+          { id: 'pesco', label: 'Pescétarien' },
+          { id: 'protein', label: 'Protéiné' }
         ].map(df => (
           <button
             key={df.id}
@@ -206,7 +207,7 @@ export default function MenuScreen() {
         <div className="menu-body">
           {/* Section Formules */}
           <section id="cat-formules" className="menu-section">
-            <h2 className="display menu-heading">Nos Formules Midi & Combos</h2>
+            <h2 className="display menu-heading">Les formules du midi</h2>
             <p className="muted small menu-lead">Poké au choix + Boisson fraîche (+ Dessert). Économisez jusqu'à 2,50 €.</p>
             {FORMULES.map(f => (
               <motion.div
@@ -249,7 +250,7 @@ export default function MenuScreen() {
                       style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0, boxShadow: '0 2px 6px rgba(0,0,0,0.08)' }}
                     />
                   ) : (
-                    <span className={`classic-swatch sm s-${item.id}`} />
+                    <span className="menu-bowl"><BowlArt item={item} className="menu-bowl-art" /></span>
                   )}
                   <div className="grow col gap-1">
                     <div className="row gap-2" style={{ flexWrap: 'wrap' }}>
