@@ -454,12 +454,6 @@ export default function HomeScreen() {
                 <a href={RESTAURANT.instagramUrl} target="_blank" rel="noreferrer">Instagram</a>
                 <button onClick={() => setInstallPromptOpen(true)}>Installer l'application</button>
               </div>
-              <div>
-                <h4>Équipe</h4>
-                <button onClick={() => navigate('/cuisine')}>Écran cuisine</button>
-                <button onClick={() => navigate('/livreur')}>Livreurs</button>
-                <button onClick={() => navigate('/admin')}>Administration</button>
-              </div>
             </div>
             <div className="h-footer-word" aria-hidden="true">
               <span>Hoya</span><HoyaMark size={72} strokeWidth={11} /><span>Poké</span>
