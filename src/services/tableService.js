@@ -32,11 +32,16 @@ export function generateTableToken(tablePrefix = 't') {
   return `hp_${tablePrefix}_${rand}`;
 }
 
+// Cloud rows may carry `active` or `is_active` instead of `isActive`
+export function normalizeTables(items = []) {
+  return items.map(t => ({ ...t, isActive: t.isActive ?? t.is_active ?? t.active ?? true }));
+}
+
 export function loadLocalTables() {
   if (typeof window === 'undefined') return DEFAULT_TABLES;
   try {
     const saved = localStorage.getItem(TABLES_STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) return normalizeTables(JSON.parse(saved));
   } catch (e) {
     console.warn('Error reading local tables:', e);
   }

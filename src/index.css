@@ -36,8 +36,8 @@
   /* Aliases & nuances studio.artim */
   --forest: #18302a;
   --forest-dark: #12261f;
-  --curry: #c45c28;
-  --curry-soft: #faeee6;
+  --curry: var(--gold);
+  --curry-soft: var(--gold-soft);
 
   --font-display: 'Grandstander', 'DM Sans', system-ui, sans-serif;
   --font-body: 'DM Sans', system-ui, sans-serif;

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { INITIAL_ORDERS, MENU, PROMO_CODES } from './data';
 import { supabase } from './supabase';
-import { loadLocalTables, loadLocalTablesConfig, saveLocalTables, saveLocalTablesConfig, syncTablesToCloud, fetchTablesFromCloud } from './services/tableService';
+import { loadLocalTables, normalizeTables, loadLocalTablesConfig, saveLocalTables, saveLocalTablesConfig, syncTablesToCloud, fetchTablesFromCloud } from './services/tableService';
 import { loadLocalKioskConfig, saveLocalKioskConfig, syncKioskConfigToCloud, fetchKioskConfigFromCloud } from './services/kioskService';
 
 const loadInitialMenu = () => {
@@ -223,7 +223,7 @@ export const useStore = create((set, get) => {
             if (tablesRow.customer_phone) {
               try { cfg = JSON.parse(tablesRow.customer_phone); saveLocalTablesConfig(cfg); } catch (e) {}
             }
-            set({ tables: tablesRow.items, tablesConfig: cfg });
+            set({ tables: normalizeTables(tablesRow.items), tablesConfig: cfg });
           }
 
           // Fetch kiosk config from cloud record
@@ -259,7 +259,7 @@ export const useStore = create((set, get) => {
               if (payload.new.customer_phone) {
                 try { cfg = JSON.parse(payload.new.customer_phone); saveLocalTablesConfig(cfg); } catch (e) {}
               }
-              set({ tables: items, tablesConfig: cfg });
+              set({ tables: normalizeTables(items), tablesConfig: cfg });
             }
             return;
           }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, ShoppingBag, Bike, ShoppingBasket, Star, MapPin, Clock, AtSign, Phone, Wifi } from 'lucide-react';
 import { useStore } from '../../store';
 import { MENU, FORMULES, CUSTOMER_REVIEWS } from '../../data';
@@ -10,7 +10,7 @@ import { ease } from '../../motion';
 import HoyaMark from '../../components/brand/HoyaMark';
 import Branch from '../../components/brand/Branch';
 import BowlArt from '../../components/brand/BowlArt';
-import { BowlScene } from '../../components/BowlVisualizer';
+import DemoBowl from '../../components/brand/DemoBowl';
 import LoyaltyModal from '../../components/LoyaltyModal';
 import FormuleModal from '../../components/FormuleModal';
 import ClientInstallPrompt from '../../components/ClientInstallPrompt';
@@ -32,69 +32,6 @@ const STEPS = [
   { title: 'La sauce maison', text: 'De la soja sucrée à la sriracha' },
   { title: 'Le croquant', text: 'Sésames, cacahuètes, oignons frits…' }
 ];
-
-// A bowl that builds itself, step by step, while the section is on screen
-const DEMOS = [
-  {
-    base: 'Riz vinaigré',
-    stages: [
-      {},
-      { veggies: ['Avocat', 'Mangue'] },
-      { veggies: ['Avocat', 'Mangue', 'Chou rouge', 'Concombre', 'Radis rose'] },
-      { protein: 'Saumon cru mariné' },
-      { sauce: 'Sriracha mayo' },
-      { toppings: ['Sésames noirs', 'Oignons frits'] }
-    ]
-  },
-  {
-    base: 'Base quinoa',
-    stages: [
-      {},
-      { veggies: ['Edamame', 'Ananas'] },
-      { veggies: ['Edamame', 'Ananas', 'Carotte', 'Grenade', 'Concombre'] },
-      { protein: 'Falafel maison' },
-      { sauce: 'Tzatziki' },
-      { toppings: ['Graines de courge', 'Sésames'] }
-    ]
-  }
-];
-
-function DemoBowl() {
-  const ref = useRef(null);
-  const inView = useInView(ref, { amount: 0.4 });
-  const reduce = useReducedMotion();
-  const [tick, setTick] = useState({ demo: 0, stage: reduce ? 5 : 0 });
-
-  useEffect(() => {
-    if (!inView || reduce) return undefined;
-    const last = tick.stage === 5;
-    const t = setTimeout(() => {
-      setTick(({ demo, stage }) => (stage === 5 ? { demo: (demo + 1) % DEMOS.length, stage: 0 } : { demo, stage: stage + 1 }));
-    }, last ? 3600 : tick.stage === 4 ? 2300 : 1300);
-    return () => clearTimeout(t);
-  }, [inView, reduce, tick]);
-
-  const demo = DEMOS[tick.demo];
-  const state = demo.stages.slice(0, tick.stage + 1).reduce((acc, s) => ({ ...acc, ...s }), {});
-
-  return (
-    <div ref={ref} className="h-demo">
-      <BowlScene
-        className="h-demo-bowl"
-        baseName={demo.base}
-        veggiesList={state.veggies || []}
-        proteinName={state.protein || ''}
-        sauceName={state.sauce || ''}
-        toppingsList={state.toppings || []}
-        isLarge
-        label="Démonstration : un bol se compose"
-      />
-      <ol className="h-demo-steps" aria-hidden="true">
-        {STEPS.map((s, i) => <li key={s.title} className={i < tick.stage ? 'on' : ''} />)}
-      </ol>
-    </div>
-  );
-}
 
 function StampCard({ stamps }) {
   return (

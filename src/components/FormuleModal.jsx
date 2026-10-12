@@ -5,7 +5,8 @@ import { useStore } from '../store';
 import { MENU } from '../data';
 import { formatPrice } from '../format';
 
-export default function FormuleModal({ formule, isOpen, onClose }) {
+// `onAdd` lets a host page (table QR, kiosk) keep its own cart instead of the global one
+export default function FormuleModal({ formule, isOpen, onClose, onAdd }) {
   const { addToCart, menu: storeMenu } = useStore();
   const currentMenu = storeMenu || MENU;
 
@@ -27,7 +28,7 @@ export default function FormuleModal({ formule, isOpen, onClose }) {
       ...(hasDessert ? [selectedDessert] : [])
     ];
 
-    addToCart({
+    (onAdd || addToCart)({
       cartName: `${formule.name} (${size})`,
       name: formule.name,
       size,

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShoppingBag, Check, Plus, Minus, Trash2, ArrowLeft, ArrowRight,
-  Sparkles, CreditCard, Banknote, Clock, AlertTriangle, Globe,
-  Coffee, UtensilsCrossed, CheckCircle2, ChevronRight, X
+import {
+  Check, Plus, Minus, Trash2, ArrowLeft, ArrowRight,
+  CreditCard, Banknote, AlertTriangle, Globe, ChevronRight, X
 } from 'lucide-react';
 import { useStore } from '../store';
 import { MENU, FORMULES } from '../data';
@@ -12,6 +11,9 @@ import { formatPrice } from '../format';
 import { playSuccessSound } from '../sound';
 import HoyaMark from '../components/brand/HoyaMark';
 import BowlArt from '../components/brand/BowlArt';
+import ProductThumb from '../components/brand/ProductThumb';
+import AnimatedMark from '../components/brand/AnimatedMark';
+import { BowlScene } from '../components/BowlVisualizer';
 import FormuleModal from '../components/FormuleModal';
 import { findTableByToken } from '../services/tableService';
 import './table/tableOrder.css';
@@ -21,6 +23,22 @@ const TEXTS = {
     serviceSurPlace: 'Sur place · Service à table',
     tablePrefix: 'Table',
     changeLang: 'English',
+    welcome: 'Bienvenue',
+    welcomeSub: 'Commandez depuis votre table, on vous apporte tout.',
+    added: 'Ajouté',
+    viewOrder: 'Voir ma commande',
+    yourOrder: 'Votre commande',
+    total: 'Total',
+    composeCta: 'Composer mon bol',
+    from: 'dès',
+    next: 'Suivant',
+    back: 'Retour',
+    addBowl: 'Ajouter à ma commande',
+    builderSteps: ['Taille & base', 'Fruits & légumes', 'Protéine', 'Sauce', 'Toppings'],
+    builderHints: ['', "Jusqu'à 5", '1 au choix', '1 au choix', "Jusqu'à 2"],
+    sending: 'Envoi en cuisine…',
+    orderNumber: 'Commande',
+    viewMenu: 'Voir notre carte en ligne',
     cartEmpty: 'Votre commande est vide',
     addToCart: 'Ajouter',
     customBowl: 'Créer mon bol sur mesure',
@@ -48,7 +66,7 @@ const TEXTS = {
     orderSentTitle: 'Commande transmise en cuisine !',
     orderSentSub: 'Restez assis à votre table, notre équipe prépare vos bols avec amour et vous les apporte.',
     counterPaymentNotice: 'N’oubliez pas de régler au comptoir lors de votre départ ou quand vous le souhaitez.',
-    orderAnother: 'Commander autre chose pour la même table',
+    orderAnother: 'Commander autre chose',
     tableDisabledTitle: 'Commande à table désactivée',
     tableDisabledDesc: 'La commande à table est momentanément indisponible. Merci de vous présenter au comptoir.',
     tokenInvalidTitle: 'QR Code non reconnu',
@@ -66,6 +84,22 @@ const TEXTS = {
     serviceSurPlace: 'Eat-in · Table service',
     tablePrefix: 'Table',
     changeLang: 'Français',
+    welcome: 'Welcome',
+    welcomeSub: 'Order from your table, we bring everything to you.',
+    added: 'Added',
+    viewOrder: 'View my order',
+    yourOrder: 'Your order',
+    total: 'Total',
+    composeCta: 'Build my bowl',
+    from: 'from',
+    next: 'Next',
+    back: 'Back',
+    addBowl: 'Add to my order',
+    builderSteps: ['Size & base', 'Fruits & veggies', 'Protein', 'Sauce', 'Toppings'],
+    builderHints: ['', 'Up to 5', 'Pick 1', 'Pick 1', 'Up to 2'],
+    sending: 'Sending to the kitchen…',
+    orderNumber: 'Order',
+    viewMenu: 'See our online menu',
     cartEmpty: 'Your order is empty',
     addToCart: 'Add',
     customBowl: 'Create your custom bowl',
@@ -171,6 +205,7 @@ export default function TableOrderView() {
   // Modals for Custom Bowl and Formulas
   const [showBuilderModal, setShowBuilderModal] = useState(false);
   const [selectedFormule, setSelectedFormule] = useState(null);
+  const [lastAdded, setLastAdded] = useState(null);
 
   // Custom Bowl Builder Internal State
   const [builderStep, setBuilderStep] = useState(0); // 0: Size & Base, 1: Protéines, 2: Légumes, 3: Sauce, 4: Toppings
@@ -214,7 +249,7 @@ export default function TableOrderView() {
   // Cart Handlers
   const addToCart = (product, size = null) => {
     setCart(prev => {
-      const price = size === 'L' && product.priceL ? product.priceL : product.price;
+      const price = size === 'L' && product.priceL ? product.priceL : (product.price ?? product.priceM ?? 0);
       const itemName = size ? `${product.name} (${size})` : product.name;
       const existingIndex = prev.findIndex(item => item.name === itemName);
 
@@ -234,6 +269,7 @@ export default function TableOrderView() {
         quantity: 1
       }];
     });
+    setLastAdded({ name: size ? `${product.name} (${size})` : product.name, at: Date.now() });
   };
 
   const updateQuantity = (itemId, delta) => {
@@ -254,7 +290,9 @@ export default function TableOrderView() {
 
   // Custom Bowl Confirmation
   const handleConfirmCustomBowl = () => {
-    const price = customSize === 'L' ? 14.90 : 11.90;
+    const base = MENU.surMesureBase || { priceM: 12.9, priceL: 15.9 };
+    const basePrice = (MENU.bases || []).find(b => b.name === customBase)?.price || 0;
+    const price = (customSize === 'L' ? base.priceL : base.priceM) + basePrice;
     const composition = [
       customBase,
       ...customProteins,
@@ -323,461 +361,287 @@ export default function TableOrderView() {
     setSubmitting(false);
   };
 
-  // Invalid or Disabled States
-  if (!activeTable || !activeTable.isActive) {
+  const storeMenu = useStore(s => s.menu);
+  const menu = storeMenu || MENU;
+  const customItems = {
+    veggies: { list: customVeggies, set: setCustomVeggies, max: 5 },
+    toppings: { list: customToppings, set: setCustomToppings, max: 2 }
+  };
+  const toggleMulti = (key, name) => {
+    const { list, set, max } = customItems[key];
+    if (list.includes(name)) set(list.filter(x => x !== name));
+    else if (list.length < max) set([...list, name]);
+  };
+  const customPrice = (() => {
+    const base = menu.surMesureBase || { priceM: 12.9, priceL: 15.9 };
+    const extra = (menu.bases || []).find(b => b.name === customBase)?.price || 0;
+    return (customSize === 'L' ? base.priceL : base.priceM) + extra;
+  })();
+
+  useEffect(() => {
+    if (!lastAdded) return undefined;
+    const timer = setTimeout(() => setLastAdded(null), 1600);
+    return () => clearTimeout(timer);
+  }, [lastAdded]);
+
+  // Invalid or disabled states
+  if (!activeTable || !activeTable.isActive || tablesConfig?.enabled === false) {
+    const invalid = !activeTable || !activeTable.isActive;
     return (
-      <div className="table-order-root" style={{ display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center' }}>
-        <div className="table-card" style={{ maxWidth: 420, padding: 32, borderRadius: 24 }}>
-          <AlertTriangle size={48} style={{ color: '#d97706', margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: 22, margin: '0 0 10px' }}>{t.tokenInvalidTitle}</h2>
-          <p style={{ color: 'var(--muted)', lineHeight: 1.5, margin: '0 0 24px' }}>{t.tokenInvalidDesc}</p>
-          <button className="btn btn-primary" onClick={() => navigate('/')}>
-            Voir notre carte en ligne
-          </button>
-        </div>
+      <div className="to-root to-center">
+        <motion.div className="to-notice" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <span className="to-notice-mark"><HoyaMark size={34} /></span>
+          <h1>{invalid ? t.tokenInvalidTitle : t.tableDisabledTitle}</h1>
+          <p>{invalid ? t.tokenInvalidDesc : t.tableDisabledDesc}</p>
+          {invalid
+            ? <button className="to-btn to-btn-forest" onClick={() => navigate('/')}>{t.viewMenu}</button>
+            : <span className="to-table-pill dark">{activeTable.name}</span>}
+        </motion.div>
       </div>
     );
   }
 
-  if (tablesConfig?.enabled === false) {
-    return (
-      <div className="table-order-root" style={{ display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center' }}>
-        <div className="table-card" style={{ maxWidth: 420, padding: 32, borderRadius: 24 }}>
-          <Coffee size={48} style={{ color: 'var(--green-800)', margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: 22, margin: '0 0 10px' }}>{t.tableDisabledTitle}</h2>
-          <p style={{ color: 'var(--muted)', lineHeight: 1.5, margin: '0 0 24px' }}>{t.tableDisabledDesc}</p>
-          <div className="table-badge-pill" style={{ background: 'var(--green-900)', margin: '0 auto' }}>
-            {activeTable.name}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const catalog = activeCategory === 'formules' || activeCategory === 'surmesure' ? [] : (menu[activeCategory] || []);
+  const stepTitle = t.builderSteps[builderStep];
 
   return (
-    <div className="table-order-root">
-      {/* 1. Persistent Top Banner & Header */}
-      <header className="table-order-header">
-        <div className="table-order-banner">
-          <div className="row gap-2">
-            <span className="table-badge-pill">
-              <span className="table-pulse-dot" />
-              <span>{activeTable.name} · {t.serviceSurPlace}</span>
-            </span>
+    <div className="to-root">
+      <header className="to-head">
+        <div className="to-head-row">
+          <div className="to-brand" onClick={() => navigate('/')} role="link">
+            <span className="to-brand-mark"><HoyaMark size={20} /></span>
+            <span>Hoya Poké</span>
           </div>
-
-          <button 
-            className="btn btn-sm btn-ghost" 
-            style={{ color: '#fff', fontSize: 12, padding: '2px 8px', borderColor: 'rgba(255,255,255,0.2)' }}
-            onClick={() => setLang(l => l === 'FR' ? 'EN' : 'FR')}
-          >
-            <Globe size={13} />
-            <span>{t.changeLang}</span>
+          <button className="to-lang" onClick={() => setLang(l => (l === 'FR' ? 'EN' : 'FR'))}>
+            <Globe size={14} />
+            {t.changeLang}
           </button>
         </div>
-
-        <div className="table-header-main">
-          <div className="row gap-2" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <HoyaMark size={28} />
-            <div>
-              <strong style={{ fontSize: 15, display: 'block', lineHeight: 1.1 }}>Hoya Poké</strong>
-              <span className="muted small" style={{ fontSize: 11 }}>Pézenas</span>
-            </div>
-          </div>
-
-          {cartCount > 0 && (
-            <button 
-              className="table-cart-trigger"
-              style={{ padding: '8px 16px', fontSize: 13 }}
-              onClick={() => setDrawerOpen(true)}
-            >
-              <ShoppingBag size={15} />
-              <span>{cartCount} · {formatPrice(cartTotal)}</span>
-            </button>
-          )}
-        </div>
-
-        {/* Categories Tab Bar */}
-        <div className="table-cat-scroll">
-          {Object.entries(t.categories).map(([catKey, label]) => (
-            <button
-              key={catKey}
-              className={`table-cat-chip ${activeCategory === catKey ? 'active' : ''}`}
-              onClick={() => {
-                setActiveCategory(catKey);
-                if (catKey === 'surmesure') setShowBuilderModal(true);
-              }}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="to-welcome">
+          <span className="to-table-pill"><span className="to-dot" />{activeTable.name} · {t.serviceSurPlace}</span>
+          <h1>{t.welcome} <em>{activeTable.name}</em></h1>
+          <p>{t.welcomeSub}</p>
         </div>
       </header>
 
-      {/* 2. Active Order Live Tracking Banner (If already ordered) */}
+      <nav className="to-tabs" aria-label="Catégories">
+        {Object.entries(t.categories).map(([key, label]) => (
+          <button
+            key={key}
+            className={activeCategory === key ? 'active' : ''}
+            onClick={() => { setActiveCategory(key); if (key === 'surmesure') setShowBuilderModal(true); }}
+          >
+            {activeCategory === key && <motion.span layoutId="to-tab" className="to-tab-pill" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
+            <span>{label}</span>
+          </button>
+        ))}
+      </nav>
+
       {trackedOrder && (
-        <section style={{ padding: '12px 16px', background: '#ecfdf5', borderBottom: '1px solid #10b981' }}>
-          <div className="row between" style={{ maxWidth: 800, margin: '0 auto' }}>
-            <div className="row gap-2">
-              <CheckCircle2 size={20} style={{ color: '#059669', flexShrink: 0 }} />
-              <div>
-                <strong style={{ fontSize: 13, color: '#065f46', display: 'block' }}>
-                  Commande #{trackedOrder.id} ({activeTable.name})
-                </strong>
-                <span style={{ fontSize: 12, color: '#047857' }}>
-                  {t.status[trackedOrder.status] || trackedOrder.status}
-                </span>
-              </div>
-            </div>
-            <button 
-              className="btn btn-sm btn-ghost" 
-              style={{ fontSize: 11, borderColor: '#10b981', color: '#065f46' }}
-              onClick={() => setActiveOrderId(trackedOrder.id)}
-            >
-              Détails
-            </button>
-          </div>
-        </section>
+        <button className="to-track-strip" onClick={() => setActiveOrderId(trackedOrder.id)}>
+          <span className="to-dot" />
+          <span><strong>{t.orderNumber} #{trackedOrder.id}</strong> · {t.status[trackedOrder.status] || trackedOrder.status}</span>
+          <ChevronRight size={16} />
+        </button>
       )}
 
-      {/* 3. Anti-Spam Warning (if user has max active orders) */}
       {maxOrdersReached && (
-        <div style={{ margin: '16px', padding: '14px', background: '#fef3c7', borderRadius: 12, border: '1px solid #f59e0b', color: '#92400e' }}>
-          <div className="row gap-2">
-            <AlertTriangle size={18} />
-            <strong style={{ fontSize: 13 }}>{t.antiSpamTitle}</strong>
-          </div>
-          <p style={{ fontSize: 12, margin: '6px 0 0', lineHeight: 1.4 }}>{t.antiSpamDesc}</p>
+        <div className="to-warning">
+          <AlertTriangle size={18} />
+          <div><strong>{t.antiSpamTitle}</strong><p>{t.antiSpamDesc}</p></div>
         </div>
       )}
 
-      {/* 4. Products Catalog Section */}
-      <main style={{ maxWidth: 960, margin: '0 auto', width: '100%' }}>
-        {/* Banner Custom Bowl Builder Hero */}
-        {activeCategory === 'surmesure' && (
-          <div style={{ padding: 16 }}>
-            <div style={{ background: 'var(--green-900)', color: '#fff', borderRadius: 20, padding: 24, textAlign: 'center' }}>
-              <Sparkles size={32} style={{ color: 'var(--gold)', margin: '0 auto 10px' }} />
-              <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>{t.customBowl}</h2>
-              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, maxWidth: 440, margin: '0 auto 16px' }}>{t.customBowlSub}</p>
-              <button 
-                className="btn btn-primary"
-                onClick={() => setShowBuilderModal(true)}
-              >
-                Commencer à composer (dès 11,90 €)
+      <main className="to-main">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeCategory}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {activeCategory === 'surmesure' && (
+              <button className="to-custom" onClick={() => setShowBuilderModal(true)}>
+                <span className="to-custom-art"><BowlArt item={{ name: 'Sur mesure', defaultProtein: 'Saumon cru mariné', defaultSauce: 'Sriracha mayo', ingredients: ['Avocat', 'Mangue', 'Chou rouge', 'Radis rose', 'Edamame'] }} className="to-custom-bowl" /></span>
+                <span className="to-custom-copy">
+                  <strong>{t.customBowl}</strong>
+                  <span>{t.customBowlSub}</span>
+                  <span className="to-btn to-btn-curry">{t.composeCta} · {t.from} {formatPrice(menu.surMesureBase?.priceM || 12.9)}</span>
+                </span>
               </button>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Formules Midi */}
-        {activeCategory === 'formules' && (
-          <div className="table-grid">
-            {FORMULES.map(f => (
-              <div key={f.id} className="table-card">
-                <div className="table-card-body">
-                  <span className="table-card-badge" style={{ position: 'static', alignSelf: 'flex-start', marginBottom: 8 }}>
-                    Formule
-                  </span>
-                  <h3 className="table-card-title">{f.name}</h3>
-                  <p className="table-card-desc">{f.desc}</p>
-                  <div className="table-card-foot">
-                    <span className="table-card-price">{formatPrice(f.price)}</span>
-                    <button 
-                      className="btn btn-sm btn-primary"
-                      onClick={() => setSelectedFormule(f)}
-                    >
-                      Composer
-                    </button>
-                  </div>
-                </div>
+            {activeCategory === 'formules' && (
+              <div className="to-list">
+                {FORMULES.map((f, i) => (
+                  <motion.button key={f.id} className="to-formule" onClick={() => setSelectedFormule(f)}
+                    initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                    <span className="to-formule-badge">{f.badge}</span>
+                    <strong>{f.name.replace(/\s*\(.*\)$/, '')}</strong>
+                    <span className="to-muted">{(f.includes || []).join(' + ')}</span>
+                    <span className="to-row-foot">
+                      <span className="price">{t.from} {formatPrice(f.priceM)}</span>
+                      <span className="to-round"><Plus size={16} /></span>
+                    </span>
+                  </motion.button>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {/* Regular Items List (Classiques, Sides, Boissons, Desserts) */}
-        {activeCategory !== 'formules' && activeCategory !== 'surmesure' && (
-          <div className="table-grid">
-            {(MENU[activeCategory] || []).map(item => (
-              <div key={item.name} className="table-card">
-                {item.image && (
-                  <div className="table-card-img-wrap">
-                    <img src={item.image} alt={item.name} className="table-card-img" />
-                    {item.badge && <span className="table-card-badge">{item.badge}</span>}
-                  </div>
-                )}
-                <div className="table-card-body">
-                  <h3 className="table-card-title">{item.name}</h3>
-                  {item.composition && (
-                    <p className="table-card-desc">{item.composition.join(' · ')}</p>
-                  )}
-                  {item.desc && !item.composition && (
-                    <p className="table-card-desc">{item.desc}</p>
-                  )}
-
-                  <div className="table-card-foot">
-                    <div>
-                      <span className="table-card-price">{formatPrice(item.price)}</span>
-                      {item.priceL && (
-                        <span className="muted small" style={{ marginLeft: 6, fontSize: 11 }}>
-                          (L: {formatPrice(item.priceL)})
-                        </span>
-                      )}
-                    </div>
-
-                    {item.priceL ? (
-                      <div className="row gap-1">
-                        <button 
-                          className="btn btn-sm btn-ghost" 
-                          style={{ padding: '4px 8px', fontSize: 12 }}
-                          onClick={() => addToCart(item, 'M')}
-                        >
-                          + M
-                        </button>
-                        <button 
-                          className="btn btn-sm btn-primary" 
-                          style={{ padding: '4px 8px', fontSize: 12 }}
-                          onClick={() => addToCart(item, 'L')}
-                        >
-                          + L
-                        </button>
+            {activeCategory === 'classiques' && (
+              <div className="to-grid">
+                {catalog.map((item, i) => (
+                  <motion.article key={item.id || item.name} className="to-classic"
+                    initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                    <span className="to-classic-art"><BowlArt item={item} className="to-classic-bowl" /></span>
+                    <div className="to-classic-body">
+                      <strong>{item.name}</strong>
+                      <span className="to-muted">{item.description}</span>
+                      <div className="to-sizes">
+                        <motion.button whileTap={{ scale: 0.94 }} onClick={() => addToCart(item, 'M')}>
+                          <span>M</span>{formatPrice(item.priceM)}<Plus size={14} />
+                        </motion.button>
+                        {item.priceL && (
+                          <motion.button whileTap={{ scale: 0.94 }} onClick={() => addToCart(item, 'L')}>
+                            <span>L</span>{formatPrice(item.priceL)}<Plus size={14} />
+                          </motion.button>
+                        )}
                       </div>
-                    ) : (
-                      <button 
-                        className="btn btn-sm btn-primary"
-                        onClick={() => addToCart(item)}
-                      >
-                        <Plus size={14} /> {t.addToCart}
-                      </button>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                  </motion.article>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
+
+            {!['classiques', 'formules', 'surmesure'].includes(activeCategory) && (
+              <div className="to-list">
+                {catalog.map((item, i) => (
+                  <motion.div key={item.id || item.name} className="to-row"
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+                    <ProductThumb item={item} category={activeCategory} className="to-thumb" />
+                    <span className="to-row-text">
+                      <strong>{item.name}</strong>
+                      <span className="price">{formatPrice(item.price ?? item.priceM)}</span>
+                    </span>
+                    <motion.button className="to-round" whileTap={{ scale: 0.88 }} onClick={() => addToCart(item)} aria-label={`${t.addToCart} ${item.name}`}>
+                      <Plus size={16} />
+                    </motion.button>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      {/* 5. Sticky Bottom Cart Trigger Bar */}
-      {cartCount > 0 && !drawerOpen && (
-        <div className="table-bottom-bar">
-          <div>
-            <div className="row gap-2">
-              <span className="table-pulse-dot" />
-              <strong style={{ fontSize: 14 }}>{activeTable.name}</strong>
-            </div>
-            <span className="muted small">{cartCount} article{cartCount > 1 ? 's' : ''}</span>
-          </div>
+      {/* Added feedback */}
+      <AnimatePresence>
+        {lastAdded && (
+          <motion.div key={lastAdded.at} className="to-toast"
+            initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10 }}>
+            <Check size={16} /> {t.added} · {lastAdded.name}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          <button 
-            className="table-cart-trigger"
-            onClick={() => {
-              if (tablesConfig?.crossSellEnabled !== false && cart.length > 0 && !cart.some(i => (MENU.boissons || []).some(b => b.name === i.name))) {
-                setShowCrossSell(true);
-              }
-              setDrawerOpen(true);
-            }}
-          >
-            <span>Voir ma commande</span>
-            <strong>{formatPrice(cartTotal)}</strong>
-            <ArrowRight size={16} />
-          </button>
-        </div>
-      )}
+      {/* Bottom cart bar */}
+      <AnimatePresence>
+        {cartCount > 0 && !drawerOpen && (
+          <motion.div className="to-bar-wrap" initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} transition={{ type: 'spring', stiffness: 380, damping: 32 }}>
+            <button
+              className="to-bar"
+              onClick={() => {
+                if (tablesConfig?.crossSellEnabled !== false && !cart.some(i => (menu.boissons || []).some(b => i.name.startsWith(b.name)))) setShowCrossSell(true);
+                setDrawerOpen(true);
+              }}
+            >
+              <motion.span key={cartCount} className="to-bar-count" initial={{ scale: 1.5 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 14 }}>{cartCount}</motion.span>
+              <span>{t.viewOrder}</span>
+              <strong>{formatPrice(cartTotal)}</strong>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* 6. Cart Drawer / Bottom Sheet */}
+      {/* Cart sheet */}
       <AnimatePresence>
         {drawerOpen && (
           <>
-            <motion.div 
-              className="table-drawer-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setDrawerOpen(false)}
-            />
-
-            <motion.div 
-              className="table-drawer-content"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            >
-              <div className="table-drawer-head">
-                <div className="row gap-2">
-                  <ShoppingBag size={20} style={{ color: 'var(--green-800)' }} />
-                  <div>
-                    <strong style={{ fontSize: 16 }}>Votre commande</strong>
-                    <span className="muted small" style={{ display: 'block' }}>{activeTable.name} · {t.serviceSurPlace}</span>
-                  </div>
+            <motion.div className="to-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDrawerOpen(false)} />
+            <motion.div className="to-sheet" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}>
+              <div className="to-sheet-head">
+                <div>
+                  <h2>{t.yourOrder}</h2>
+                  <span className="to-muted">{activeTable.name} · {t.serviceSurPlace}</span>
                 </div>
-                <button className="icon-btn" onClick={() => setDrawerOpen(false)}>
-                  <X size={18} />
-                </button>
+                <button className="to-icon" onClick={() => setDrawerOpen(false)} aria-label="Fermer"><X size={18} /></button>
               </div>
 
-              <div className="table-drawer-body">
-                {/* Cross-Sell Suggestion */}
+              <div className="to-sheet-body">
                 {showCrossSell && (
-                  <div style={{ background: 'var(--cream-2)', padding: 14, borderRadius: 14, border: '1px solid var(--line)' }}>
-                    <div className="row between" style={{ marginBottom: 8 }}>
-                      <strong style={{ fontSize: 13, color: 'var(--green-900)' }}>{t.crossSellTitle}</strong>
-                      <button 
-                        style={{ background: 'none', border: 'none', fontSize: 11, color: 'var(--muted)', cursor: 'pointer', textDecoration: 'underline' }}
-                        onClick={() => setShowCrossSell(false)}
-                      >
-                        {t.noThanks}
-                      </button>
+                  <div className="to-upsell">
+                    <div className="to-upsell-head">
+                      <strong>{t.crossSellTitle}</strong>
+                      <button onClick={() => setShowCrossSell(false)}>{t.noThanks}</button>
                     </div>
-                    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-                      {(MENU.boissons || []).slice(0, 3).map(b => (
-                        <div key={b.name} style={{ background: '#fff', padding: 8, borderRadius: 10, minWidth: 140, border: '1px solid var(--line)' }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, display: 'block' }}>{b.name}</span>
-                          <span className="price small">{formatPrice(b.price)}</span>
-                          <button 
-                            className="btn btn-sm btn-ghost" 
-                            style={{ width: '100%', marginTop: 6, padding: '2px 0', fontSize: 11 }}
-                            onClick={() => addToCart(b)}
-                          >
-                            + Ajouter
-                          </button>
-                        </div>
+                    <div className="to-upsell-row">
+                      {(menu.boissons || []).slice(0, 4).map(b => (
+                        <button key={b.name} onClick={() => addToCart(b)}>
+                          <ProductThumb item={b} category="boissons" className="to-upsell-thumb" />
+                          <span>{b.name}</span>
+                          <span className="price">{formatPrice(b.price)}</span>
+                        </button>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Cart Items List */}
-                <div className="col">
+                <AnimatePresence initial={false}>
                   {cart.map(item => (
-                    <div key={item.id} className="table-cart-item">
-                      <div className="col" style={{ flex: 1, paddingRight: 10 }}>
-                        <strong style={{ fontSize: 14 }}>{item.name}</strong>
-                        {item.composition && (
-                          <span className="muted small" style={{ fontSize: 11, marginTop: 2 }}>
-                            {item.composition.join(' · ')}
-                          </span>
-                        )}
-                        <span className="price small" style={{ marginTop: 4 }}>
-                          {formatPrice(item.price * item.quantity)}
-                        </span>
+                    <motion.div key={item.id} layout className="to-line" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -30 }}>
+                      <div className="to-line-text">
+                        <strong>{item.name}</strong>
+                        {item.composition?.length > 1 && <span className="to-muted">{item.composition.join(' · ')}</span>}
+                        <span className="price">{formatPrice(item.price * item.quantity)}</span>
                       </div>
-
-                      <div className="row gap-1" style={{ alignItems: 'center' }}>
-                        <button 
-                          className="icon-btn" 
-                          style={{ width: 28, height: 28 }}
-                          onClick={() => updateQuantity(item.id, -1)}
-                        >
-                          {item.quantity === 1 ? <Trash2 size={13} style={{ color: '#ef4444' }} /> : <Minus size={13} />}
+                      <div className="to-qty">
+                        <button onClick={() => updateQuantity(item.id, -1)} aria-label="Moins">
+                          {item.quantity === 1 ? <Trash2 size={14} /> : <Minus size={14} />}
                         </button>
-                        <span style={{ minWidth: 20, textAlign: 'center', fontWeight: 700, fontSize: 13 }}>
-                          {item.quantity}
-                        </span>
-                        <button 
-                          className="icon-btn" 
-                          style={{ width: 28, height: 28 }}
-                          onClick={() => updateQuantity(item.id, 1)}
-                        >
-                          <Plus size={13} />
-                        </button>
+                        <motion.span key={item.quantity} initial={{ scale: 1.4 }} animate={{ scale: 1 }}>{item.quantity}</motion.span>
+                        <button onClick={() => updateQuantity(item.id, 1)} aria-label="Plus"><Plus size={14} /></button>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
+                </AnimatePresence>
 
-                {/* Optional Customer Name Input */}
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 4 }}>
-                    {t.customerNamePlaceholder}
-                  </label>
-                  <input 
-                    type="text" 
-                    className="input" 
-                    placeholder="Ex: Sarah"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: 10 }}
-                  />
-                </div>
+                <label className="to-field">
+                  <span>{t.customerNamePlaceholder}</span>
+                  <input type="text" placeholder="Ex : Sarah" value={customerName} onChange={e => setCustomerName(e.target.value)} />
+                </label>
 
-                {/* Payment Method Selector */}
                 {tablesConfig?.paymentMode === 'BOTH' && (
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 700, display: 'block', marginBottom: 8 }}>
-                      {t.paymentChoice}
-                    </label>
-                    <div className="col gap-2">
-                      <label 
-                        className={`row gap-2 ${paymentMethod === 'ONLINE' ? 'active' : ''}`}
-                        style={{ 
-                          padding: 12, 
-                          borderRadius: 12, 
-                          border: `1.5px solid ${paymentMethod === 'ONLINE' ? 'var(--green-700)' : 'var(--line)'}`,
-                          background: paymentMethod === 'ONLINE' ? 'rgba(46, 125, 50, 0.05)' : '#fff',
-                          cursor: 'pointer' 
-                        }}
-                      >
-                        <input 
-                          type="radio" 
-                          name="table_pay" 
-                          checked={paymentMethod === 'ONLINE'} 
-                          onChange={() => setPaymentMethod('ONLINE')} 
-                        />
-                        <CreditCard size={18} style={{ color: 'var(--green-700)' }} />
-                        <div className="col">
-                          <strong style={{ fontSize: 13 }}>{t.payOnline}</strong>
-                          <span className="muted small">{t.payOnlineSub}</span>
-                        </div>
-                      </label>
-
-                      <label 
-                        className={`row gap-2 ${paymentMethod === 'COMPTOIR' ? 'active' : ''}`}
-                        style={{ 
-                          padding: 12, 
-                          borderRadius: 12, 
-                          border: `1.5px solid ${paymentMethod === 'COMPTOIR' ? 'var(--green-700)' : 'var(--line)'}`,
-                          background: paymentMethod === 'COMPTOIR' ? 'rgba(46, 125, 50, 0.05)' : '#fff',
-                          cursor: 'pointer' 
-                        }}
-                      >
-                        <input 
-                          type="radio" 
-                          name="table_pay" 
-                          checked={paymentMethod === 'COMPTOIR'} 
-                          onChange={() => setPaymentMethod('COMPTOIR')} 
-                        />
-                        <Banknote size={18} style={{ color: '#d97706' }} />
-                        <div className="col">
-                          <strong style={{ fontSize: 13 }}>{t.payCounter}</strong>
-                          <span className="muted small">{t.payCounterSub}</span>
-                        </div>
-                      </label>
-                    </div>
+                  <div className="to-field">
+                    <span>{t.paymentChoice}</span>
+                    {[
+                      { id: 'ONLINE', icon: CreditCard, title: t.payOnline, sub: t.payOnlineSub },
+                      { id: 'COMPTOIR', icon: Banknote, title: t.payCounter, sub: t.payCounterSub }
+                    ].map(({ id, icon: Icon, title, sub }) => (
+                      <button key={id} className={`to-pay ${paymentMethod === id ? 'active' : ''}`} onClick={() => setPaymentMethod(id)}>
+                        <Icon size={18} />
+                        <span><strong>{title}</strong><span className="to-muted">{sub}</span></span>
+                        <span className="to-radio" />
+                      </button>
+                    ))}
                   </div>
                 )}
+              </div>
 
-                {/* Total Recap */}
-                <div style={{ background: 'var(--cream)', padding: 14, borderRadius: 12, marginTop: 10 }}>
-                  <div className="row between">
-                    <span style={{ fontSize: 14 }}>Total de votre plateau</span>
-                    <strong className="price" style={{ fontSize: 20 }}>{formatPrice(cartTotal)}</strong>
-                  </div>
-                  <span className="muted small" style={{ display: 'block', marginTop: 4 }}>
-                    Service inclus à la {activeTable.name} · Préparé minute
-                  </span>
-                </div>
-
-                {/* Send Order Button */}
-                <button 
-                  className="btn btn-primary"
-                  style={{ width: '100%', padding: '14px', fontSize: 16, justifyContent: 'center' }}
-                  disabled={submitting || maxOrdersReached}
-                  onClick={handleSendOrder}
-                >
-                  {submitting ? 'Transmission en cuisine...' : t.submitOrder}
+              <div className="to-sheet-foot">
+                <div className="to-total"><span>{t.total}</span><strong className="price">{formatPrice(cartTotal)}</strong></div>
+                <button className="to-btn to-btn-forest to-btn-block" disabled={submitting || maxOrdersReached || cart.length === 0} onClick={handleSendOrder}>
+                  {submitting ? t.sending : t.submitOrder}
                 </button>
               </div>
             </motion.div>
@@ -785,277 +649,117 @@ export default function TableOrderView() {
         )}
       </AnimatePresence>
 
-      {/* 7. Live Tracking Modal / Screen */}
+      {/* Order sent */}
       <AnimatePresence>
         {trackedOrder && activeOrderId && (
-          <div className="modal-centered-wrapper" style={{ zIndex: 999 }}>
-            <motion.div 
-              className="modal-centered-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            />
-            <motion.div 
-              className="table-tracking-box"
-              style={{ position: 'relative', zIndex: 1000, width: '92%', maxWidth: 480 }}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-            >
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#ecfdf5', color: '#059669', display: 'grid', placeItems: 'center', margin: '0 auto 16px' }}>
-                <CheckCircle2 size={36} />
-              </div>
-
-              <span className="table-badge-pill" style={{ background: 'var(--green-900)', marginBottom: 12 }}>
-                {activeTable.name} · Commande #{trackedOrder.id}
-              </span>
-
-              <h2 style={{ fontSize: 22, margin: '8px 0' }}>{t.orderSentTitle}</h2>
-              <p style={{ color: 'var(--muted)', fontSize: 13, lineHeight: 1.5, margin: '0 0 20px' }}>
-                {t.orderSentSub}
-              </p>
-
-              {/* Status progression steps */}
-              <div className="col" style={{ textAlign: 'left', marginBottom: 20 }}>
-                {[
-                  { key: 'NOUVELLE', label: '1. Reçue en cuisine' },
-                  { key: 'PREPARATION', label: '2. En préparation' },
-                  { key: 'PRETE', label: '3. Prête pour le service' },
-                  { key: 'TERMINEE', label: '4. Servie à table' }
-                ].map((step) => {
-                  const isCurrent = trackedOrder.status === step.key;
+          <motion.div className="to-done" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="to-done-card" initial={{ y: 30, scale: 0.97 }} animate={{ y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
+              <span className="to-done-mark"><AnimatedMark size={70} delay={0.2} /></span>
+              <span className="to-table-pill dark">{activeTable.name} · #{trackedOrder.id}</span>
+              <h2>{t.orderSentTitle}</h2>
+              <p>{t.orderSentSub}</p>
+              <ol className="to-steps">
+                {['NOUVELLE', 'PREPARATION', 'PRETE', 'TERMINEE'].map((key, i, all) => {
+                  const current = all.indexOf(trackedOrder.status);
                   return (
-                    <div 
-                      key={step.key} 
-                      className={`table-status-step ${isCurrent ? 'active' : ''}`}
-                    >
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: isCurrent ? '#10b981' : '#9ca3af' }} />
-                      <span style={{ fontWeight: isCurrent ? 700 : 500, fontSize: 13 }}>{step.label}</span>
-                    </div>
+                    <li key={key} className={i < current ? 'done' : i === current ? 'current' : ''}>
+                      <span className="to-step-dot">{i < current && <Check size={11} strokeWidth={3} />}</span>
+                      <span>{t.status[key]}</span>
+                    </li>
                   );
                 })}
-              </div>
-
-              {trackedOrder.paymentStatus !== 'PAYÉ' && (
-                <div style={{ padding: 12, background: '#fef3c7', borderRadius: 10, color: '#92400e', fontSize: 12, marginBottom: 16 }}>
-                  {t.counterPaymentNotice}
-                </div>
-              )}
-
-              <button 
-                className="btn btn-primary"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={() => {
-                  setActiveOrderId(null);
-                }}
-              >
-                {t.orderAnother}
-              </button>
+              </ol>
+              {trackedOrder.paymentStatus !== 'PAYÉ' && <p className="to-pay-note">{t.counterPaymentNotice}</p>}
+              <button className="to-btn to-btn-forest to-btn-block" onClick={() => setActiveOrderId(null)}>{t.orderAnother}</button>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 8. Custom Bowl Builder Modal */}
+      {/* Custom bowl builder with live preview */}
       <AnimatePresence>
         {showBuilderModal && (
-          <div className="modal-centered-wrapper" style={{ zIndex: 980 }}>
-            <motion.div 
-              className="modal-centered-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowBuilderModal(false)}
-            />
-            <motion.div 
-              className="table-modal-card"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-            >
-              <div className="row between" style={{ marginBottom: 16 }}>
+          <>
+            <motion.div className="to-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowBuilderModal(false)} />
+            <motion.div className="to-sheet to-builder" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}>
+              <div className="to-sheet-head">
                 <div>
-                  <strong style={{ fontSize: 18 }}>Composer mon bol</strong>
-                  <span className="muted small" style={{ display: 'block' }}>Étape {builderStep + 1} / 5</span>
+                  <h2>{t.customBowl}</h2>
+                  <span className="to-muted">{builderStep + 1}/5 · {stepTitle}{t.builderHints[builderStep] ? ` · ${t.builderHints[builderStep]}` : ''}</span>
                 </div>
-                <button className="icon-btn" onClick={() => setShowBuilderModal(false)}>
-                  <X size={18} />
-                </button>
+                <button className="to-icon" onClick={() => setShowBuilderModal(false)} aria-label="Fermer"><X size={18} /></button>
               </div>
 
-              {/* Step 0: Taille & Base */}
-              {builderStep === 0 && (
-                <div className="col gap-3">
-                  <div>
-                    <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>1. Choisir la taille</span>
-                    <div className="row gap-2">
-                      <button 
-                        className={`table-option-chip grow ${customSize === 'M' ? 'active' : ''}`}
-                        onClick={() => setCustomSize('M')}
-                      >
-                        Medium (M) · 11,90 €
-                      </button>
-                      <button 
-                        className={`table-option-chip grow ${customSize === 'L' ? 'active' : ''}`}
-                        onClick={() => setCustomSize('L')}
-                      >
-                        Large (L) · 14,90 €
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>2. Choisir votre base</span>
-                    <div className="col gap-2">
-                      {(MENU.bases || []).map(b => (
-                        <button 
-                          key={b.name}
-                          className={`table-option-chip ${customBase === b.name ? 'active' : ''}`}
-                          onClick={() => setCustomBase(b.name)}
-                          style={{ justifyContent: 'flex-start', paddingLeft: 16 }}
-                        >
-                          {b.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <div className="to-builder-preview">
+                <BowlScene
+                  className="to-builder-bowl"
+                  baseName={customBase}
+                  veggiesList={customVeggies}
+                  proteinName={customProteins[0] || ''}
+                  sauceName={customSauce}
+                  toppingsList={customToppings}
+                  isLarge={customSize === 'L'}
+                  label="Aperçu de votre bol"
+                />
+                <div className="to-builder-progress">
+                  {t.builderSteps.map((s, i) => <span key={s} className={i <= builderStep ? 'on' : ''} />)}
                 </div>
-              )}
+              </div>
 
-              {/* Step 1: Protéines */}
-              {builderStep === 1 && (
-                <div className="col gap-2">
-                  <span className="eyebrow">Choisissez vos protéines (1 pour M, 2 pour L)</span>
-                  {(MENU.proteines || []).map(p => {
-                    const sel = customProteins.includes(p.name);
-                    return (
-                      <button 
-                        key={p.name}
-                        className={`table-option-chip ${sel ? 'active' : ''}`}
-                        onClick={() => {
-                          setCustomProteins(prev => sel ? prev.filter(x => x !== p.name) : [...prev, p.name]);
-                        }}
-                        style={{ justifyContent: 'space-between' }}
-                      >
-                        <span>{p.name}</span>
-                        {sel && <Check size={14} />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <div className="to-sheet-body">
+                <AnimatePresence mode="wait">
+                  <motion.div key={builderStep} className="to-chips"
+                    initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.22 }}>
+                    {builderStep === 0 && (
+                      <>
+                        {['M', 'L'].map(sz => (
+                          <button key={sz} className={`to-chip wide ${customSize === sz ? 'active' : ''}`} onClick={() => setCustomSize(sz)}>
+                            <strong>{sz === 'M' ? t.sizeM : t.sizeL}</strong>
+                            <span>{formatPrice(sz === 'M' ? menu.surMesureBase?.priceM || 12.9 : menu.surMesureBase?.priceL || 15.9)}</span>
+                          </button>
+                        ))}
+                        {(menu.bases || []).map(b => (
+                          <button key={b.name} className={`to-chip ${customBase === b.name ? 'active' : ''}`} onClick={() => setCustomBase(b.name)}>
+                            {b.name}{b.price ? ` +${formatPrice(b.price)}` : ''}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                    {builderStep === 1 && (menu.fruitsLegumes || []).map(f => (
+                      <button key={f.name} className={`to-chip ${customVeggies.includes(f.name) ? 'active' : ''}`} onClick={() => toggleMulti('veggies', f.name)}>{f.name}</button>
+                    ))}
+                    {builderStep === 2 && (menu.proteines || []).map(p => (
+                      <button key={p.name} className={`to-chip ${customProteins[0] === p.name ? 'active' : ''}`} onClick={() => setCustomProteins([p.name])}>{p.name}</button>
+                    ))}
+                    {builderStep === 3 && (menu.sauces || []).map(sc => (
+                      <button key={sc.name} className={`to-chip ${customSauce === sc.name ? 'active' : ''}`} onClick={() => setCustomSauce(sc.name)}>{sc.name}</button>
+                    ))}
+                    {builderStep === 4 && (menu.toppings || []).map(tp => (
+                      <button key={tp.name} className={`to-chip ${customToppings.includes(tp.name) ? 'active' : ''}`} onClick={() => toggleMulti('toppings', tp.name)}>{tp.name}</button>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
 
-              {/* Step 2: Fruits & Légumes */}
-              {builderStep === 2 && (
-                <div className="col gap-2">
-                  <span className="eyebrow">Choisissez jusqu'à 4 fruits & légumes frais</span>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
-                    {(MENU.fruitsLegumes || []).map(f => {
-                      const sel = customVeggies.includes(f.name);
-                      return (
-                        <button 
-                          key={f.name}
-                          className={`table-option-chip ${sel ? 'active' : ''}`}
-                          onClick={() => {
-                            setCustomVeggies(prev => sel ? prev.filter(x => x !== f.name) : [...prev, f.name]);
-                          }}
-                          style={{ fontSize: 12, minHeight: 40, padding: '8px 10px' }}
-                        >
-                          {f.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Sauce */}
-              {builderStep === 3 && (
-                <div className="col gap-2">
-                  <span className="eyebrow">Choisissez votre sauce</span>
-                  {(MENU.sauces || []).map(s => (
-                    <button 
-                      key={s.name}
-                      className={`table-option-chip ${customSauce === s.name ? 'active' : ''}`}
-                      onClick={() => setCustomSauce(s.name)}
-                      style={{ justifyContent: 'space-between' }}
-                    >
-                      <span>{s.name}</span>
-                      {customSauce === s.name && <Check size={14} />}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Step 4: Toppings */}
-              {builderStep === 4 && (
-                <div className="col gap-2">
-                  <span className="eyebrow">Toppings croquants</span>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
-                    {(MENU.toppings || []).map(tp => {
-                      const sel = customToppings.includes(tp.name);
-                      return (
-                        <button 
-                          key={tp.name}
-                          className={`table-option-chip ${sel ? 'active' : ''}`}
-                          onClick={() => {
-                            setCustomToppings(prev => sel ? prev.filter(x => x !== tp.name) : [...prev, tp.name]);
-                          }}
-                          style={{ fontSize: 12, minHeight: 40, padding: '8px 10px' }}
-                        >
-                          {tp.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Step Controls */}
-              <div className="row between" style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
-                {builderStep > 0 ? (
-                  <button className="btn btn-ghost" onClick={() => setBuilderStep(s => s - 1)}>
-                    Retour
-                  </button>
-                ) : <div />}
-
-                {builderStep < 4 ? (
-                  <button className="btn btn-primary" onClick={() => setBuilderStep(s => s + 1)}>
-                    Suivant <ArrowRight size={14} />
-                  </button>
-                ) : (
-                  <button className="btn btn-primary" onClick={handleConfirmCustomBowl}>
-                    Ajouter au plateau
-                  </button>
-                )}
+              <div className="to-sheet-foot to-builder-foot">
+                {builderStep > 0
+                  ? <button className="to-btn to-btn-ghost" onClick={() => setBuilderStep(st => st - 1)}><ArrowLeft size={16} /> {t.back}</button>
+                  : <span className="price to-builder-price">{formatPrice(customPrice)}</span>}
+                {builderStep < 4
+                  ? <button className="to-btn to-btn-forest" onClick={() => setBuilderStep(st => st + 1)}>{t.next} <ArrowRight size={16} /></button>
+                  : <button className="to-btn to-btn-curry" onClick={handleConfirmCustomBowl}>{t.addBowl} · {formatPrice(customPrice)}</button>}
               </div>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
 
-      {/* 9. Formule Modal */}
-      <AnimatePresence>
-        {selectedFormule && (
-          <FormuleModal 
-            formule={selectedFormule}
-            onClose={() => setSelectedFormule(null)}
-            onValidate={(customFormuleItem) => {
-              addToCart({
-                name: `${selectedFormule.name} (${customFormuleItem.bowlSize})`,
-                price: customFormuleItem.price,
-                composition: [
-                  customFormuleItem.bowlName,
-                  customFormuleItem.side,
-                  customFormuleItem.drink,
-                  customFormuleItem.dessert
-                ].filter(Boolean)
-              });
-              setSelectedFormule(null);
-            }}
-          />
-        )}
-      </AnimatePresence>
+      <FormuleModal
+        formule={selectedFormule}
+        isOpen={!!selectedFormule}
+        onClose={() => setSelectedFormule(null)}
+        onAdd={(item) => addToCart({ name: item.cartName, price: item.price, composition: item.composition })}
+      />
     </div>
   );
 }

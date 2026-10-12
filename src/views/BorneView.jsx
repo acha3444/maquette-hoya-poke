@@ -12,6 +12,9 @@ import { formatPrice } from '../format';
 import { RESTAURANT } from '../restaurant';
 import HoyaMark from '../components/brand/HoyaMark';
 import Branch from '../components/brand/Branch';
+import DemoBowl from '../components/brand/DemoBowl';
+import AnimatedMark from '../components/brand/AnimatedMark';
+import { BowlScene } from '../components/BowlVisualizer';
 import BowlArt from '../components/brand/BowlArt';
 import { getKioskDeviceId, loadLocalKioskConfig, getNextKioskOrderNumber } from '../services/kioskService';
 import { lockStaffApp } from '../components/StaffGuard';
@@ -447,19 +450,43 @@ export default function BorneView() {
                 exit={{ opacity: 0 }}
                 onClick={() => setKioskState('MODE')}
               >
-                <div>
+                <Branch className="borne-attract-branch" />
+                <motion.div
+                  className="borne-attract-copy"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <span className="borne-attract-eyebrow">{RESTAURANT.tagline}</span>
                   <h1 className="borne-attract-title">{t.touchToOrder}</h1>
                   <p className="borne-attract-sub">{t.subtitle}</p>
-                </div>
+                </motion.div>
 
                 <div className="borne-attract-hero">
-                  <img src={config.heroImage || '/hero.jpg'} alt="Hoya Poké Bowl" />
+                  <DemoBowl className="borne-attract-demo" bowlClassName="borne-attract-bowl" />
+                  <div className="borne-attract-sticker" aria-hidden="true">
+                    <svg viewBox="0 0 120 120" className="borne-sticker-ring">
+                      <defs><path id="borne-ring" d="M60 60m-44 0a44 44 0 1 1 88 0a44 44 0 1 1-88 0" /></defs>
+                      <text textLength="272" lengthAdjust="spacing">
+                        <textPath href="#borne-ring" textLength="272" lengthAdjust="spacing">POKÉ BOWLS & COFFEE · HEALTHY FOOD ·</textPath>
+                      </text>
+                    </svg>
+                    <HoyaMark size={34} />
+                  </div>
                 </div>
 
                 <div className="borne-attract-cta">
                   <HoyaMark size={28} />
                   <span>{t.order}</span>
                   <ArrowRight size={24} />
+                </div>
+
+                <div className="borne-attract-ticker" aria-hidden="true">
+                  <div>
+                    {[...RESTAURANT.promises, ...RESTAURANT.promises].map((p, i) => (
+                      <span key={i}>{p}<HoyaMark size={16} strokeWidth={12} /></span>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -705,6 +732,19 @@ export default function BorneView() {
                   </span>
                 </div>
 
+                <div className="borne-builder-preview">
+                  <BowlScene
+                    className="borne-builder-bowl"
+                    baseName={customBowl.base || 'Riz vinaigré'}
+                    veggiesList={customBowl.fruitsLegumes}
+                    proteinName={customBowl.proteine}
+                    sauceName={customBowl.sauce}
+                    toppingsList={customBowl.toppings}
+                    isLarge={customBowl.size === 'L'}
+                    label="Aperçu de votre bol"
+                  />
+                </div>
+
                 {/* Step 0: Taille */}
                 {builderStep === 0 && (
                   <div style={{ width: '100%', maxWidth: 760 }}>
@@ -753,7 +793,7 @@ export default function BorneView() {
                           }}
                         >
                           <div style={{ fontSize: 20, fontWeight: 800 }}>{b.name}</div>
-                          {b.price > 0 && <div style={{ color: 'var(--curry)', fontWeight: 700 }}>+{formatPrice(b.price)}</div>}
+                          {b.price > 0 && <div style={{ color: 'var(--gold-ink)', fontWeight: 700 }}>+{formatPrice(b.price)}</div>}
                         </button>
                       ))}
                     </div>
@@ -1142,8 +1182,8 @@ export default function BorneView() {
                 exit={{ opacity: 0 }}
               >
                 <div className="borne-confirm-box">
-                  <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--green-800)', color: '#fff', display: 'grid', placeItems: 'center' }}>
-                    <Check size={48} strokeWidth={3} />
+                  <div className="borne-confirm-mark">
+                    <AnimatedMark size={84} delay={0.25} />
                   </div>
 
                   <h1 className="borne-attract-title">{t.confirmTitle}</h1>
