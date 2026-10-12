@@ -4,8 +4,6 @@ import { Printer, X, Check, Clock, Bike, ShoppingBag, MapPin, Phone, ArrowRight 
 import { formatPrice } from '../format';
 
 export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
-  if (!order) return null;
-
   // Auto-launch native print dialog when triggered from "Accepter"
   React.useEffect(() => {
     if (order?.triggerPrint) {
@@ -15,6 +13,8 @@ export default function TicketPrintModal({ order, onClose, onAdvanceStatus }) {
       return () => clearTimeout(timer);
     }
   }, [order?.id, order?.triggerPrint]);
+
+  if (!order) return null;
 
   const handlePrint = () => {
     window.print();
