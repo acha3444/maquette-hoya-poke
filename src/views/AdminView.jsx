@@ -6,7 +6,7 @@ import {
   ChefHat, ShoppingBag, ArrowLeft, LockKeyhole, RefreshCw, 
   SlidersHorizontal, Sparkles, AlertCircle, FileText, Printer,
   Eye, EyeOff, KeyRound, Smartphone, CreditCard, Flame,
-  QrCode, Tv
+  QrCode, Tv, Users, Mail, Sliders
 } from 'lucide-react';
 import { useStore } from '../store';
 import { formatPrice } from '../format';
@@ -19,6 +19,9 @@ import ProductThumb from '../components/brand/ProductThumb';
 import StaffBrand from '../components/brand/StaffBrand';
 import AdminTablesTab from './admin/AdminTablesTab';
 import AdminBorneTab from './admin/AdminBorneTab';
+import AdminClientsTab from './admin/AdminClientsTab';
+import AdminCampagnesTab from './admin/AdminCampagnesTab';
+import AdminFeaturesTab from './admin/AdminFeaturesTab';
 import './admin.css';
 
 const PRESET_IMAGES = [
@@ -415,6 +418,18 @@ export default function AdminView() {
             <FileText size={14} />
             <span>Clôture Caisse & Bilan Z</span>
           </button>
+          <button className={activeMainTab === 'clients' ? 'active' : ''} onClick={() => setActiveMainTab('clients')}>
+            <Users size={14} />
+            <span>Clients & Fidélité</span>
+          </button>
+          <button className={activeMainTab === 'campagnes' ? 'active' : ''} onClick={() => setActiveMainTab('campagnes')}>
+            <Mail size={14} />
+            <span>Campagnes Email</span>
+          </button>
+          <button className={activeMainTab === 'features' ? 'active' : ''} onClick={() => setActiveMainTab('features')}>
+            <Sliders size={14} />
+            <span>Modules & Options</span>
+          </button>
         </div>
 
         {activeMainTab === 'carte' && (
@@ -675,6 +690,21 @@ export default function AdminView() {
       {/* View 4: Borne Tactile */}
       {activeMainTab === 'borne' && (
         <AdminBorneTab />
+      )}
+
+      {/* View 5: Fichier Clients & Fidélité */}
+      {activeMainTab === 'clients' && (
+        <AdminClientsTab />
+      )}
+
+      {/* View 6: Campagnes Emailing Resend */}
+      {activeMainTab === 'campagnes' && (
+        <AdminCampagnesTab />
+      )}
+
+      {/* View 7: Modules & Options / Feature Flags */}
+      {activeMainTab === 'features' && (
+        <AdminFeaturesTab />
       )}
 
       {/* Modal: Add / Edit Product */}

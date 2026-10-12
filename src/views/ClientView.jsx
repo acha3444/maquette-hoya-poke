@@ -7,6 +7,8 @@ import MenuScreen from './client/MenuScreen';
 import BuilderScreen from './client/BuilderScreen';
 import CheckoutScreen from './client/CheckoutScreen';
 import TrackingScreen from './client/TrackingScreen';
+import AccountView from './AccountView';
+import PrivacyPolicyView from './PrivacyPolicyView';
 import './client/client.css';
 
 const AnimatedRoutes = () => {
@@ -20,6 +22,8 @@ const AnimatedRoutes = () => {
           <Route path="/builder" element={<BuilderScreen />} />
           <Route path="/checkout" element={<CheckoutScreen />} />
           <Route path="/tracking" element={<TrackingScreen />} />
+          <Route path="/compte" element={<AccountView />} />
+          <Route path="/confidentialite" element={<PrivacyPolicyView />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

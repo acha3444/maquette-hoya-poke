@@ -63,7 +63,7 @@ function StampCard({ stamps }) {
 
 export default function HomeScreen() {
   const navigate = useNavigate();
-  const { restaurantOpen, setOrderType, cart, menu: storeMenu, loyaltyStamps } = useStore();
+  const { restaurantOpen, setOrderType, cart, menu: storeMenu, loyaltyStamps, featuresConfig, currentUser, customerProfile } = useStore();
   const menu = storeMenu || MENU;
   const [loyaltyOpen, setLoyaltyOpen] = useState(false);
   const [activeFormule, setActiveFormule] = useState(null);
@@ -100,11 +100,29 @@ export default function HomeScreen() {
           <nav className="h-nav-links" aria-label="Navigation principale">
             <button onClick={() => navigate('/menu')}>La carte</button>
             <button onClick={compose}>Composer</button>
-            <button onClick={() => setLoyaltyOpen(true)}>Fidélité</button>
+            {featuresConfig?.loyalty && (
+              <button onClick={() => setLoyaltyOpen(true)}>Fidélité</button>
+            )}
+            {featuresConfig?.accounts && (
+              <button onClick={() => navigate('/compte')}>
+                {currentUser ? (customerProfile?.first_name ? `Compte (${customerProfile.first_name})` : 'Mon compte') : 'Connexion'}
+              </button>
+            )}
             <button onClick={scrollToInfos}>Infos</button>
           </nav>
 
           <div className="h-nav-actions">
+            {featuresConfig?.accounts && (
+              <button 
+                className="h-cart" 
+                onClick={() => navigate('/compte')} 
+                aria-label="Mon compte" 
+                title={currentUser ? "Mon compte" : "Se connecter"}
+                style={{ width: 38, height: 38 }}
+              >
+                <span style={{ fontSize: 16 }}>👤</span>
+              </button>
+            )}
             <button className="h-cart" onClick={() => navigate('/menu')} aria-label={`Panier, ${cart.length} article${cart.length > 1 ? 's' : ''}`}>
               <ShoppingBasket size={19} />
               {cart.length > 0 && <span className="h-cart-count">{cart.length}</span>}
@@ -299,23 +317,25 @@ export default function HomeScreen() {
         </section>
 
         {/* ───────── Loyalty: the real stamp card ───────── */}
-        <section className="h-section">
-          <div className="h-loyalty">
-            <motion.div className="h-loyalty-copy" {...reveal}>
-              <span className="h-eyebrow dark">Carte de fidélité</span>
-              <h2 className="h-title">{RESTAURANT.loyalty.reward}.</h2>
-              <p className="h-lead">
-                Un tampon par bol. Au dixième, le suivant est pour nous. Votre carte vous suit en ligne comme au comptoir.
-              </p>
-              <button className="h-btn h-btn-forest" onClick={() => setLoyaltyOpen(true)}>
-                Voir ma carte · {stamps}/{RESTAURANT.loyalty.stamps}
-              </button>
-            </motion.div>
-            <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.1 }}>
-              <StampCard stamps={stamps} />
-            </motion.div>
-          </div>
-        </section>
+        {featuresConfig?.loyalty && (
+          <section className="h-section">
+            <div className="h-loyalty">
+              <motion.div className="h-loyalty-copy" {...reveal}>
+                <span className="h-eyebrow dark">Carte de fidélité</span>
+                <h2 className="h-title">{RESTAURANT.loyalty.reward}.</h2>
+                <p className="h-lead">
+                  Un tampon par bol. Au dixième, le suivant est pour nous. Votre carte vous suit en ligne comme au comptoir.
+                </p>
+                <button className="h-btn h-btn-forest" onClick={() => setLoyaltyOpen(true)}>
+                  Voir ma carte · {stamps}/{RESTAURANT.loyalty.stamps}
+                </button>
+              </motion.div>
+              <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.1 }}>
+                <StampCard stamps={stamps} />
+              </motion.div>
+            </div>
+          </section>
+        )}
 
         {/* ───────── Reviews ───────── */}
         <section className="h-section">
@@ -472,6 +492,10 @@ export default function HomeScreen() {
                 <button onClick={() => navigate('/borne')}>Borne tactile sur place</button>
                 <button onClick={() => navigate('/t/hp_t1_9a2b')}>Commande à table (QR Code)</button>
                 <button onClick={() => navigate('/tracking')}>Suivre ma commande</button>
+                {featuresConfig?.accounts && (
+                  <button onClick={() => navigate('/compte')}>Mon compte & Fidélité</button>
+                )}
+                <button onClick={() => navigate('/confidentialite')}>Politique de confidentialité (RGPD)</button>
               </div>
               <div>
                 <h4>Le restaurant</h4>

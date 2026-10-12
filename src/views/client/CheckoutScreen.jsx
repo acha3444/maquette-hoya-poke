@@ -40,7 +40,11 @@ export default function CheckoutScreen() {
     claimLoyaltyReward,
     activePromo,
     applyPromo,
-    removePromo
+    removePromo,
+    currentUser,
+    customerProfile,
+    featuresConfig,
+    loyaltyRules
   } = useStore();
   const isDelivery = orderType === 'LIVRAISON';
 
@@ -49,7 +53,15 @@ export default function CheckoutScreen() {
   const [addressError, setAddressError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('ONLINE'); // 'ONLINE' | 'ON_SITE'
-  const [formData, setFormData] = useState({ name: '', phone: '', address: '', instructions: '', time: 'ASAP' });
+  const [formData, setFormData] = useState(() => ({
+    name: customerProfile?.first_name || '',
+    phone: customerProfile?.phone || '',
+    email: customerProfile?.email || currentUser?.email || '',
+    address: customerProfile?.delivery_addresses?.[0] || '',
+    instructions: '',
+    time: 'ASAP'
+  }));
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [promoCodeInput, setPromoCodeInput] = useState('');
   const [promoFeedback, setPromoFeedback] = useState(null);
   const [useLoyaltyReward, setUseLoyaltyReward] = useState(false);
@@ -111,6 +123,8 @@ export default function CheckoutScreen() {
     if (!canPay || submitting) return;
     setSubmitting(true);
 
+    const cleanEmail = formData.email ? formData.email.trim().toLowerCase() : null;
+
     const newOrder = {
       id: (Math.floor(Math.random() * 9000) + 1000).toString(),
       status: 'NOUVELLE',
@@ -118,14 +132,18 @@ export default function CheckoutScreen() {
       time: formData.time === 'ASAP'
         ? new Date(Date.now() + 30 * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
         : formData.time,
-      customerName: formData.name || 'Client web',
+      customerName: formData.name || (customerProfile?.first_name ? customerProfile.first_name : 'Client web'),
       customerPhone: formData.phone || '06 00 00 00 00',
+      customerEmail: cleanEmail,
+      customerId: customerProfile?.id || null,
       address: isDelivery ? formData.address : 'Retrait sur place',
       zone: deliveryZone ? deliveryZone.id : null,
       deliveryFee,
       total,
       promoCode: activePromo?.code || null,
       discount: promoDiscount + loyaltyDiscount,
+      loyaltyApplied: Boolean(useLoyaltyReward),
+      emailMarketingConsent: Boolean(marketingConsent),
       paymentStatus: paymentMethod === 'ONLINE' ? 'PAYÉ' : 'A_ENCAISSER',
       paymentMethod: paymentMethod === 'ONLINE' ? 'EN LIGNE (CB)' : (isDelivery ? 'SUR PLACE (LIVREUR)' : 'SUR PLACE (COMPTOIR)'),
       items: cart
@@ -139,13 +157,33 @@ export default function CheckoutScreen() {
       addLoyaltyStamp(bowlsOrdered);
     }
 
+    // Envoi asynchrone de l'email de confirmation de commande si email renseigné
+    if (cleanEmail) {
+      fetch('/api/email/transactional', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'ORDER_CONFIRMATION',
+          recipientEmail: cleanEmail,
+          customerName: formData.name || 'Client',
+          order: newOrder
+        })
+      }).catch(err => console.warn('Email confirmation notice:', err));
+    }
+
     // Short delay so the payment step reads as a real action
     setTimeout(() => {
       playSuccessSound();
       addOrder(newOrder);
       clearCart();
       removePromo();
-      navigate('/tracking', { state: { orderId: newOrder.id, earnedStamps: useLoyaltyReward ? 0 : bowlsOrdered } });
+      navigate('/tracking', { 
+        state: { 
+          orderId: newOrder.id, 
+          earnedStamps: useLoyaltyReward ? 0 : bowlsOrdered,
+          customerEmail: cleanEmail
+        } 
+      });
     }, 700);
   };
 
@@ -217,10 +255,29 @@ export default function CheckoutScreen() {
 
             <motion.section variants={item} className="col gap-3">
               <h3 className="eyebrow">Coordonnées</h3>
-              <input placeholder="Nom" value={formData.name} onChange={update('name')} autoComplete="name" />
-              <input type="tel" placeholder="Téléphone" value={formData.phone} onChange={update('phone')} autoComplete="tel" />
+              <input placeholder="Nom ou prénom" value={formData.name} onChange={update('name')} autoComplete="name" />
+              <input type="tel" placeholder="Téléphone (pour le suivi)" value={formData.phone} onChange={update('phone')} autoComplete="tel" />
+              <input type="email" placeholder="Email (pour la confirmation & fidélité)" value={formData.email} onChange={update('email')} autoComplete="email" />
               {isDelivery && (
                 <textarea placeholder="Digicode, étage, indications" value={formData.instructions} onChange={update('instructions')} rows={2} />
+              )}
+
+              {/* Case à cocher consentement marketing (NON cochée par défaut - RGPD) */}
+              {featuresConfig?.emailing && (
+                <div style={{ background: 'var(--cream-2)', padding: '12px 14px', borderRadius: 'var(--r-sm)', border: '1px solid var(--line)' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', fontSize: 13, lineHeight: 1.4 }}>
+                    <input 
+                      type="checkbox" 
+                      checked={marketingConsent} 
+                      onChange={e => setMarketingConsent(e.target.checked)}
+                      style={{ marginTop: 2, accentColor: 'var(--green-700)' }} 
+                    />
+                    <span>
+                      Je souhaite recevoir les nouveautés et offres exclusives de Hoya Poké par email.<br />
+                      <span className="muted" style={{ fontSize: 11 }}>Désinscription possible à tout moment en 1 clic.</span>
+                    </span>
+                  </label>
+                </div>
               )}
             </motion.section>
 

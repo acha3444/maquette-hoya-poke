@@ -21,7 +21,7 @@ const getSteps = (type) => [
 export default function TrackingScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { orders, loyaltyStamps, toggleFavorite, favorites } = useStore();
+  const { orders, loyaltyStamps, toggleFavorite, favorites, currentUser, featuresConfig } = useStore();
 
   const orderId = location.state?.orderId || orders[0]?.id;
   const earnedStamps = location.state?.earnedStamps || 1;
@@ -173,6 +173,31 @@ export default function TrackingScreen() {
                   <Phone size={16} />
                 </button>
               </div>
+            </motion.div>
+          )}
+
+          {/* Post-order Account Creation Prompt for Guest Customers */}
+          {!currentUser && featuresConfig?.accounts && (
+            <motion.div 
+              className="card" 
+              style={{ background: 'linear-gradient(135deg, var(--green-900) 0%, #1e3325 100%)', color: 'var(--cream)', padding: 18 }}
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="row gap-2" style={{ marginBottom: 6 }}>
+                <Sparkles size={18} style={{ color: 'var(--curry)' }} />
+                <strong style={{ fontSize: 14, color: 'var(--cream)' }}>Gardez votre tampon de fidélité !</strong>
+              </div>
+              <p style={{ fontSize: 12, opacity: 0.85, margin: '0 0 12px 0', lineHeight: 1.4 }}>
+                Créez votre compte en un clic pour sauvegarder vos points de fidélité (10 tampons = 11ᵉ bol offert) et suivre toutes vos commandes.
+              </p>
+              <button 
+                className="btn btn-sm" 
+                onClick={() => navigate('/compte')}
+                style={{ background: 'var(--curry)', color: 'var(--ink)', fontWeight: 800, border: 'none', width: '100%' }}
+              >
+                Créer mon compte en 1 clic
+              </button>
             </motion.div>
           )}
 

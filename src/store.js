@@ -3,6 +3,9 @@ import { INITIAL_ORDERS, MENU, PROMO_CODES } from './data';
 import { supabase } from './supabase';
 import { loadLocalTables, normalizeTables, loadLocalTablesConfig, saveLocalTables, saveLocalTablesConfig, syncTablesToCloud, fetchTablesFromCloud } from './services/tableService';
 import { loadLocalKioskConfig, saveLocalKioskConfig, syncKioskConfigToCloud, fetchKioskConfigFromCloud } from './services/kioskService';
+import { loadLocalFeatures, saveLocalFeatures, syncFeaturesToCloud } from './services/featureFlagService';
+import { customerAuthService } from './services/customerAuthService';
+import { loyaltyEngine } from './services/loyaltyEngine';
 
 const loadInitialMenu = () => {
   if (typeof window === 'undefined') return MENU;
@@ -415,10 +418,65 @@ export const useStore = create((set, get) => {
       return newOrder.id;
     },
 
+    // Feature Flags (Comptes, Fidélité, Emailing)
+    featuresConfig: loadLocalFeatures(),
+    setFeaturesConfig: (newFeatures) => {
+      saveLocalFeatures(newFeatures);
+      syncFeaturesToCloud(newFeatures);
+      set({ featuresConfig: newFeatures });
+    },
+
+    // Customer Accounts State
+    currentUser: null,
+    customerProfile: null,
+    setCurrentUser: (user) => set({ currentUser: user }),
+    setCustomerProfile: (profile) => set({ customerProfile: profile }),
+    refreshCustomerProfile: async () => {
+      const user = await customerAuthService.getCurrentUser();
+      if (user?.email) {
+        const profile = await customerAuthService.getProfile(user.email, user);
+        const card = await loyaltyEngine.getLoyaltyCard(profile?.id);
+        set({ currentUser: user, customerProfile: profile, loyaltyStamps: card.stamps });
+      } else {
+        set({ currentUser: null, customerProfile: null });
+      }
+    },
+
+    // Loyalty Rules Engine
+    loyaltyRules: loyaltyEngine.getRules(),
+    setLoyaltyRules: (rules) => {
+      loyaltyEngine.saveRules(rules);
+      set({ loyaltyRules: rules });
+    },
+
     updateOrderStatus: async (id, status) => {
+      const prevOrder = get().orders.find(o => o.id === id);
       set((state) => ({
         orders: state.orders.map(o => o.id === id ? { ...o, status } : o)
       })); // optimistic update
+
+      // Hook Fidélité automatique : Crédit des tampons quand la commande passe à PRETE ou TERMINEE
+      if ((status === 'TERMINEE' || status === 'PRETE') && prevOrder && prevOrder.status !== 'TERMINEE' && prevOrder.status !== 'PRETE') {
+        const profile = get().customerProfile;
+        if (get().featuresConfig?.loyalty) {
+          loyaltyEngine.creditStampsOnPaidOrder(prevOrder, profile);
+        }
+        // Envoi email transactionnel commande prête si email renseigné
+        const targetEmail = prevOrder.customerEmail || prevOrder.customer_email;
+        if (targetEmail) {
+          fetch('/api/email/transactional', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'ORDER_READY',
+              recipientEmail: targetEmail,
+              customerName: prevOrder.customerName || 'Client',
+              order: prevOrder
+            })
+          }).catch(() => {});
+        }
+      }
+
       try {
         const { error } = await supabase.from('orders').update({ status }).eq('id', String(id));
         if (error) console.error('Supabase update error:', error);
