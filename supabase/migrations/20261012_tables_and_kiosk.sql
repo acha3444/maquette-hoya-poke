@@ -63,32 +63,62 @@ VALUES
   ('tables_config', '{"enabled": true, "paymentMode": "BOTH", "maxUnpaidOrdersPerTable": 3}'::jsonb)
 ON CONFLICT (key) DO NOTHING;
 
--- 4. Activation du Realtime pour les tables et paramètres
-ALTER PUBLICATION supabase_realtime ADD TABLE public.restaurant_tables;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.kiosk_settings;
+-- 4. Activation du Realtime pour les tables et paramètres (si la publication existe)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables 
+      WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'restaurant_tables'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.restaurant_tables;
+    END IF;
+
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables 
+      WHERE pubname = 'supabase_realtime' 
+        AND schemaname = 'public' 
+        AND tablename = 'kiosk_settings'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE public.kiosk_settings;
+    END IF;
+  END IF;
+END $$;
 
 -- 5. Sécurité RLS (Row Level Security)
 ALTER TABLE public.restaurant_tables ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.kiosk_settings ENABLE ROW LEVEL SECURITY;
 
--- Lecture publique de la configuration et des tables (pour valider le QR code du client)
+-- Lecture publique des tables et paramètres
+DROP POLICY IF EXISTS "Lecture publique des tables actives" ON public.restaurant_tables;
 CREATE POLICY "Lecture publique des tables actives" 
 ON public.restaurant_tables 
 FOR SELECT 
+TO anon, authenticated
 USING (true);
 
+DROP POLICY IF EXISTS "Lecture publique des paramètres" ON public.kiosk_settings;
 CREATE POLICY "Lecture publique des paramètres" 
 ON public.kiosk_settings 
 FOR SELECT 
+TO anon, authenticated
 USING (true);
 
--- Modification réservée aux utilisateurs authentifiés ou clé service
+-- Modification autorisée pour mise à jour par l'admin
+DROP POLICY IF EXISTS "Modification tables réservée staff" ON public.restaurant_tables;
 CREATE POLICY "Modification tables réservée staff" 
 ON public.restaurant_tables 
 FOR ALL 
-USING (auth.role() = 'authenticated' OR auth.role() = 'anon');
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Modification paramètres réservée staff" ON public.kiosk_settings;
 CREATE POLICY "Modification paramètres réservée staff" 
 ON public.kiosk_settings 
 FOR ALL 
-USING (auth.role() = 'authenticated' OR auth.role() = 'anon');
+TO anon, authenticated
+USING (true)
+WITH CHECK (true);

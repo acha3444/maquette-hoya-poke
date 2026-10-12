@@ -246,6 +246,15 @@ export default function BorneView() {
     return () => clearInterval(interval);
   }, [kioskState, config.idleTimeout, showIdleModal]);
 
+  const handleResetKiosk = () => {
+    setKioskCart([]);
+    setConfirmedOrder(null);
+    setSelectedProduct(null);
+    setShowIdleModal(false);
+    setLoyaltyPhone('');
+    setKioskState('ATTRACT');
+  };
+
   // Idle countdown tick
   useEffect(() => {
     if (!showIdleModal) return;
@@ -278,15 +287,6 @@ export default function BorneView() {
 
     return () => clearTimeout(tId);
   }, [kioskState, autoReturnCountdown]);
-
-  const handleResetKiosk = () => {
-    setKioskCart([]);
-    setConfirmedOrder(null);
-    setSelectedProduct(null);
-    setShowIdleModal(false);
-    setLoyaltyPhone('');
-    setKioskState('ATTRACT');
-  };
 
   // 3. Secret Exit (5-second long press on top-right corner)
   const handleSecretExitStart = () => {

@@ -91,31 +91,58 @@ const initialViewMode = () => {
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 function mapFromDb(row) {
+  const isBorne = row.source === 'BORNE' || 
+    Boolean(row.kiosk_id) || 
+    String(row.id).startsWith('B-') || 
+    (row.customer_name && row.customer_name.includes('BORNE')) || 
+    (row.address && row.address.includes('Borne'));
+
+  const isTable = row.source === 'TABLE' || 
+    Boolean(row.table_name) || 
+    (row.customer_name && /Table \d+|Terrasse \d+/i.test(row.customer_name)) || 
+    (row.address && /Table \d+|Terrasse \d+/i.test(row.address));
+
+  const extractedTableName = row.table_name || 
+    row.address?.match(/(Table\s*\d+|Terrasse\s*\d+)/i)?.[0] || 
+    row.customer_name?.match(/(Table\s*\d+|Terrasse\s*\d+)/i)?.[0] || 
+    null;
+
+  const extractedDailyNumber = row.daily_number || 
+    (String(row.id).startsWith('B-') ? String(row.id) : null) || 
+    row.customer_name?.match(/B-\d+/)?.[0] || 
+    row.address?.match(/B-\d+/)?.[0] || 
+    null;
+
+  const extractedKioskId = row.kiosk_id || 
+    (isBorne ? (row.address?.match(/Borne\s*\d+/i)?.[0] || 'Borne 1') : null);
+
+  const finalSource = row.source || (isTable ? 'TABLE' : isBorne ? 'BORNE' : (row.type === 'LIVRAISON' ? 'LIVRAISON' : 'RETRAIT'));
+
   return {
     id: String(row.id),
     status: row.status,
-    type: row.type || 'RETRAIT',
-    source: row.source || (row.table_name ? 'TABLE' : (row.kiosk_id || String(row.id).startsWith('B-')) ? 'BORNE' : (row.type === 'LIVRAISON' ? 'LIVRAISON' : 'RETRAIT')),
-    tableName: row.table_name || null,
+    type: row.type || (isTable || isBorne ? 'SUR_PLACE' : 'RETRAIT'),
+    source: finalSource,
+    tableName: extractedTableName,
     tableToken: row.table_token || null,
-    kioskId: row.kiosk_id || null,
-    dailyNumber: row.daily_number || (String(row.id).startsWith('B-') ? row.id : null),
+    kioskId: extractedKioskId,
+    dailyNumber: extractedDailyNumber,
     time: row.time || '12:00',
-    customerName: row.customer_name || row.customerName || 'Client',
+    customerName: row.customer_name || row.customerName || (isTable ? `Client ${extractedTableName || ''}`.trim() : isBorne ? `Borne (${extractedDailyNumber || 'B-001'})` : 'Client'),
     customerPhone: row.customer_phone || row.customerPhone || '06 00 00 00 00',
-    address: row.address || '7 Rue Anatole France, Pézenas',
+    address: row.address || (isTable ? `Sur place (${extractedTableName || 'Table'})` : isBorne ? 'Sur place (Borne)' : '7 Rue Anatole France, Pézenas'),
     zone: row.zone,
     deliveryFee: Number(row.delivery_fee ?? row.deliveryFee ?? 0),
     total: Number(row.total || 0),
     paymentStatus: row.payment_status || row.paymentStatus || 'PAYÉ',
-    items: row.items || [],
+    items: Array.isArray(row.items) ? row.items : [],
     driver: row.driver || 'Alex',
     isLate: Boolean(row.is_late ?? row.isLate ?? false),
     created_at: row.created_at
   };
 }
 
-function mapToDb(order) {
+function mapToDbFull(order) {
   return {
     id: String(order.id),
     status: order.status || 'NOUVELLE',
@@ -129,6 +156,41 @@ function mapToDb(order) {
     customer_name: order.customerName || (order.tableName ? `Client ${order.tableName}` : 'Client'),
     customer_phone: order.customerPhone || '06 00 00 00 00',
     address: order.address || (order.tableName ? `Sur place (${order.tableName})` : null),
+    zone: order.zone || null,
+    delivery_fee: order.deliveryFee || 0,
+    total: Number(order.total || 0),
+    payment_status: order.paymentStatus || 'PAYÉ',
+    items: order.items || [],
+    driver: order.driver || null,
+    is_late: Boolean(order.isLate || false)
+  };
+}
+
+function mapToDbCompat(order) {
+  let enrichedCustomerName = order.customerName || 'Client';
+  let enrichedAddress = order.address || null;
+
+  if (order.source === 'TABLE' || order.tableName) {
+    if (!enrichedCustomerName.includes('Table') && !enrichedCustomerName.includes('Terrasse')) {
+      enrichedCustomerName = `${enrichedCustomerName} [${order.tableName || 'Table'}]`;
+    }
+    if (!enrichedAddress) enrichedAddress = `Sur place · ${order.tableName || 'Table'}`;
+  } else if (order.source === 'BORNE' || order.kioskId || String(order.id).startsWith('B-')) {
+    const num = order.dailyNumber || order.id;
+    if (!enrichedCustomerName.includes('BORNE')) {
+      enrichedCustomerName = `${enrichedCustomerName} [BORNE ${num}]`;
+    }
+    if (!enrichedAddress) enrichedAddress = `Sur place (Borne) · ${num}`;
+  }
+
+  return {
+    id: String(order.id),
+    status: order.status || 'NOUVELLE',
+    type: order.type || (order.tableName || order.source === 'BORNE' ? 'SUR_PLACE' : 'RETRAIT'),
+    time: order.time || '12:00',
+    customer_name: enrichedCustomerName,
+    customer_phone: order.customerPhone || (order.source === 'BORNE' ? 'BORNE' : '06 00 00 00 00'),
+    address: enrichedAddress,
     zone: order.zone || null,
     delivery_fee: order.deliveryFee || 0,
     total: Number(order.total || 0),
@@ -325,8 +387,17 @@ export const useStore = create((set, get) => {
     addOrder: async (order) => {
       set((state) => ({ orders: [order, ...state.orders] })); // optimistic update
       try {
-        const { error } = await supabase.from('orders').insert(mapToDb(order));
-        if (error) console.error('Supabase insert error:', error);
+        const fullPayload = mapToDbFull(order);
+        const { error } = await supabase.from('orders').insert(fullPayload);
+        if (error) {
+          // Fallback to compat payload if custom columns (source, table_name, etc.) are not in schema cache
+          console.warn('Supabase full insert fallback (retrying with compatible schema):', error.message);
+          const compatPayload = mapToDbCompat(order);
+          const { error: compatErr } = await supabase.from('orders').insert(compatPayload);
+          if (compatErr) {
+            console.error('Supabase compat insert error:', compatErr);
+          }
+        }
       } catch (e) {
         console.error('Supabase insert exception:', e);
       }
@@ -442,7 +513,12 @@ export const useStore = create((set, get) => {
       try {
         await supabase.from('orders').delete().neq('id', '__pin_config__');
         for (const init of INITIAL_ORDERS) {
-          await supabase.from('orders').insert(mapToDb(init));
+          try {
+            const { error } = await supabase.from('orders').insert(mapToDbFull(init));
+            if (error) {
+              await supabase.from('orders').insert(mapToDbCompat(init));
+            }
+          } catch (e) {}
         }
       } catch (e) {}
     },

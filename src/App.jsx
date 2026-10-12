@@ -258,14 +258,7 @@ function AppContent() {
             </StaffGuard>
           } 
         />
-        <Route 
-          path="/borne" 
-          element={
-            <StaffGuard title="Borne de commande Hoya Poké" defaultPin="1234">
-              <BorneView />
-            </StaffGuard>
-          } 
-        />
+        <Route path="/borne" element={<BorneView />} />
         <Route path="/t/:token" element={<TableOrderView />} />
         <Route path="/*" element={<ClientView />} />
       </Routes>

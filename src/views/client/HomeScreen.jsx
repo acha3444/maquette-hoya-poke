@@ -532,6 +532,8 @@ export default function HomeScreen() {
                 <button onClick={() => start('RETRAIT')}>À emporter</button>
                 <button onClick={() => start('LIVRAISON')}>Livraison en direct du site</button>
                 <button onClick={compose}>Composer son poké</button>
+                <button onClick={() => navigate('/borne')}>Borne tactile sur place</button>
+                <button onClick={() => navigate('/t/hp_t1_9a2b')}>Commande à table (QR Code)</button>
                 <button onClick={() => navigate('/tracking')}>Suivre ma commande</button>
               </div>
               <div>
